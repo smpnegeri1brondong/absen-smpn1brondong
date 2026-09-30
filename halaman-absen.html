@@ -10,7 +10,10 @@
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
-.header{height:64px;background:white;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:9999}
+.header{height:64px;background:white;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:50}
+.logo-box{display:flex;align-items:center;gap:10px}
+.logo-img{width:40px;height:40px;border-radius:12px;background:transparent;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;overflow:hidden}
+.logo-img img{width:100%;height:100%;object-fit:contain}
 .container{max-width:480px;margin:0 auto;padding:16px}
 .card{background:white;border:1px solid #e2e8f0;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.04);position:relative;z-index:1}
 .btn{height:48px;border-radius:14px;font-weight:800;display:flex;align-items:center;justify-content:center;border:none;width:100%;cursor:pointer;font-family:Inter}
@@ -37,12 +40,17 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 </head>
 <body>
 <header class="header">
-<div style="display:flex;align-items:center;gap:8px"><div style="width:36px;height:36px;border-radius:10px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800">QR</div><div><div style="font-weight:800;color:#0f355c;font-size:12px">SI-ABSEN</div><div style="font-size:10px;color:#64748b">KETAT + AUTO + FIX 4 BUG</div></div></div>
-<div><span id="gidBadge" class="hidden" style="background:#e0f2fe;color:#0f355c;font-size:11px;font-weight:700;padding:6px 10px;border-radius:999px"></span> <a id="logoutBtn" href="#" class="hidden" onclick="logout();return false;" style="font-size:12px;color:#64748b">Logout</a></div>
+<div class="logo-box">
+    <div class="logo-img"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'" alt="SI-ABSEN" style="width:100%;height:100%;object-fit:contain"/></div>
+    <div>
+      <div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SI-ABSEN</div>
+      <div style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.5px">SMPN 1 BRONDONG</div>
+    </div>
+  </div>
 </header>
 <div class="container">
-<div id="loginScreen"><div class="card" style="margin-top:20px"><div style="text-align:center"><div style="width:64px;height:64px;border-radius:20px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:28px">🔐</div><h2 style="color:#0f355c">Login Guru</h2><p style="font-size:12px;color:#64748b">Mode Ketat Anti Titip</p></div>
-<div style="margin-top:16px"><label style="font-size:12px;font-weight:700">ID PRIVAT</label><input id="gidInput" class="input" placeholder="G-37286" style="margin-top:6px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"/></div>
+<div id="loginScreen"><div class="card" style="margin-top:20px"><div style="text-align:center"><div style="width:64px;height:64px;border-radius:20px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:28px">🔐</div><h2 style="color:#0f355c">Login Guru</h2></div>
+<div style="margin-top:16px"><label style="font-size:12px;font-weight:700">ID PRIVAT</label><input id="gidInput" class="input" placeholder="G-*****" style="margin-top:6px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"/></div>
 <div style="margin-top:12px"><label style="font-size:12px;font-weight:700">PASSWORD</label><div style="position:relative;margin-top:6px"><input id="passInput" class="input" type="password" placeholder="Brondong..." style="padding-right:50px"/><button type="button" id="eyeBtn" onclick="togglePass()" style="position:absolute;right:6px;top:6px;height:36px;width:36px;border:none;background:#f1f5f9;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><div id="loginError" class="hidden" style="margin-top:8px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b;font-size:12px;padding:8px 12px;border-radius:10px"></div></div>
 <button class="btn btn-primary" style="margin-top:16px;height:52px" onclick="doLogin()">Masuk →</button></div></div>
 
@@ -71,9 +79,9 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
   </div>
 </div>
 
-<div class="card" style="overflow:hidden"><div style="font-size:11px;font-weight:800;color:#64748b">GPS • 40m • 36R6+X89</div><div id="statusLokasi" style="font-weight:800;color:#0f355c;margin-top:6px">Belum cek</div><div id="locText" style="font-size:12px;color:#64748b">Klik Cek Lokasi</div><div id="radiusBadge" style="margin-top:8px;display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:5px 10px;font-size:11px">Menunggu GPS</div><div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;position:relative;z-index:1"><div id="miniMap"></div></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="flex:1" onclick="cekLokasi()">📍 Cek Lokasi</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('peta')">Peta</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('satelit')">Sat</button></div></div>
+<div class="card" style="overflow:hidden"><div style="font-size:11px;font-weight:800;color:#64748b">GPS • 36R6+X89</div><div id="statusLokasi" style="font-weight:800;color:#0f355c;margin-top:6px">Belum cek</div><div id="locText" style="font-size:12px;color:#64748b">Klik Cek Lokasi</div><div id="radiusBadge" style="margin-top:8px;display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:5px 10px;font-size:11px">Menunggu GPS</div><div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;position:relative;z-index:1"><div id="miniMap"></div></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="flex:1" onclick="cekLokasi()">📍 Cek Lokasi</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('peta')">Peta</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('satelit')">Sat</button></div></div>
 
-<div class="card"><div style="font-size:11px;font-weight:800;color:#64748b">KAMERA QR • MODE KETAT + AUTO</div>
+<div class="card"><div style="font-size:11px;font-weight:800;color:#64748b">KAMERA QR • AUTO</div>
 <div style="margin-top:10px"><div id="reader"></div><div id="qrResult" style="display:none;margin-top:8px;font-size:11px;padding:10px 12px;border-radius:10px;background:#f8fafc;border:1px dashed #e2e8f0;font-weight:600"></div></div>
 <div style="display:flex;gap:8px;margin-top:10px"><button id="btnStartCam" class="btn btn-primary" style="flex:1" onclick="startCamera()">📷 NYALAKAN KAMERA</button><button id="btnStopCam" class="btn btn-outline hidden" style="flex:1" onclick="stopCamera()">✕ Matikan Kamera</button></div>
 <button class="btn btn-primary hidden" style="margin-top:12px;height:54px" id="scanBtn" onclick="mulaiScan()">✅ Absen Manual</button>
