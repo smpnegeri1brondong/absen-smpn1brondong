@@ -3,446 +3,203 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Absen Guru - SI-ABSEN ID + Password</title>
+<title>SI-ABSEN - Single File + Kamera Nyala</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="firebase-config.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
-body{margin:0;font-family:Inter,system-ui;background:#f8fafc;color:#0f172a}
+body{margin:0;font-family:Inter;background:#f8fafc}
 .header{height:64px;background:white;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:50}
 .container{max-width:480px;margin:0 auto;padding:16px}
-.card{background:white;border:1px solid #e2e8f0;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,0.04)}
-.btn{height:48px;border-radius:14px;font-weight:800;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;border:none;width:100%;font-family:Inter}
+.card{background:white;border:1px solid #e2e8f0;border-radius:20px;padding:16px;margin-bottom:14px}
+.btn{height:48px;border-radius:14px;font-weight:800;display:flex;align-items:center;justify-content:center;border:none;width:100%;cursor:pointer;font-family:Inter}
 .btn-primary{background:#0f355c;color:white}
 .btn-outline{background:white;border:1px solid #e2e8f0;color:#0f355c}
-.btn:disabled{opacity:0.5;cursor:not-allowed}
-#miniMap{height:180px;border-radius:14px}
-.viewfinder{background:#0b1220;border-radius:18px;height:260px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#94a3b8}
-.corner{position:absolute;width:28px;height:28px;border:3px solid #38bdf8}
-.input{width:100%;height:48px;border:1px solid #e2e8f0;border-radius:14px;padding:0 14px;font-size:14px;font-weight:600;font-family:Inter;box-sizing:border-box}
-.input:focus{outline:none;border-color:#0f355c;box-shadow:0 0 0 3px rgba(15,53,92,0.1)}
-.badge-valid{background:#dcfce7;border:1px solid #bbf7d0;color:#166534}
-.badge-invalid{background:#fee2e2;border:1px solid #fecaca;color:#991b1b}
-.hidden{display:none !important}
-.logo-img{width:40px;height:40px;border-radius:12px;background:transparent;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.logo-img img{width:100%;height:100%;object-fit:contain}
+.btn:disabled{opacity:.5}
+#miniMap{height:200px;border-radius:14px}
+#reader{width:100%;border-radius:18px;overflow:hidden;background:#000;min-height:260px}
+.hidden{display:none!important}
+.input{width:100%;height:48px;border:1px solid #e2e8f0;border-radius:14px;padding:0 14px;font-weight:600;box-sizing:border-box}
+.badge-valid{background:#dcfce7;border:1px solid #bbf7d0;color:#166534;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:700}
+.badge-invalid{background:#fee2e2;border:1px solid #fecaca;color:#991b1b;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:700}
 </style>
 </head>
 <body>
 <header class="header">
-  <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none">
-    <div class="logo-img"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.textContent='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'" alt="logo"/></div>
-    <div><div style="font-weight:800;color:#0f355c;font-size:12px">SI-ABSEN</div><div style="font-size:10px;color:#64748b">ID + Password • 40m</div></div>
-  </a>
-  <div style="display:flex;align-items:center;gap:8px">
-    <span id="gidBadge" class="hidden" style="background:#e0f2fe;color:#0f355c;font-size:11px;font-weight:700;padding:6px 10px;border-radius:999px"></span>
-    <a id="logoutBtn" href="#" class="hidden" onclick="logout(); return false;" style="font-size:12px;color:#64748b;text-decoration:none">Logout</a>
-  </div>
+<a href="data:text/html;base64,PCFkb2N0eXBlIGh0bWw+CjxodG1sIGxhbmc9ImlkIj4KPGhlYWQ+CjxtZXRhIGNoYXJzZXQ9InV0Zi04Ii8+CjxtZXRhIG5hbWU9InZpZXdwb3J0IiBjb250ZW50PSJ3aWR0aD1kZXZpY2Utd2lkdGgsaW5pdGlhbC1zY2FsZT0xIi8+Cjx0aXRsZT5TSS1BQlNFTiAtIFNNUE4gMSBCcm9uZG9uZyB8IDM2UjYrWDg5PC90aXRsZT4KPGxpbmsgaHJlZj0iaHR0cHM6Ly9mb250cy5nb29nbGVhcGlzLmNvbS9jc3MyP2ZhbWlseT1JbnRlcjp3Z2h0QDQwMDs2MDA7ODAwJmRpc3BsYXk9c3dhcCIgcmVsPSJzdHlsZXNoZWV0Ij4KPGxpbmsgcmVsPSJzdHlsZXNoZWV0IiBocmVmPSJodHRwczovL3VucGtnLmNvbS9sZWFmbGV0QDEuOS40L2Rpc3QvbGVhZmxldC5jc3MiLz4KPHNjcmlwdCBzcmM9Imh0dHBzOi8vdW5wa2cuY29tL2xlYWZsZXRAMS45LjQvZGlzdC9sZWFmbGV0LmpzIj48L3NjcmlwdD4KPHN0eWxlPgoqe2JveC1zaXppbmc6Ym9yZGVyLWJveH0KYm9keXttYXJnaW46MDtmb250LWZhbWlseTpJbnRlcixzeXN0ZW0tdWk7YmFja2dyb3VuZDojZjhmYWZjO2NvbG9yOiMwZjE3MmF9Ci5oZWFkZXJ7aGVpZ2h0OjY0cHg7YmFja2dyb3VuZDp3aGl0ZTtib3JkZXItYm90dG9tOjFweCBzb2xpZCAjZTJlOGYwO2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47cGFkZGluZzowIDIwcHg7cG9zaXRpb246c3RpY2t5O3RvcDowO3otaW5kZXg6NTB9Ci5sb2dvLWJveHtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDoxMHB4fQoubG9nby1pbWd7d2lkdGg6NDBweDtoZWlnaHQ6NDBweDtib3JkZXItcmFkaXVzOjEycHg7YmFja2dyb3VuZDp0cmFuc3BhcmVudDtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpjZW50ZXI7Y29sb3I6d2hpdGU7Zm9udC13ZWlnaHQ6ODAwO292ZXJmbG93OmhpZGRlbn0KLmxvZ28taW1nIGltZ3t3aWR0aDoxMDAlO2hlaWdodDoxMDAlO29iamVjdC1maXQ6Y29udGFpbn0KLmJ0bntoZWlnaHQ6NDBweDtwYWRkaW5nOjAgMThweDtib3JkZXItcmFkaXVzOjEycHg7Zm9udC13ZWlnaHQ6NzAwO2ZvbnQtc2l6ZToxM3B4O3RleHQtZGVjb3JhdGlvbjpub25lO2Rpc3BsYXk6aW5saW5lLWZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpjZW50ZXI7Y3Vyc29yOnBvaW50ZXI7Ym9yZGVyOm5vbmU7Zm9udC1mYW1pbHk6SW50ZXJ9Ci5idG4tcHJpbWFyeXtiYWNrZ3JvdW5kOiMwZjM1NWM7Y29sb3I6d2hpdGV9Ci5idG4tb3V0bGluZXtiYWNrZ3JvdW5kOndoaXRlO2JvcmRlcjoxcHggc29saWQgI2UyZThmMDtjb2xvcjojMGYzNTVjfQoubWFwLWNhcmR7Ym9yZGVyLXJhZGl1czoyMHB4O292ZXJmbG93OmhpZGRlbjtib3JkZXI6MXB4IHNvbGlkICNlMmU4ZjA7YmFja2dyb3VuZDp3aGl0ZTtib3gtc2hhZG93OjAgOHB4IDI0cHggcmdiYSgxNSw1Myw5MiwwLjA4KX0KI21hcHtoZWlnaHQ6MzYwcHg7YmFja2dyb3VuZDojZThlZWY1fQouYmFkZ2V7ZGlzcGxheTppbmxpbmUtZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjZweDtiYWNrZ3JvdW5kOndoaXRlO2JvcmRlcjoxcHggc29saWQgI2UyZThmMDtib3JkZXItcmFkaXVzOjk5OXB4O3BhZGRpbmc6NnB4IDEycHg7Zm9udC1zaXplOjExcHg7Zm9udC13ZWlnaHQ6NzAwO2JveC1zaGFkb3c6MCAycHggOHB4IHJnYmEoMCwwLDAsMC4wOCl9Ci50b2dnbGUtZ3JvdXB7ZGlzcGxheTpmbGV4O2JhY2tncm91bmQ6d2hpdGU7Ym9yZGVyLXJhZGl1czoxMnB4O292ZXJmbG93OmhpZGRlbjtib3JkZXI6MXB4IHNvbGlkICNlMmU4ZjA7Ym94LXNoYWRvdzowIDJweCA4cHggcmdiYSgwLDAsMCwwLjA4KX0KLnRvZ2dsZS1idG57cGFkZGluZzo2cHggMTJweDtmb250LXNpemU6MTFweDtmb250LXdlaWdodDo3MDA7Ym9yZGVyOm5vbmU7Y3Vyc29yOnBvaW50ZXI7YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojNjQ3NDhifQoudG9nZ2xlLWJ0bi5hY3RpdmV7YmFja2dyb3VuZDojMGYzNTVjO2NvbG9yOndoaXRlfQoKLyogUkVTUE9OU0lWRSBIUCBGSVggKi8KQG1lZGlhIChtYXgtd2lkdGg6IDc2OHB4KXsKICAuaGVhZGVye3BhZGRpbmc6MCAxNHB4O2hlaWdodDo1NnB4fQogIC5oZWFkZXIgbmF2LmhpZGUtbW9iaWxle2Rpc3BsYXk6bm9uZSAhaW1wb3J0YW50fQogIG1haW57cGFkZGluZzoxNnB4IDE0cHggIWltcG9ydGFudH0KICBkaXZbc3R5bGUqPSJncmlkLXRlbXBsYXRlLWNvbHVtbnM6MS4xZnIgMC45ZnIiXXtncmlkLXRlbXBsYXRlLWNvbHVtbnM6MWZyICFpbXBvcnRhbnQ7Z2FwOjIwcHggIWltcG9ydGFudH0KICBoMXtmb250LXNpemU6MzJweCAhaW1wb3J0YW50O2xpbmUtaGVpZ2h0OjAuOTUgIWltcG9ydGFudH0KICAjbWFwe2hlaWdodDozMjBweCAhaW1wb3J0YW50fQogIC5tYXAtY2FyZHtib3JkZXItcmFkaXVzOjE2cHggIWltcG9ydGFudH0KICAuYmFkZ2V7Zm9udC1zaXplOjlweCAhaW1wb3J0YW50O3BhZGRpbmc6NHB4IDhweCAhaW1wb3J0YW50fQogIC50b2dnbGUtZ3JvdXB7dHJhbnNmb3JtOnNjYWxlKDAuOSk7dHJhbnNmb3JtLW9yaWdpbjp0b3AgcmlnaHR9CiAgZGl2W3N0eWxlKj0iZ3JpZC10ZW1wbGF0ZS1jb2x1bW5zOnJlcGVhdCgzLDFmcikiXXtncmlkLXRlbXBsYXRlLWNvbHVtbnM6MWZyICFpbXBvcnRhbnR9CiAgZm9vdGVyIGRpdltzdHlsZSo9ImhlaWdodDo2NHB4Il17aGVpZ2h0OmF1dG8gIWltcG9ydGFudDtwYWRkaW5nOjE0cHggMCAhaW1wb3J0YW50O2ZsZXgtZGlyZWN0aW9uOmNvbHVtbiAhaW1wb3J0YW50O2FsaWduLWl0ZW1zOnN0YXJ0ICFpbXBvcnRhbnQ7Z2FwOjZweCAhaW1wb3J0YW50fQogIHNlY3Rpb257cGFkZGluZzoyMHB4IDE0cHggIWltcG9ydGFudH0KfQpAbWVkaWEgKG1heC13aWR0aDogNDgwcHgpewogIGgxe2ZvbnQtc2l6ZToyOHB4ICFpbXBvcnRhbnR9CiAgI21hcHtoZWlnaHQ6MjgwcHggIWltcG9ydGFudH0KICAuYnRue2ZvbnQtc2l6ZToxMnB4ICFpbXBvcnRhbnQ7aGVpZ2h0OjQwcHggIWltcG9ydGFudH0KfQoKPC9zdHlsZT4KPC9oZWFkPgo8Ym9keT4KPGhlYWRlciBjbGFzcz0iaGVhZGVyIj4KICA8ZGl2IGNsYXNzPSJsb2dvLWJveCI+CiAgICA8ZGl2IGNsYXNzPSJsb2dvLWltZyI+PGltZyBzcmM9ImxvZ28tc21wMi5wbmciIG9uZXJyb3I9InRoaXMuc3R5bGUuZGlzcGxheT0nbm9uZSc7IHRoaXMucGFyZW50RWxlbWVudC5pbm5lckhUTUw9J1FSJzsgdGhpcy5wYXJlbnRFbGVtZW50LnN0eWxlLmJhY2tncm91bmQ9JyMwZjM1NWMnOyB0aGlzLnBhcmVudEVsZW1lbnQuc3R5bGUuY29sb3I9J3doaXRlJyIgYWx0PSJTSS1BQlNFTiIgc3R5bGU9IndpZHRoOjEwMCU7aGVpZ2h0OjEwMCU7b2JqZWN0LWZpdDpjb250YWluIi8+PC9kaXY+CiAgICA8ZGl2PgogICAgICA8ZGl2IHN0eWxlPSJmb250LXdlaWdodDo4MDA7Y29sb3I6IzBmMzU1Yztmb250LXNpemU6MTNweDtsZXR0ZXItc3BhY2luZzowLjNweCI+U0ktQUJTRU48L2Rpdj4KICAgICAgPGRpdiBzdHlsZT0iZm9udC1zaXplOjEwcHg7Y29sb3I6IzY0NzQ4Yjtmb250LXdlaWdodDo2MDA7bGV0dGVyLXNwYWNpbmc6MC41cHgiPlNNUE4gMSBCUk9ORE9ORzwvZGl2PgogICAgPC9kaXY+CiAgPC9kaXY+CiAgPGRpdiBzdHlsZT0iZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6MTZweCI+CiAgICA8bmF2IHN0eWxlPSJkaXNwbGF5OmZsZXg7Z2FwOjE0cHg7Zm9udC1zaXplOjEycHg7Y29sb3I6IzY0NzQ4Yjtmb250LXdlaWdodDo2MDAiIGNsYXNzPSJoaWRlLW1vYmlsZSI+CiAgICAgIDxzcGFuPkNhcmEgS2VyamE8L3NwYW4+PHNwYW4+S2VhbWFuYW48L3NwYW4+PHNwYW4+UHJpdmFzaSBBbWFuPC9zcGFuPgogICAgPC9uYXY+CiAgICA8c3BhbiBzdHlsZT0iYmFja2dyb3VuZDojMGYxNzJhO2NvbG9yOndoaXRlO2ZvbnQtc2l6ZToxMHB4O2ZvbnQtd2VpZ2h0OjcwMDtwYWRkaW5nOjVweCAxMHB4O2JvcmRlci1yYWRpdXM6OTk5cHgiPuKXjyBMaXZlIFN5c3RlbTwvc3Bhbj4KICA8L2Rpdj4KPC9oZWFkZXI+Cgo8bWFpbiBzdHlsZT0ibWF4LXdpZHRoOjExMjBweDttYXJnaW46MCBhdXRvO3BhZGRpbmc6MjRweCAyMHB4Ij4KICA8ZGl2IHN0eWxlPSJkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo4cHg7bWFyZ2luLWJvdHRvbToxMnB4Ij4KICAgIDxzcGFuIHN0eWxlPSJkaXNwbGF5OmlubGluZS1mbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6NnB4O2JhY2tncm91bmQ6d2hpdGU7Ym9yZGVyOjFweCBzb2xpZCAjZTJlOGYwO2JvcmRlci1yYWRpdXM6OTk5cHg7cGFkZGluZzo1cHggMTJweDtmb250LXNpemU6MTBweDtmb250LXdlaWdodDo3MDA7Y29sb3I6IzBmMzU1YyI+PHNwYW4gc3R5bGU9IndpZHRoOjE2cHg7aGVpZ2h0OjE2cHg7YmFja2dyb3VuZDojMGYzNTVjO2NvbG9yOndoaXRlO2JvcmRlci1yYWRpdXM6OTk5cHg7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6Y2VudGVyO2ZvbnQtc2l6ZToxMHB4Ij7wn5uh77iPPC9zcGFuPiBTSVNURU0gUkVTTUkgLSAyMDI1LzIwMjYgUHJpdmFzaSBUZXJqYWdhPC9zcGFuPgogIDwvZGl2PgogIAogIDxkaXYgc3R5bGU9ImRpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6MS4xZnIgMC45ZnI7Z2FwOjI4cHg7YWxpZ24taXRlbXM6c3RhcnQiPgogICAgPGRpdj4KICAgICAgPGgxIHN0eWxlPSJmb250LXNpemU6NDZweDtsaW5lLWhlaWdodDowLjk7Zm9udC13ZWlnaHQ6ODAwO2NvbG9yOiMwZjM1NWM7bWFyZ2luOjAiPlNJLUFCU0VOPGJyLz5TTVBOIDE8YnIvPkJyb25kb25nPC9oMT4KICAgICAgPHAgc3R5bGU9ImNvbG9yOiM0NzU1Njk7Zm9udC1zaXplOjEzcHg7bGluZS1oZWlnaHQ6MS42O21heC13aWR0aDo0MjBweDttYXJnaW4tdG9wOjE0cHgiPkFic2Vuc2kgUVIgQmVyYmFzaXMgTG9rYXNpIHwgSUQgUHJpdmF0ICYgVGVyZW5rcmlwc2k8YnIvPlNla2FsaSBjZXRhayB1bnR1ayBJRCBDYXJkLCB2YWxpZGFzaSBvdG9tYXRpcyBoYW55YSBkYWxhbSByYWRpdXMgNDBtIHNla29sYWguPC9wPgogICAgICA8ZGl2IHN0eWxlPSJkaXNwbGF5OmZsZXg7Z2FwOjEwcHg7bWFyZ2luLXRvcDoxOHB4O2ZsZXgtd3JhcDp3cmFwIj4KICAgICAgICA8YSBjbGFzcz0iYnRuIGJ0bi1wcmltYXJ5IiBzdHlsZT0iaGVpZ2h0OjQ0cHg7cGFkZGluZzowIDIwcHgiIGhyZWY9ImhhbGFtYW4tYWJzZW4uaHRtbCI+TWFzdWsgU2ViYWdhaSBHdXJ1IOKGkjwvYT4KICAgICAgICA8YSBjbGFzcz0iYnRuIGJ0bi1vdXRsaW5lIiBzdHlsZT0iaGVpZ2h0OjQ0cHgiIGhyZWY9ImFkbWluLWFic2VuLmh0bWwiPlBhbmVsIEFkbWluPC9hPgogICAgICA8L2Rpdj4KICAgICAgPGRpdiBzdHlsZT0iZGlzcGxheTpmbGV4O2dhcDoxNHB4O21hcmdpbi10b3A6MTRweDtmb250LXNpemU6MTFweDtjb2xvcjojNjQ3NDhiO2ZvbnQtd2VpZ2h0OjYwMCI+CiAgICAgICAgPHNwYW4gc3R5bGU9ImRpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjRweCI+8J+foiBHdXJ1IFRlcnZlcmlmaWthc2k8L3NwYW4+CiAgICAgICAgPHNwYW4gc3R5bGU9ImRpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjRweCI+8J+UkiBUZXItZW5rcmlwc2kgJiBBbWFuPC9zcGFuPgogICAgICA8L2Rpdj4KICAgIDwvZGl2PgoKICAgIDxkaXYgY2xhc3M9Im1hcC1jYXJkIj4KICAgICAgPGRpdiBzdHlsZT0icG9zaXRpb246cmVsYXRpdmUiPgogICAgICAgIDxkaXYgaWQ9Im1hcCI+PC9kaXY+CiAgICAgICAgPCEtLSBUb3AgYmFkZ2VzIC0tPgogICAgICAgIDxkaXYgc3R5bGU9InBvc2l0aW9uOmFic29sdXRlO3RvcDoxMnB4O2xlZnQ6MTJweDtyaWdodDoxMnB4O3otaW5kZXg6NTAwO2Rpc3BsYXk6ZmxleDtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjthbGlnbi1pdGVtczpzdGFydDtnYXA6OHB4O2ZsZXgtd3JhcDp3cmFwIj4KICAgICAgICAgIDxkaXYgY2xhc3M9ImJhZGdlIj7il48gcmFkaXVzIDQwbSBBa3RpZiDigKIgMzZSNitYODk8L2Rpdj4KICAgICAgICAgIDxkaXYgY2xhc3M9InRvZ2dsZS1ncm91cCI+CiAgICAgICAgICAgIDxidXR0b24gaWQ9ImJ0blBldGEiIGNsYXNzPSJ0b2dnbGUtYnRuIGFjdGl2ZSIgb25jbGljaz0ic2V0TW9kZSgncGV0YScpIj7wn5e677iPIFBldGE8L2J1dHRvbj4KICAgICAgICAgICAgPGJ1dHRvbiBpZD0iYnRuU2F0ZWxpdCIgY2xhc3M9InRvZ2dsZS1idG4iIG9uY2xpY2s9InNldE1vZGUoJ3NhdGVsaXQnKSI+8J+bsO+4jyBTYXRlbGl0PC9idXR0b24+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICA8L2Rpdj4KICAgICAgICA8IS0tIEJvdHRvbSBjYXJkcyAtLT4KICAgICAgICA8ZGl2IHN0eWxlPSJwb3NpdGlvbjphYnNvbHV0ZTtib3R0b206MTJweDtsZWZ0OjEycHg7cmlnaHQ6MTJweDt6LWluZGV4OjUwMDtkaXNwbGF5OmZsZXg7Z2FwOjhweDtmbGV4LXdyYXA6d3JhcCI+CiAgICAgICAgICA8ZGl2IHN0eWxlPSJmbGV4OjE7YmFja2dyb3VuZDp3aGl0ZTtib3JkZXItcmFkaXVzOjE0cHg7cGFkZGluZzoxMHB4IDEycHg7Ym9yZGVyOjFweCBzb2xpZCAjZTJlOGYwO2JveC1zaGFkb3c6MCAycHggMTJweCByZ2JhKDAsMCwwLDAuMDgpIj4KICAgICAgICAgICAgPGRpdiBzdHlsZT0iZm9udC1zaXplOjlweDtmb250LXdlaWdodDo4MDA7Y29sb3I6Izk0YTNiODtsZXR0ZXItc3BhY2luZzowLjhweCI+U01QTiAxIEJyb25kb25nPC9kaXY+CiAgICAgICAgICAgIDxkaXYgc3R5bGU9ImZvbnQtd2VpZ2h0OjgwMDtmb250LXNpemU6MTJweDtjb2xvcjojMGYzNTVjO21hcmdpbi10b3A6MnB4Ij4tNi45MDc1LCAxMTIuMjEwOCDigKIgTGFtb25nYW48L2Rpdj4KICAgICAgICAgICAgPGRpdiBzdHlsZT0iZm9udC1zaXplOjEwcHg7Y29sb3I6IzY0NzQ4YjttYXJnaW4tdG9wOjFweCI+MzZSNitYODkg4oCiIEJvaG8sIFRsb2dvcmV0bm88L2Rpdj4KICAgICAgICAgIDwvZGl2PgogICAgICAgICAgPGRpdiBzdHlsZT0iYmFja2dyb3VuZDojMGYzNTVjO2NvbG9yOndoaXRlO2JvcmRlci1yYWRpdXM6MTRweDtwYWRkaW5nOjEwcHggMTJweDttaW4td2lkdGg6MTEwcHg7Ym94LXNoYWRvdzowIDJweCAxMnB4IHJnYmEoMCwwLDAsMC4xNSkiPgogICAgICAgICAgICA8ZGl2IHN0eWxlPSJmb250LXNpemU6OXB4O2ZvbnQtd2VpZ2h0OjcwMDtsZXR0ZXItc3BhY2luZzowLjhweDtvcGFjaXR5OjAuNyI+U1RBVFVTPC9kaXY+CiAgICAgICAgICAgIDxkaXYgc3R5bGU9ImZvbnQtd2VpZ2h0OjgwMDtmb250LXNpemU6MTJweDttYXJnaW4tdG9wOjJweCI+4pePIFZhbGlkPC9kaXY+CiAgICAgICAgICAgIDxkaXYgc3R5bGU9ImZvbnQtc2l6ZToxMHB4O29wYWNpdHk6MC44O21hcmdpbi10b3A6MXB4Ij5EaSBEYWxhbSA0MG08L2Rpdj4KICAgICAgICAgIDwvZGl2PgogICAgICAgIDwvZGl2PgogICAgICA8L2Rpdj4KICAgIDwvZGl2PgogIDwvZGl2Pgo8L21haW4+Cgo8c2VjdGlvbiBzdHlsZT0iYmFja2dyb3VuZDp3aGl0ZTtib3JkZXItdG9wOjFweCBzb2xpZCAjZTJlOGYwO2JvcmRlci1ib3R0b206MXB4IHNvbGlkICNlMmU4ZjA7bWFyZ2luLXRvcDozMnB4O3BhZGRpbmc6MjhweCAyMHB4Ij4KICA8ZGl2IHN0eWxlPSJtYXgtd2lkdGg6MTEyMHB4O21hcmdpbjowIGF1dG8iPgogICAgPGRpdiBzdHlsZT0iZGlzcGxheTpmbGV4O2p1c3RpZnktY29udGVudDpzcGFjZS1iZXR3ZWVuO2FsaWduLWl0ZW1zOmVuZDtmbGV4LXdyYXA6d3JhcDtnYXA6MTJweDttYXJnaW4tYm90dG9tOjE4cHgiPgogICAgICA8ZGl2PgogICAgICAgIDxkaXYgc3R5bGU9ImZvbnQtc2l6ZToxMHB4O2ZvbnQtd2VpZ2h0OjgwMDtsZXR0ZXItc3BhY2luZzoxcHg7Y29sb3I6Izk0YTNiOCI+Q0FSQSBLRVJKQSBTSVNURU08L2Rpdj4KICAgICAgICA8aDIgc3R5bGU9ImZvbnQtc2l6ZToyNHB4O2ZvbnQtd2VpZ2h0OjgwMDtjb2xvcjojMGYzNTVjO21hcmdpbjo2cHggMCAwO2xpbmUtaGVpZ2h0OjEuMSI+QWJzZW4gMyBkZXRpayw8YnIvPnRhbnBhIHJpYmV0LjwvaDI+CiAgICAgIDwvZGl2PgogICAgICA8ZGl2IHN0eWxlPSJmb250LXNpemU6MTFweDtjb2xvcjojNjQ3NDhiO21heC13aWR0aDozMDBweDtsaW5lLWhlaWdodDoxLjUiPkRpcmFuY2FuZyB1bnR1ayBndXJ1IC0gYnVrYW4gdW50dWsgYWRtaW4uIEN1a3VwIGJhd2EgSFAgc2VuZGlyaSwgdGlkYWsgcGVybHUgdHVrYXIgcGVyYW5na2F0LCBoYW55YSBhYnNlbiBkaSBhcmVhIFNNUE4gMSBCcm9uZG9uZy48L2Rpdj4KICAgIDwvZGl2PgogICAgPGRpdiBzdHlsZT0iZGlzcGxheTpncmlkO2dyaWQtdGVtcGxhdGUtY29sdW1uczpyZXBlYXQoMywxZnIpO2dhcDoxNnB4Ij4KICAgICAgPGRpdiBzdHlsZT0iYmFja2dyb3VuZDp3aGl0ZTtib3JkZXI6MXB4IHNvbGlkICNlMmU4ZjA7Ym9yZGVyLXJhZGl1czoxNnB4O3BhZGRpbmc6MThweDtwb3NpdGlvbjpyZWxhdGl2ZSI+CiAgICAgICAgPGRpdiBzdHlsZT0icG9zaXRpb246YWJzb2x1dGU7dG9wOjE0cHg7cmlnaHQ6MTRweDtmb250LXNpemU6MTBweDtjb2xvcjojY2JkNWUxO2ZvbnQtd2VpZ2h0OjcwMCI+MDE8L2Rpdj4KICAgICAgICA8ZGl2IHN0eWxlPSJ3aWR0aDozNnB4O2hlaWdodDozNnB4O2JvcmRlci1yYWRpdXM6MTBweDtiYWNrZ3JvdW5kOiNmMWY1Zjk7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6Y2VudGVyO2ZvbnQtc2l6ZToxNnB4Ij7wn5GkPC9kaXY+CiAgICAgICAgPGRpdiBzdHlsZT0iZm9udC13ZWlnaHQ6ODAwO2NvbG9yOiMwZjM1NWM7bWFyZ2luLXRvcDoxNHB4O2ZvbnQtc2l6ZToxM3B4Ij5Mb2dpbiBkZW5nYW4gSUQgUHJpdmF0PC9kaXY+CiAgICAgICAgPGRpdiBzdHlsZT0iZm9udC1zaXplOjExcHg7Y29sb3I6IzY0NzQ4YjttYXJnaW4tdG9wOjZweDtsaW5lLWhlaWdodDoxLjUiPlNldGlhcCBndXJ1IGRhcGF0IElEIHVuaWsgcGVybWFuZW4gaGFueWEgZGlrZXRhaHVpIGd1cnUgJiBhZG1pbi4gVGlkYWsgYmlzYSBkaXRlYmFrLCB0aWRhayBiaXNhIGR1cGxpa2F0LjwvZGl2PgogICAgICAgIDxkaXYgc3R5bGU9Im1hcmdpbi10b3A6MTJweCI+PHNwYW4gc3R5bGU9ImZvbnQtc2l6ZTo5cHg7YmFja2dyb3VuZDojZjFmNWY5O2JvcmRlcjoxcHggc29saWQgI2UyZThmMDtwYWRkaW5nOjRweCA4cHg7Ym9yZGVyLXJhZGl1czo5OTlweDtmb250LXdlaWdodDo3MDA7Y29sb3I6IzQ3NTU2OSI+8J+GlCBJRCBVbmlrIOKAoiBQcml2YXQ8L3NwYW4+PC9kaXY+CiAgICAgIDwvZGl2PgogICAgICA8ZGl2IHN0eWxlPSJiYWNrZ3JvdW5kOndoaXRlO2JvcmRlcjoxcHggc29saWQgI2UyZThmMDtib3JkZXItcmFkaXVzOjE2cHg7cGFkZGluZzoxOHB4O3Bvc2l0aW9uOnJlbGF0aXZlIj4KICAgICAgICA8ZGl2IHN0eWxlPSJwb3NpdGlvbjphYnNvbHV0ZTt0b3A6MTRweDtyaWdodDoxNHB4O2ZvbnQtc2l6ZToxMHB4O2NvbG9yOiNjYmQ1ZTE7Zm9udC13ZWlnaHQ6NzAwIj4wMjwvZGl2PgogICAgICAgIDxkaXYgc3R5bGU9IndpZHRoOjM2cHg7aGVpZ2h0OjM2cHg7Ym9yZGVyLXJhZGl1czoxMHB4O2JhY2tncm91bmQ6I2YxZjVmOTtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpjZW50ZXI7Zm9udC1zaXplOjE2cHgiPvCfk7E8L2Rpdj4KICAgICAgICA8ZGl2IHN0eWxlPSJmb250LXdlaWdodDo4MDA7Y29sb3I6IzBmMzU1YzttYXJnaW4tdG9wOjE0cHg7Zm9udC1zaXplOjEzcHgiPlNjYW4gUVIgZGkgSUQgQ2FyZCBkZW5nYW4gSFAgc2VuZGlyaTwvZGl2PgogICAgICAgIDxkaXYgc3R5bGU9ImZvbnQtc2l6ZToxMXB4O2NvbG9yOiM2NDc0OGI7bWFyZ2luLXRvcDo2cHg7bGluZS1oZWlnaHQ6MS41Ij5UZW1wZWxrYW4ga2FtZXJhIGtlIFFSIGRpIGthcnR1IGlkZW50aXRhcy4gVGlkYWsgcGVybHUgSFAgc2Vrb2xhaCAtIHBha2FpIEhQIHByaWJhZGkgZ3VydS48L2Rpdj4KICAgICAgICA8ZGl2IHN0eWxlPSJtYXJnaW4tdG9wOjEycHgiPjxzcGFuIHN0eWxlPSJmb250LXNpemU6OXB4O2JhY2tncm91bmQ6I2YxZjVmOTtib3JkZXI6MXB4IHNvbGlkICNlMmU4ZjA7cGFkZGluZzo0cHggOHB4O2JvcmRlci1yYWRpdXM6OTk5cHg7Zm9udC13ZWlnaHQ6NzAwO2NvbG9yOiM0NzU1NjkiPvCfk7EgQllPRCDigKIgTm8gRGV2aWNlIFNoYXJpbmc8L3NwYW4+PC9kaXY+CiAgICAgIDwvZGl2PgogICAgICA8ZGl2IHN0eWxlPSJiYWNrZ3JvdW5kOndoaXRlO2JvcmRlcjoxcHggc29saWQgI2UyZThmMDtib3JkZXItcmFkaXVzOjE2cHg7cGFkZGluZzoxOHB4O3Bvc2l0aW9uOnJlbGF0aXZlIj4KICAgICAgICA8ZGl2IHN0eWxlPSJwb3NpdGlvbjphYnNvbHV0ZTt0b3A6MTRweDtyaWdodDoxNHB4O2ZvbnQtc2l6ZToxMHB4O2NvbG9yOiNjYmQ1ZTE7Zm9udC13ZWlnaHQ6NzAwIj4wMzwvZGl2PgogICAgICAgIDxkaXYgc3R5bGU9IndpZHRoOjM2cHg7aGVpZ2h0OjM2cHg7Ym9yZGVyLXJhZGl1czoxMHB4O2JhY2tncm91bmQ6I2YxZjVmOTtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpjZW50ZXI7Zm9udC1zaXplOjE2cHgiPvCfk408L2Rpdj4KICAgICAgICA8ZGl2IHN0eWxlPSJmb250LXdlaWdodDo4MDA7Y29sb3I6IzBmMzU1YzttYXJnaW4tdG9wOjE0cHg7Zm9udC1zaXplOjEzcHgiPlZhbGlkYXNpIG90b21hdGlzIGRhbGFtIHJhZGl1cyA0MG08L2Rpdj4KICAgICAgICA8ZGl2IHN0eWxlPSJmb250LXNpemU6MTFweDtjb2xvcjojNjQ3NDhiO21hcmdpbi10b3A6NnB4O2xpbmUtaGVpZ2h0OjEuNSI+U2lzdGVtIGNlayBsb2thc2kgcmVhbC10aW1lLiBIYW55YSBiaXNhIGFic2VuIGppa2EgYmVyYWRhIGRpIGFyZWEgNDBtIFNNUE4gMSBCcm9uZG9uZy48L2Rpdj4KICAgICAgICA8ZGl2IHN0eWxlPSJtYXJnaW4tdG9wOjEycHgiPjxzcGFuIHN0eWxlPSJmb250LXNpemU6OXB4O2JhY2tncm91bmQ6I2RjZmNlNztib3JkZXI6MXB4IHNvbGlkICNiYmY3ZDA7cGFkZGluZzo0cHggOHB4O2JvcmRlci1yYWRpdXM6OTk5cHg7Zm9udC13ZWlnaHQ6NzAwO2NvbG9yOiMxNjY1MzQiPvCfk40gR2VvZmVuY2luZyA0MG08L3NwYW4+PC9kaXY+CiAgICAgIDwvZGl2PgogICAgPC9kaXY+CiAgPC9kaXY+Cjwvc2VjdGlvbj4KCjxmb290ZXIgc3R5bGU9ImJhY2tncm91bmQ6d2hpdGU7Ym9yZGVyLXRvcDoxcHggc29saWQgI2UyZThmMCI+PGRpdiBzdHlsZT0ibWF4LXdpZHRoOjExMjBweDttYXJnaW46MCBhdXRvO3BhZGRpbmc6MCAyMHB4O2hlaWdodDo2NHB4O2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW4iPjxkaXYgc3R5bGU9ImRpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjEwcHgiPjxkaXYgc3R5bGU9IndpZHRoOjMycHg7aGVpZ2h0OjMycHg7Ym9yZGVyLXJhZGl1czo4cHg7YmFja2dyb3VuZDp0cmFuc3BhcmVudDtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpjZW50ZXI7b3ZlcmZsb3c6aGlkZGVuIj48aW1nIHNyYz0ibG9nby1zbXAyLnBuZyIgb25lcnJvcj0idGhpcy5zdHlsZS5kaXNwbGF5PSdub25lJzsgdGhpcy5wYXJlbnRFbGVtZW50LnRleHRDb250ZW50PSdRUic7IHRoaXMucGFyZW50RWxlbWVudC5zdHlsZS5iYWNrZ3JvdW5kPScjMGYzNTVjJzsgdGhpcy5wYXJlbnRFbGVtZW50LnN0eWxlLmNvbG9yPSd3aGl0ZSc7IHRoaXMucGFyZW50RWxlbWVudC5zdHlsZS5mb250V2VpZ2h0PSc4MDAnIiBhbHQ9ImxvZ28iIHN0eWxlPSJ3aWR0aDoxMDAlO2hlaWdodDoxMDAlO29iamVjdC1maXQ6Y29udGFpbiIvPjwvZGl2PjxkaXY+PGRpdiBzdHlsZT0iZm9udC13ZWlnaHQ6ODAwO2ZvbnQtc2l6ZToxMXB4O2NvbG9yOiMwZjM1NWMiPlNJLUFCU0VOIOKAlCBTTVBOIDEgQnJvbmRvbmc8L2Rpdj48ZGl2IHN0eWxlPSJmb250LXNpemU6OXB4O2NvbG9yOiM5NGEzYjgiPlFSIEdlb2ZlbmNpbmcgQWJzZW5zaSDigKIgSUQgUHJpdmF0IFRlcmphZ2Eg4oCiIEFudGkgVGl0aXAgQWJzZW4g4oCiIDM2UjYrWDg5PC9kaXY+PC9kaXY+PC9kaXY+PGRpdiBzdHlsZT0iZm9udC1zaXplOjlweDtjb2xvcjojOTRhM2I4O2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjhweCI+PHNwYW4+wqkgMjAyNSBTTVBOIDEgQnJvbmRvbmcsIExhbW9uZ2FuPC9zcGFuPjxzcGFuPuKAoiAtNi45MDc1LCAxMTIuMjEwODwvc3Bhbj48c3BhbiBzdHlsZT0iYmFja2dyb3VuZDojMGYxNzJhO2NvbG9yOndoaXRlO3BhZGRpbmc6M3B4IDhweDtib3JkZXItcmFkaXVzOjk5OXB4O2ZvbnQtd2VpZ2h0OjcwMCI+djEuMCDigKIgRGVzYWluIEFtYW48L3NwYW4+PC9kaXY+PC9kaXY+PC9mb290ZXI+Cgo8c2NyaXB0Pgpjb25zdCBMQVQ9LTYuOTA3NTYyNSwgTE5HPTExMi4yMTA4MTI1LCBQTFVTPSIzNlI2K1g4OSI7CmxldCBSQURJVVM9cGFyc2VJbnQobG9jYWxTdG9yYWdlLmdldEl0ZW0oJ1JBRElVU19NRVRFUicpfHwnNDAnKTsKbG9jYWxTdG9yYWdlLnNldEl0ZW0oJ1JBRElVU19NRVRFUicsJzQwJyk7CmxldCBNT0RFPWxvY2FsU3RvcmFnZS5nZXRJdGVtKCdNQVBfTU9ERScpfHwncGV0YSc7CmxldCBtYXAsIHJvYWRMYXllciwgc2F0TGF5ZXIsIGNpcmNsZTsKCmZ1bmN0aW9uIGluaXRNYXAoKXsKICBtYXAgPSBMLm1hcCgnbWFwJyx7em9vbUNvbnRyb2w6ZmFsc2V9KS5zZXRWaWV3KFtMQVQsTE5HXSwxNyk7CiAgCiAgLy8gR29vZ2xlIE1hcHMgUm9hZCAtIGFudGkgYmxvY2tlZAogIHJvYWRMYXllciA9IEwudGlsZUxheWVyKCdodHRwczovL3tzfS5nb29nbGUuY29tL3Z0L2x5cnM9bSZ4PXt4fSZ5PXt5fSZ6PXt6fScsIHtzdWJkb21haW5zOlsnbXQwJywnbXQxJywnbXQyJywnbXQzJ10sIG1heFpvb206MjAsCiAgICBhdHRyaWJ1dGlvbjonJmNvcHk7IEdvb2dsZSBNYXBzJwogIH0pOwogIAogIC8vIEdvb2dsZSBNYXBzIFNhdGVsbGl0ZQogIHNhdExheWVyID0gTC50aWxlTGF5ZXIoJ2h0dHBzOi8ve3N9Lmdvb2dsZS5jb20vdnQvbHlycz1zJng9e3h9Jnk9e3l9Jno9e3p9JywgewogICAgc3ViZG9tYWluczpbJ210MCcsJ210MScsJ210MicsJ210MyddLCBtYXhab29tOjIwLAogICAgYXR0cmlidXRpb246JyZjb3B5OyBHb29nbGUgTWFwcycKICB9KTsKCiAgLy8gRGVmYXVsdCBsYXllcgogIGlmKE1PREU9PT0nc2F0ZWxpdCcpIHNhdExheWVyLmFkZFRvKG1hcCk7IGVsc2Ugcm9hZExheWVyLmFkZFRvKG1hcCk7CiAgCiAgTC5jb250cm9sLnpvb20oe3Bvc2l0aW9uOidib3R0b21yaWdodCd9KS5hZGRUbyhtYXApOwogIAogIC8vIENpcmNsZSAtIHdhcm5hIGJlZGEgdW50dWsgc2F0ZWxpdCBiaWFyIGtlbGlhdGFuCiAgY29uc3QgY2lyY2xlQ29sb3IgPSBNT0RFPT09J3NhdGVsaXQnID8gJyNmZmZmZmYnIDogJyMwZjRjODEnOwogIGNvbnN0IGZpbGxDb2xvciA9IE1PREU9PT0nc2F0ZWxpdCcgPyAnIzM4YmRmOCcgOiAnIzBmNGM4MSc7CiAgY29uc3QgZmlsbE9wYWNpdHkgPSBNT0RFPT09J3NhdGVsaXQnID8gMC4yNSA6IDAuMTI7CiAgCiAgY2lyY2xlID0gTC5jaXJjbGUoW0xBVCxMTkddLHsKICAgIHJhZGl1czpSQURJVVMsIAogICAgY29sb3I6Y2lyY2xlQ29sb3IsIAogICAgd2VpZ2h0OjIsIAogICAgZGFzaEFycmF5Oic4IDgnLCAKICAgIGZpbGxDb2xvcjpmaWxsQ29sb3IsIAogICAgZmlsbE9wYWNpdHk6ZmlsbE9wYWNpdHkKICB9KS5hZGRUbyhtYXApOwogIAogIEwubWFya2VyKFtMQVQsTE5HXSkuYWRkVG8obWFwKS5iaW5kUG9wdXAoYFNNUE4gMSBCcm9uZG9uZzxicj4ke1BMVVN9PGJyPkpsLiBSYXlhLCBCb2hvLCBUbG9nb3JldG5vLCBLZWMuIEJyb25kb25nLCBLYWJ1cGF0ZW4gTGFtb25nYW4sIEphd2EgVGltdXIgNjIyNjNgKTsKCiAgdXBkYXRlVG9nZ2xlVUkoKTsKICBzZXRUaW1lb3V0KCgpPT5tYXAuaW52YWxpZGF0ZVNpemUoKSwzMDApOwp9CgpmdW5jdGlvbiBzZXRNb2RlKG1vZGUpewogIE1PREU9bW9kZTsKICBsb2NhbFN0b3JhZ2Uuc2V0SXRlbSgnTUFQX01PREUnLCBtb2RlKTsKICAKICBpZihtb2RlPT09J3NhdGVsaXQnKXsKICAgIGlmKG1hcC5oYXNMYXllcihyb2FkTGF5ZXIpKSBtYXAucmVtb3ZlTGF5ZXIocm9hZExheWVyKTsKICAgIHNhdExheWVyLmFkZFRvKG1hcCk7CiAgICAvLyBVcGRhdGUgY2lyY2xlIGJpYXIga2VsaWF0YW4gZGkgc2F0ZWxpdAogICAgaWYoY2lyY2xlKXsKICAgICAgY2lyY2xlLnNldFN0eWxlKHtjb2xvcjonI2ZmZmZmZicsIGZpbGxDb2xvcjonIzM4YmRmOCcsIGZpbGxPcGFjaXR5OjAuMjV9KTsKICAgIH0KICB9IGVsc2UgewogICAgaWYobWFwLmhhc0xheWVyKHNhdExheWVyKSkgbWFwLnJlbW92ZUxheWVyKHNhdExheWVyKTsKICAgIHJvYWRMYXllci5hZGRUbyhtYXApOwogICAgaWYoY2lyY2xlKXsKICAgICAgY2lyY2xlLnNldFN0eWxlKHtjb2xvcjonIzBmNGM4MScsIGZpbGxDb2xvcjonIzBmNGM4MScsIGZpbGxPcGFjaXR5OjAuMTJ9KTsKICAgIH0KICB9CiAgdXBkYXRlVG9nZ2xlVUkoKTsKfQoKZnVuY3Rpb24gdXBkYXRlVG9nZ2xlVUkoKXsKICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnYnRuUGV0YScpLmNsYXNzTmFtZSA9IE1PREU9PT0ncGV0YScgPyAndG9nZ2xlLWJ0biBhY3RpdmUnIDogJ3RvZ2dsZS1idG4nOwogIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdidG5TYXRlbGl0JykuY2xhc3NOYW1lID0gTU9ERT09PSdzYXRlbGl0JyA/ICd0b2dnbGUtYnRuIGFjdGl2ZScgOiAndG9nZ2xlLWJ0bic7Cn0KCndpbmRvdy5hZGRFdmVudExpc3RlbmVyKCdET01Db250ZW50TG9hZGVkJywgaW5pdE1hcCk7Cjwvc2NyaXB0Pgo8L2JvZHk+CjwvaHRtbD4K" style="display:flex;align-items:center;gap:10px;text-decoration:none"><div style="width:36px;height:36px;border-radius:10px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800">QR</div><div><div style="font-weight:800;color:#0f355c;font-size:12px">SI-ABSEN • SINGLE FILE</div><div style="font-size:10px;color:#64748b">Firebase di dalam • Kamera Nyala</div></div></a>
+<div><span id="gidBadge" class="hidden" style="background:#e0f2fe;color:#0f355c;font-size:11px;font-weight:700;padding:6px 10px;border-radius:999px"></span> <a id="logoutBtn" href="#" class="hidden" onclick="logout();return false;" style="font-size:12px;color:#64748b">Logout</a></div>
 </header>
-
 <div class="container">
-  <!-- LOGIN SCREEN ID + PASSWORD -->
-  <div id="loginScreen">
-    <div class="card" style="margin-top:20px">
-      <div style="text-align:center;margin-bottom:16px">
-        <div style="width:64px;height:64px;border-radius:20px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:28px">🔐</div>
-        <h2 style="margin:12px 0 6px;color:#0f355c;font-size:20px;font-weight:800">Login Guru</h2>
-        <p style="color:#64748b;font-size:13px;margin:0">Masukkan ID Privat + Password masing-masing</p>
-      </div>
-      
-      <div style="margin-top:16px">
-        <label style="font-size:12px;font-weight:700;color:#475569">ID PRIVAT (G-XXXXX)</label>
-        <input id="gidInput" class="input" placeholder="Contoh: G-83105" style="margin-top:6px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" />
-      </div>
-      <div style="margin-top:12px">
-        <label style="font-size:12px;font-weight:700;color:#475569">PASSWORD</label>
-        <div style="position:relative;margin-top:6px">
-          <input id="passInput" class="input" type="password" placeholder="Password guru" style="padding-right:44px"/>
-          <button type="button" onclick="togglePass()" style="position:absolute;right:6px;top:6px;height:36px;width:36px;border:none;background:#f1f5f9;border-radius:10px;cursor:pointer">👁️</button>
-        </div>
-        <div style="font-size:10px;color:#94a3b8;margin-top:6px">Default awal Brondong+4 digit NIP, tapi bisa diganti sendiri biar gampang diingat</div>
-        <div id="loginError" class="hidden" style="margin-top:8px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b;font-size:12px;padding:8px 12px;border-radius:10px"></div>
-        <div id="loginSuccess" class="hidden" style="margin-top:8px;background:#dcfce7;border:1px solid #bbf7d0;color:#166534;font-size:12px;padding:8px 12px;border-radius:10px"></div>
-      </div>
+<div id="loginScreen"><div class="card" style="margin-top:20px"><div style="text-align:center"><div style="width:64px;height:64px;border-radius:20px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:28px">🔐</div><h2 style="color:#0f355c">Login Guru</h2></div>
+<div style="margin-top:16px"><label style="font-size:12px;font-weight:700">ID PRIVAT</label><input id="gidInput" class="input" placeholder="G-37286" style="margin-top:6px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"/></div>
+<div style="margin-top:12px"><label style="font-size:12px;font-weight:700">PASSWORD</label><input id="passInput" class="input" type="password" placeholder="Brondong..." style="margin-top:6px"/><div id="loginError" class="hidden" style="margin-top:8px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b;font-size:12px;padding:8px 12px;border-radius:10px"></div></div>
+<button class="btn btn-primary" style="margin-top:16px;height:52px" onclick="doLogin()">Masuk →</button>
+<div style="margin-top:10px;font-size:11px;color:#64748b;background:#f8fafc;border:1px dashed #e2e8f0;padding:8px;border-radius:10px">Test: G-37286 / Brondong8691<br/>G-83105 / Brondong1004</div></div></div>
 
-      <button class="btn btn-primary" style="margin-top:16px;height:52px" onclick="doLogin()">Masuk dengan ID + Password →</button>
+<div id="absenScreen" class="hidden">
+<div class="card"><div style="display:flex;justify-content:space-between"><div><div style="font-size:11px;font-weight:800;color:#64748b">PROFIL GURU</div><div id="namaGuru" style="font-weight:800;color:#0f355c;margin-top:4px;font-size:16px"></div><div id="nipGuru" style="font-size:12px;color:#64748b"></div></div><div id="inisialGuru" style="width:44px;height:44px;border-radius:999px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800"></div></div><div id="firebaseInfo" style="margin-top:10px;font-size:10px;padding:6px 10px;border-radius:8px;background:#f1f5f9;border:1px solid #e2e8f0">Firebase: mengecek...</div></div>
 
-      <div style="margin-top:14px;background:#f8fafc;border:1px dashed #e2e8f0;border-radius:12px;padding:10px 12px">
-        <div style="font-size:11px;font-weight:700;color:#64748b">CONTOH LOGIN VALID:</div>
-        <div style="font-size:11px;color:#475569;margin-top:4px;font-family:monospace" id="contohLogin">G-83105 / Brondong1004 (Husnul Anam)<br/>G-20839 / Brondong1004<br/>G-34817 (tanpa NIP) → password ada di admin</div>
-        <div style="font-size:10px;color:#94a3b8;margin-top:4px">Admin bisa lihat semua password di admin-absen.html</div>
-      </div>
+<div class="card"><div style="font-size:11px;font-weight:800;color:#64748b">GPS • 40m • 36R6+X89</div><div id="statusLokasi" style="font-weight:800;color:#0f355c;margin-top:6px">Belum cek</div><div id="locText" style="font-size:12px;color:#64748b">Klik Cek Lokasi</div><div id="radiusBadge" style="margin-top:8px;display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:5px 10px;font-size:11px">Menunggu GPS</div><div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden"><div id="miniMap"></div></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="flex:1" onclick="cekLokasi()">📍 Cek Lokasi</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('peta')">Peta</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('satelit')">Sat</button></div></div>
 
-      <div style="text-align:center;margin-top:16px"><a href="index.html" style="font-size:12px;color:#64748b">← Kembali ke halaman awal</a></div>
-    </div>
-  </div>
-
-  <!-- ABSEN SCREEN -->
-  <div id="absenScreen" class="hidden">
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-size:11px;font-weight:800;letter-spacing:0.8px;color:#64748b">PROFIL GURU • LOGIN SUKSES</div>
-          <div id="namaGuru" style="font-weight:800;color:#0f355c;margin-top:4px;font-size:16px"></div>
-          <div id="nipGuru" style="font-size:12px;color:#64748b;margin-top:2px"></div>
-        </div>
-        <div id="inisialGuru" style="width:44px;height:44px;border-radius:999px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800"></div>
-      </div>
-
-    <div class="card" style="padding:12px 14px">
-      <div style="display:flex;justify-content:space-between;align-items:start;gap:12px">
-        <div style="flex:1">
-          <div style="font-size:9px;font-weight:800;letter-spacing:0.8px;color:#94a3b8">KEAMANAN AKUN</div>
-          <div style="font-weight:800;color:#0f355c;margin-top:2px;font-size:12px">Password Pribadi</div>
-          <div id="currentPassInfo" style="margin-top:6px;font-size:10px;color:#64748b"></div>
-        </div>
-        <button onclick="toggleGantiPass()" id="btnGantiPass" style="height:28px;padding:0 10px;font-size:10px;font-weight:700;border-radius:999px;border:1px solid #e2e8f0;background:white;color:#0f355c;cursor:pointer;flex-shrink:0">✏️ Ganti</button>
-      </div>
-      <div id="gantiPassForm" class="hidden" style="margin-top:12px;border-top:1px solid #f1f5f9;padding-top:12px">
-        <div style="display:grid;gap:8px">
-          <input id="newPassInput" class="input" type="password" placeholder="Password baru bebas" style="height:40px;font-size:12px"/>
-          <input id="confirmPassInput" class="input" type="password" placeholder="Ulangi password baru" style="height:40px;font-size:12px"/>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-primary" style="flex:1;height:40px;font-size:12px" onclick="simpanPasswordBaru()">Simpan →</button>
-            <button class="btn btn-outline" style="flex:1;height:40px;font-size:12px" onclick="toggleGantiPass()">Batal</button>
-          </div>
-          <div id="passChangeMsg" class="hidden" style="font-size:11px;padding:8px 10px;border-radius:10px"></div>
-        </div>
-      </div>
-    </div>
-
-
-    <div class="card">
-      <div style="font-size:11px;font-weight:800;letter-spacing:0.8px;color:#64748b">STATUS LOKASI • 40m • 36R6+X89</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-        <div><div style="font-weight:800;color:#0f355c" id="statusLokasi">Mencari lokasi...</div><div style="font-size:12px;color:#64748b" id="locText">Menunggu GPS</div></div>
-        <div id="radiusBadge" style="font-size:11px;font-weight:700;padding:6px 10px;border-radius:999px" class="badge-valid">Di Dalam 40m</div>
-      </div>
-      <div style="height:8px;background:#e2e8f0;border-radius:999px;margin-top:12px;overflow:hidden"><div id="prog" style="height:100%;width:43%;background:#0f355c;border-radius:999px"></div></div>
-      <div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden"><div id="miniMap"></div></div>
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn btn-outline" style="flex:1" onclick="cekLokasi()">📍 Cek Ulang</button>
-        <button class="btn btn-outline" style="flex:1" onclick="setModeMini('peta')" id="miniPeta">🗺️ Peta</button>
-        <button class="btn btn-outline" style="flex:1" onclick="setModeMini('satelit')" id="miniSat">🛰️ Sat</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div style="font-size:11px;font-weight:800;letter-spacing:0.8px;color:#64748b">SCANNER QR • ID + PASSWORD VALID</div>
-      <div class="viewfinder" style="margin-top:12px">
-        <div class="corner" style="top:18px;left:18px;border-right:none;border-bottom:none"></div>
-        <div class="corner" style="top:18px;right:18px;border-left:none;border-bottom:none"></div>
-        <div class="corner" style="bottom:18px;left:18px;border-right:none;border-top:none"></div>
-        <div class="corner" style="bottom:18px;right:18px;border-left:none;border-top:none"></div>
-        <div style="text-align:center">
-          <div style="font-size:13px;font-weight:700;color:#e2e0f0">QR ID Card Guru</div>
-          <div style="font-size:11px;color:#94a3b8;margin-top:4px">Scan validasi ID + Password</div>
-          <div id="qrSim" style="margin-top:12px;background:rgba(255,255,255,0.1);border:1px dashed #334155;border-radius:10px;padding:8px 12px;font-size:10px;font-family:monospace;color:#cbd5e1">G-XXXXX|Nama|NIP|40m</div>
-        </div>
-      </div>
-      <button class="btn btn-primary" style="margin-top:14px;height:54px" id="scanBtn" onclick="mulaiScan()">✅ Scan & Absen Sekarang</button>
-      <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-        <div id="c1" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;text-align:center;font-size:11px;font-weight:700;color:#475569">ID Cocok <div>⏳</div></div>
-        <div id="c2" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;text-align:center;font-size:11px;font-weight:700;color:#475569">Lokasi &lt;40m <div>⏳</div></div>
-        <div id="c3" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;text-align:center;font-size:11px;font-weight:700;color:#475569">Pass Valid <div>⏳</div></div>
-      </div>
-      <div id="hasil" style="display:none;margin-top:14px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:14px;padding:14px">
-        <div style="display:flex;gap:10px;align-items:center">
-          <div id="hasilInisial" style="width:40px;height:40px;border-radius:999px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800"></div>
-          <div><div id="hasilNama" style="font-weight:800;color:#166534"></div><div id="hasilNip" style="font-size:11px;color:#15803d"></div></div>
-        </div>
-        <div style="margin-top:10px;font-size:11px;color:#166534;background:white;border:1px solid #bbf7d0;border-radius:10px;padding:8px 10px">
-          <div>✅ Absen berhasil (ID + Password valid)</div>
-          <div id="jamWaktu" style="margin-top:4px;font-weight:700"></div>
-          <div id="firebaseStatus" style="margin-top:4px;font-size:10px;color:#065f46"></div>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="card"><div style="font-size:11px;font-weight:800;color:#64748b">KAMERA QR • WAJIB NYALA</div>
+<div style="margin-top:10px"><div id="reader"></div><div id="qrResult" style="display:none;margin-top:8px;font-size:11px;padding:8px 10px;border-radius:10px;background:#f8fafc;border:1px dashed #e2e8f0"></div></div>
+<div style="display:flex;gap:8px;margin-top:10px"><button id="btnStartCam" class="btn btn-primary" style="flex:1" onclick="startCamera()">📷 NYALAKAN KAMERA</button><button id="btnStopCam" class="btn btn-outline hidden" style="flex:1" onclick="stopCamera()">✕ Matikan</button></div>
+<div style="margin-top:6px;font-size:10px;color:#64748b">Di HP harus HTTPS (GitHub Pages sudah HTTPS) + Izinkan Kamera. QR harus berisi G-XXXXX|Nama. Kalau QR cocok, baru tombol Absen aktif.</div>
+<button class="btn btn-primary" style="margin-top:14px;height:54px" id="scanBtn" onclick="mulaiScan()">✅ Absen Sekarang</button>
+<div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px"><div id="c1" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;text-align:center;font-size:11px;font-weight:700">ID <div>⏳</div></div><div id="c2" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;text-align:center;font-size:11px;font-weight:700">GPS <div>⏳</div></div><div id="c3" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;text-align:center;font-size:11px;font-weight:700">Firebase <div>⏳</div></div></div>
+<div id="hasil" style="display:none;margin-top:14px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:14px;padding:14px"><div id="jamWaktu" style="font-weight:700;color:#166534"></div><div id="firebaseStatus" style="margin-top:4px;font-size:10px"></div><div id="lokasiStatus" style="margin-top:4px;font-size:10px;color:#64748b"></div></div>
+</div>
+</div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const LAT=-6.9075625, LNG=112.2108125, PLUS="36R6+X89";
-let RADIUS=parseInt(localStorage.getItem('RADIUS_METER')||'40');
-let map, markerUser, circle, roadLayer, satLayer, MODE_MINI=localStorage.getItem('MAP_MODE')||'peta';
-let currentGuru=null;
+// ==== FIREBASE CONFIG LANGSUNG DI DALAM - SINGLE FILE ====
+const firebaseConfig = {
+  apiKey: "AIzaSyCSi5QKL-MapUUdGLV4OuiXupXa3XmRKvg",
+  authDomain: "smpn1-brondong-absen.firebaseapp.com",
+  projectId: "smpn1-brondong-absen",
+  storageBucket: "smpn1-brondong-absen.firebasestorage.app",
+  messagingSenderId: "174884842248",
+  appId: "1:174884842248:web:8625540d5f3ff8b7f45abd"
+};
 let db=null;
-let lastDistance=0;
-
-let cfg = null;
+const fbInfo=document.getElementById('firebaseInfo');
 try{
-  if (typeof window !== 'undefined' && window.firebaseConfig) cfg = window.firebaseConfig;
-  else if (typeof firebaseConfig !== 'undefined') cfg = firebaseConfig;
-  if(!cfg) throw new Error("firebaseConfig tidak ditemukan - pastikan firebase-config.js ada di folder yang sama");
-  const app = initializeApp(cfg);
-  db = getFirestore(app);
-  console.log("✅ Firestore terhubung", cfg.projectId);
-}catch(e){ console.warn("Firebase belum config", e); }
+  const app=initializeApp(firebaseConfig);
+  db=getFirestore(app);
+  fbInfo.textContent="✅ Firebase terhubung: "+firebaseConfig.projectId;
+  fbInfo.style.background="#dcfce7"; fbInfo.style.borderColor="#bbf7d0"; fbInfo.style.color="#166534";
+}catch(e){
+  fbInfo.textContent="❌ Firebase gagal: "+e.message;
+  fbInfo.style.background="#fee2e2";
+}
 
-const GURUS=[{"no": 1, "nama": "Husnul Anam, S.Pd, M.Pd", "nip": "196906101998021004", "gid": "G-83105", "password": "Brondong1004"}, {"no": 2, "nama": "Drs. Khoim Khoirul A, M.Pd", "nip": "196807161998021004", "gid": "G-20839", "password": "Brondong1004"}, {"no": 3, "nama": "Drs. Zainuddin, M.Pd", "nip": "196805221997031002", "gid": "G-94652", "password": "Brondong1002"}, {"no": 4, "nama": "Drs. Joko Sutomo", "nip": "196710211999031003", "gid": "G-72600", "password": "Brondong1003"}, {"no": 5, "nama": "Ishnafiyah, S.Ag", "nip": "197507151999032008", "gid": "G-32712", "password": "Brondong2008"}, {"no": 6, "nama": "Evi Irawati, S.Pd", "nip": "197302112000122004", "gid": "G-79374", "password": "Brondong2004"}, {"no": 7, "nama": "Hilmishobah, S.Pd, M.Pd", "nip": "197109082003121003", "gid": "G-10058", "password": "Brondong1003"}, {"no": 8, "nama": "Anis Mufadhilah, S.Pd", "nip": "197010282007012012", "gid": "G-58661", "password": "Brondong2012"}, {"no": 9, "nama": "Muhamad Nur Cahyo, S. Pd", "nip": "197106092007011019", "gid": "G-59237", "password": "Brondong1019"}, {"no": 10, "nama": "Dra. Sri Hartini", "nip": "196609182008012006", "gid": "G-84672", "password": "Brondong2006"}, {"no": 11, "nama": "M. Khusen, S.Pd", "nip": "197111042008011009", "gid": "G-40409", "password": "Brondong1009"}, {"no": 12, "nama": "Asri Pujitami, S.Pd", "nip": "198501182010012015", "gid": "G-18622", "password": "Brondong2015"}, {"no": 13, "nama": "Moh. Safi, S.Kom", "nip": "197607052011011006", "gid": "G-60160", "password": "Brondong1006"}, {"no": 14, "nama": "Fitri Komariyah, S.Pd", "nip": "197508012009022001", "gid": "G-62543", "password": "Brondong2001"}, {"no": 15, "nama": "Sudibyanto, S.Pd", "nip": "197804242008011017", "gid": "G-22804", "password": "Brondong1017"}, {"no": 16, "nama": "Nikmatus Solichah, S.Ag", "nip": "197403092014062001", "gid": "G-15682", "password": "Brondong2001"}, {"no": 17, "nama": "Mahriwati, S.Pd", "nip": "197408312021212003", "gid": "G-25556", "password": "Brondong2003"}, {"no": 18, "nama": "Yusuf Budiharjo, S.Pd", "nip": "198206072022211002", "gid": "G-37728", "password": "Brondong1002"}, {"no": 19, "nama": "Teguh Wahyu Widayat, S. Pd", "nip": "198305012023211008", "gid": "G-59221", "password": "Brondong1008"}, {"no": 20, "nama": "Mamluhah, S.Pd", "nip": "198310192023212010", "gid": "G-23021", "password": "Brondong2010"}, {"no": 21, "nama": "Sakiman, SE", "nip": "197010242024211002", "gid": "G-63923", "password": "Brondong1002"}, {"no": 22, "nama": "Slamet Mamik H, S.Pd", "nip": "197902122024211001", "gid": "G-16452", "password": "Brondong1001"}, {"no": 23, "nama": "Maghfiroh, S.Pd", "nip": "198204152024212005", "gid": "G-90272", "password": "Brondong2005"}, {"no": 24, "nama": "Selvi Putri Cornivia, S.Pd", "nip": "199812312024212016", "gid": "G-13652", "password": "Brondong2016"}, {"no": 25, "nama": "Dwi Chandra Puspita A, S.Pd", "nip": "199906212024212016", "gid": "G-82582", "password": "Brondong2016"}, {"no": 26, "nama": "Nanda Wijayanti, S.pd", "nip": "200007272025212022", "gid": "G-76875", "password": "Brondong2022"}, {"no": 27, "nama": "Bunga Cahyaning Atie, S.Pd", "nip": "200108222025212006", "gid": "G-18758", "password": "Brondong2006"}, {"no": 28, "nama": "Toni Wijayanto, S.Kom", "nip": "198210242023211005", "gid": "G-35462", "password": "Brondong1005"}, {"no": 29, "nama": "Maghfiroh, S.Pd", "nip": "-", "gid": "G-34817", "password": "Brondong1710"}, {"no": 30, "nama": "Abdullah Faqih, S.Pdi. M.Ag", "nip": "-", "gid": "G-13489", "password": "Brondong8967"}, {"no": 31, "nama": "Muhamad Yunus Anis, S.Pd", "nip": "-", "gid": "G-39875", "password": "Brondong7575"}, {"no": 32, "nama": "Imarotul Hasanah, S.Pd", "nip": "19800615210012003", "gid": "G-93715", "password": "Brondong2003"}, {"no": 33, "nama": "Nurul Hidayati, S.Pd", "nip": "197810052009022005", "gid": "G-62114", "password": "Brondong2005"}, {"no": 34, "nama": "Mutholiah", "nip": "197111172009012001", "gid": "G-70331", "password": "Brondong2001"}, {"no": 35, "nama": "Nyamin", "nip": "197205042025211004", "gid": "G-56461", "password": "Brondong1004"}, {"no": 36, "nama": "Wartiyaningsih, S.Pd", "nip": "199308122025212060", "gid": "G-78122", "password": "Brondong2060"}, {"no": 37, "nama": "Muzahidin, S.Pd", "nip": "198801042025211108", "gid": "G-14014", "password": "Brondong1108"}, {"no": 38, "nama": "Arum Rahmana, S.Pd", "nip": "199210192025212086", "gid": "G-88075", "password": "Brondong2086"}, {"no": 39, "nama": "R. Arif Nur Cahyono, S.Pus", "nip": "198004262025211045", "gid": "G-24520", "password": "Brondong1045"}, {"no": 40, "nama": "Solkan", "nip": "-", "gid": "G-81582", "password": "Brondong8298"}, {"no": 41, "nama": "Fatiha Sabila, SE", "nip": "-", "gid": "G-35965", "password": "Brondong6573"}, {"no": 42, "nama": "Ahmad Marzuq Al Himni, S. Kom", "nip": "-", "gid": "G-37286", "password": "Brondong8691"}, {"no": 43, "nama": "Dedy Ustman", "nip": "-", "gid": "G-25987", "password": "Brondong8718"}, {"no": 44, "nama": "Helmy Hartiningsih", "nip": "-", "gid": "G-41909", "password": "Brondong0953"}];
+const LAT=-6.9075625, LNG=112.2108125, PLUS="36R6+X89";
+let RADIUS=40, map, roadLayer, satLayer, circle, markerUser;
+let currentGuru=null, lastDistance=9999, lastPos=null;
+let qrScanned=false, qrValue=null, html5QrCode=null;
+let MODE_MINI=localStorage.getItem('MAP_MODE')||'peta';
 
-let schoolMarker, lineToDevice;
+const GURUS=[{"no":1,"nama":"Husnul Anam, S.Pd, M.Pd","nip":"196906101998021004","gid":"G-83105","password":"Brondong1004"},{"no":2,"nama":"Drs. Khoim Khoirul A, M.Pd","nip":"196807161998021004","gid":"G-20839","password":"Brondong1004"},{"no":3,"nama":"Drs. Zainuddin, M.Pd","nip":"196805221997031002","gid":"G-94652","password":"Brondong1002"},{"no":4,"nama":"Drs. Joko Sutomo","nip":"196710211999031003","gid":"G-72600","password":"Brondong1003"},{"no":5,"nama":"Ishnafiyah, S.Ag","nip":"197507151999032008","gid":"G-32712","password":"Brondong2008"},{"no":6,"nama":"Evi Irawati, S.Pd","nip":"197302112000122004","gid":"G-79374","password":"Brondong2004"},{"no":7,"nama":"Hilmishobah, S.Pd, M.Pd","nip":"197109082003121003","gid":"G-10058","password":"Brondong1003"},{"no":8,"nama":"Anis Mufadhilah, S.Pd","nip":"197010282007012012","gid":"G-58661","password":"Brondong2012"},{"no":9,"nama":"Muhamad Nur Cahyo, S. Pd","nip":"197106092007011019","gid":"G-59237","password":"Brondong1019"},{"no":10,"nama":"Dra. Sri Hartini","nip":"196609182008012006","gid":"G-84672","password":"Brondong2006"},{"no":11,"nama":"M. Khusen, S.Pd","nip":"197111042008011009","gid":"G-40409","password":"Brondong1009"},{"no":12,"nama":"Asri Pujitami, S.Pd","nip":"198501182010012015","gid":"G-18622","password":"Brondong2015"},{"no":13,"nama":"Moh. Safi, S.Kom","nip":"197607052011011006","gid":"G-60160","password":"Brondong1006"},{"no":14,"nama":"Fitri Komariyah, S.Pd","nip":"197508012009022001","gid":"G-62543","password":"Brondong2001"},{"no":15,"nama":"Sudibyanto, S.Pd","nip":"197804242008011017","gid":"G-22804","password":"Brondong1017"},{"no":16,"nama":"Nikmatus Solichah, S.Ag","nip":"197403092014062001","gid":"G-15682","password":"Brondong2001"},{"no":17,"nama":"Mahriwati, S.Pd","nip":"197408312021212003","gid":"G-25556","password":"Brondong2003"},{"no":18,"nama":"Yusuf Budiharjo, S.Pd","nip":"198206072022211002","gid":"G-37728","password":"Brondong1002"},{"no":19,"nama":"Teguh Wahyu Widayat, S. Pd","nip":"198305012023211008","gid":"G-59221","password":"Brondong1008"},{"no":20,"nama":"Mamluhah, S.Pd","nip":"198310192023212010","gid":"G-23021","password":"Brondong2010"},{"no":21,"nama":"Sakiman, SE","nip":"197010242024211002","gid":"G-63923","password":"Brondong1002"},{"no":22,"nama":"Slamet Mamik H, S.Pd","nip":"197902122024211001","gid":"G-16452","password":"Brondong1001"},{"no":23,"nama":"Maghfiroh, S.Pd","nip":"198204152024212005","gid":"G-90272","password":"Brondong2005"},{"no":24,"nama":"Selvi Putri Cornivia, S.Pd","nip":"199812312024212016","gid":"G-13652","password":"Brondong2016"},{"no":25,"nama":"Dwi Chandra Puspita A, S.Pd","nip":"199906212024212016","gid":"G-82582","password":"Brondong2016"},{"no":26,"nama":"Nanda Wijayanti, S.pd","nip":"200007272025212022","gid":"G-76875","password":"Brondong2022"},{"no":27,"nama":"Bunga Cahyaning Atie, S.Pd","nip":"200108222025212006","gid":"G-18758","password":"Brondong2006"},{"no":28,"nama":"Toni Wijayanto, S.Kom","nip":"198210242023211005","gid":"G-35462","password":"Brondong1005"},{"no":29,"nama":"Maghfiroh, S.Pd","nip":"-","gid":"G-34817","password":"Brondong1710"},{"no":30,"nama":"Abdullah Faqih, S.Pdi. M.Ag","nip":"-","gid":"G-13489","password":"Brondong8967"},{"no":31,"nama":"Muhamad Yunus Anis, S.Pd","nip":"-","gid":"G-39875","password":"Brondong7575"},{"no":32,"nama":"Imarotul Hasanah, S.Pd","nip":"19800615210012003","gid":"G-93715","password":"Brondong2003"},{"no":33,"nama":"Nurul Hidayati, S.Pd","nip":"197810052009022005","gid":"G-62114","password":"Brondong2005"},{"no":34,"nama":"Mutholiah","nip":"197111172009012001","gid":"G-70331","password":"Brondong2001"},{"no":35,"nama":"Nyamin","nip":"197205042025211004","gid":"G-56461","password":"Brondong1004"},{"no":36,"nama":"Wartiyaningsih, S.Pd","nip":"199308122025212060","gid":"G-78122","password":"Brondong2060"},{"no":37,"nama":"Muzahidin, S.Pd","nip":"198801042025211108","gid":"G-14014","password":"Brondong1108"},{"no":38,"nama":"Arum Rahmana, S.Pd","nip":"199210192025212086","gid":"G-88075","password":"Brondong2086"},{"no":39,"nama":"R. Arif Nur Cahyono, S.Pus","nip":"198004262025211045","gid":"G-24520","password":"Brondong1045"},{"no":40,"nama":"Solkan","nip":"-","gid":"G-81582","password":"Brondong8298"},{"no":41,"nama":"Fatiha Sabila, SE","nip":"-","gid":"G-35965","password":"Brondong6573"},{"no":42,"nama":"Ahmad Marzuq Al Himni, S. Kom","nip":"-","gid":"G-37286","password":"Brondong8691"},{"no":43,"nama":"Dedy Ustman","nip":"-","gid":"G-25987","password":"Brondong8718"},{"no":44,"nama":"Helmy Hartiningsih","nip":"-","gid":"G-41909","password":"Brondong0953"}];
+
+window.getInisial=n=>{const p=n.trim().split(/\s+/);return p.length>=2?(p[0][0]+p[1][0]).toUpperCase():n.substring(0,2).toUpperCase();}
+window.hitungJarak=(a,b,c,d)=>{const R=6371000;const toRad=x=>x*Math.PI/180;const dLa=toRad(c-a),dLo=toRad(d-b);const q=Math.sin(dLa/2)**2+Math.cos(toRad(a))*Math.cos(toRad(c))*Math.sin(dLo/2)**2;return R*2*Math.atan2(Math.sqrt(q),Math.sqrt(1-q));};
+
 function initMap(){
   if(map) map.remove();
-  map = L.map('miniMap',{zoomControl:false}).setView([LAT,LNG],17);
-  roadLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20, attribution:'&copy; Google Maps'});
-  satLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20, attribution:'&copy; Google Maps'});
-  if(MODE_MINI==='satelit') satLayer.addTo(map); else roadLayer.addTo(map);
-  circle=L.circle([LAT,LNG],{radius:RADIUS, color:'#0f355c', weight:2, dashArray:'8 8', fillColor:'#0f355c', fillOpacity:0.12}).addTo(map);
-  // Titik sekolah - ikon khusus
-  const schoolIcon = L.divIcon({html:'<div style="width:28px;height:28px;background:#0f355c;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,0.3)">🏫</div>', iconSize:[28,28], className:''});
-  schoolMarker = L.marker([LAT,LNG], {icon: schoolIcon}).addTo(map).bindPopup('<b>SMPN 1 Brondong</b><br>'+PLUS+'<br>Radius 40m • Titik pusat');
+  map=L.map('miniMap',{zoomControl:false}).setView([LAT,LNG],17);
+  roadLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20}).addTo(map);
+  satLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20});
+  if(MODE_MINI==='satelit'){map.removeLayer(roadLayer); satLayer.addTo(map);}
+  circle=L.circle([LAT,LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f355c',fillOpacity:.12}).addTo(map);
+  L.marker([LAT,LNG]).addTo(map).bindPopup('SMPN 1 Brondong<br>'+PLUS);
   setTimeout(()=>map.invalidateSize(),300);
-  updateMiniToggle();
 }
-window.initMap=initMap;
+window.setModeMini=m=>{MODE_MINI=m;localStorage.setItem('MAP_MODE',m);if(m==='satelit'){if(map.hasLayer(roadLayer)) map.removeLayer(roadLayer); satLayer.addTo(map);}else{if(map.hasLayer(satLayer)) map.removeLayer(satLayer); roadLayer.addTo(map);}};
 
-window.setModeMini=function(mode){
-  MODE_MINI=mode; localStorage.setItem('MAP_MODE',mode);
-  if(mode==='satelit'){ if(map.hasLayer(roadLayer)) map.removeLayer(roadLayer); satLayer.addTo(map); }
-  else { if(map.hasLayer(satLayer)) map.removeLayer(satLayer); roadLayer.addTo(map); }
-  updateMiniToggle();
-}
-function updateMiniToggle(){
-  document.getElementById('miniPeta').style.background=MODE_MINI==='peta'?'#0f355c':'white'; document.getElementById('miniPeta').style.color=MODE_MINI==='peta'?'white':'#64748b';
-  document.getElementById('miniSat').style.background=MODE_MINI==='satelit'?'#0f355c':'white'; document.getElementById('miniSat').style.color=MODE_MINI==='satelit'?'white':'#64748b';
-}
+window.cekLokasi=()=>{
+  const t=document.getElementById('locText'), s=document.getElementById('statusLokasi'), b=document.getElementById('radiusBadge');
+  s.textContent='Mencari GPS...'; t.textContent='Aktifkan GPS HP & Izinkan Lokasi';
+  if(!navigator.geolocation){ t.textContent='Browser tidak support GPS'; return; }
+  navigator.geolocation.getCurrentPosition(p=>{
+    const d=hitungJarak(p.coords.latitude,p.coords.longitude,LAT,LNG); lastDistance=d; lastPos=p;
+    s.textContent='Lokasi Terdeteksi ✅'; t.innerHTML=`Kamu <b>${Math.round(d)}m</b> dari sekolah • Akurasi ${Math.round(p.coords.accuracy)}m`;
+    b.textContent=d<=RADIUS?`Di Dalam ${RADIUS}m ✅`:`Di Luar ${Math.round(d)}m ❌`; b.className=d<=RADIUS?'badge-valid':'badge-invalid';
+    if(markerUser&&map) map.removeLayer(markerUser);
+    const ic=L.divIcon({html:'<div style="width:18px;height:18px;background:#2563eb;border:3px solid white;border-radius:50%"></div>',iconSize:[18,18],className:''});
+    markerUser=L.marker([p.coords.latitude,p.coords.longitude],{icon:ic}).addTo(map);
+    map.fitBounds(L.featureGroup([circle,markerUser]).getBounds().pad(0.4));
+  }, e=>{
+    let msg=e.message; if(e.code===1) msg='Izin lokasi ditolak - Buka Setting HP > Chrome > Location > Allow';
+    if(e.code===2) msg='Sinyal GPS lemah - coba di luar ruangan';
+    if(e.code===3) msg='Timeout - coba lagi';
+    t.innerHTML=`❌ ${msg}<br><span style="font-size:10px">Harus HTTPS + Chrome HP + Izinkan Lokasi</span>`; s.textContent='GPS Gagal';
+  }, {enableHighAccuracy:true, timeout:30000, maximumAge:0});
+};
 
-window.getInisial=function(nama){
-  const parts=nama.trim().split(/\s+/);
-  if(parts.length>=2) return (parts[0][0]+parts[1][0]).toUpperCase();
-  return nama.substring(0,2).toUpperCase();
-}
-
-window.togglePass=function(){
-  const inp=document.getElementById('passInput');
-  inp.type = inp.type==='password' ? 'text' : 'password';
-}
-
-window.getEffectivePassword=function(guru){
-  // Cek password custom dari localStorage (biar guru bisa ganti sendiri biar ga lupa)
-  const custom = localStorage.getItem('SI-ABSEN_PASS_'+guru.gid);
-  if(custom) return custom;
-  return guru.password;
-}
-
-window.doLogin=function(){
-  const input=document.getElementById('gidInput').value.trim().toUpperCase();
-  const pass=document.getElementById('passInput').value.trim();
-  const errEl=document.getElementById('loginError');
-  const sucEl=document.getElementById('loginSuccess');
-  errEl.classList.add('hidden'); sucEl.classList.add('hidden');
-  if(!input || !pass){ errEl.textContent='Masukkan ID dan Password dulu'; errEl.classList.remove('hidden'); return; }
-  const guru=GURUS.find(g=>g.gid.toUpperCase()===input);
-  if(!guru){ errEl.innerHTML='ID <b>'+input+'</b> tidak ditemukan.'; errEl.classList.remove('hidden'); return; }
-  const effectivePass = getEffectivePassword(guru);
-  if(effectivePass !== pass){ errEl.innerHTML='Password salah untuk <b>'+input+'</b>. Coba ingat-ingat password pribadimu atau hubungi admin untuk reset.'; errEl.classList.remove('hidden'); return; }
-  currentGuru=guru;
-  localStorage.setItem('SI-ABSEN_GID', guru.gid);
-  localStorage.setItem('SI-ABSEN_NAMA', guru.nama);
-  sucEl.textContent='Login berhasil, mengalihkan...'; sucEl.classList.remove('hidden');
-  setTimeout(()=> showAbsenScreen(), 600);
-}
-
-function showAbsenScreen(){
-  if(!currentGuru){
-    const savedGid=localStorage.getItem('SI-ABSEN_GID');
-    if(savedGid) currentGuru=GURUS.find(g=>g.gid===savedGid);
-  }
-  if(!currentGuru) return;
-  document.getElementById('loginScreen').classList.add('hidden');
-  document.getElementById('absenScreen').classList.remove('hidden');
-  document.getElementById('gidBadge').textContent=currentGuru.gid;
-  document.getElementById('gidBadge').classList.remove('hidden');
-  document.getElementById('logoutBtn').classList.remove('hidden');
-  document.getElementById('namaGuru').textContent=currentGuru.nama;
-  const nipText=currentGuru.nip && currentGuru.nip!=='-' ? currentGuru.nip : '-';
-  document.getElementById('nipGuru').textContent='NIP '+nipText+' • '+currentGuru.gid+' • '+PLUS;
-  document.getElementById('inisialGuru').textContent=getInisial(currentGuru.nama);
-  document.getElementById('hasilNama').textContent=currentGuru.nama;
-  document.getElementById('hasilNip').textContent='NIP '+nipText+' • '+currentGuru.gid+' • VALID • '+PLUS;
-  document.getElementById('hasilInisial').textContent=getInisial(currentGuru.nama);
-  document.getElementById('qrSim').textContent=currentGuru.gid+'|'+currentGuru.nama+'|'+nipText+'|'+LAT+','+LNG;
-  setTimeout(()=>{ initMap(); cekLokasi(); },100);
-}
-
-window.logout=function(){
-  localStorage.removeItem('SI-ABSEN_GID'); localStorage.removeItem('SI-ABSEN_NAMA');
-  currentGuru=null;
-  document.getElementById('absenScreen').classList.add('hidden');
-  document.getElementById('loginScreen').classList.remove('hidden');
-  document.getElementById('gidBadge').classList.add('hidden');
-  document.getElementById('logoutBtn').classList.add('hidden');
-  document.getElementById('gidInput').value=''; document.getElementById('passInput').value='';
-  document.getElementById('hasil').style.display='none';
-  ['c1','c2','c3'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el){ el.style.background='#f8fafc'; el.innerHTML=el.id==='c1'?'ID Cocok <div>⏳</div>':el.id==='c2'?'Lokasi &lt;40m <div>⏳</div>':'Pass Valid <div>⏳</div>'; }
-  });
-}
-
-window.cekLokasi=function(){
-  const t=document.getElementById('locText'), b=document.getElementById('radiusBadge'), p=document.getElementById('prog');
-  const statusL=document.getElementById('statusLokasi');
-  if(statusL) statusL.textContent='Mencari GPS...'; t.textContent='Mencari GPS...';
-  if(!navigator.geolocation){
-    t.textContent='Browser tidak support GPS';
-    if(statusL) statusL.textContent='GPS Tidak Support';
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(pos=>{
-    const d=hitungJarak(pos.coords.latitude,pos.coords.longitude,LAT,LNG);
-    lastDistance=d;
-    if(statusL) statusL.textContent='Lokasi Terdeteksi';
-    t.innerHTML='Titik kamu <span style="color:#0f355c;font-weight:800">●</span> '+Math.round(d)+'m dari sekolah <span style="color:#0f355c">🏫</span> ('+PLUS+')';
-    const pct = Math.min(100, Math.round((RADIUS / Math.max(1,d))*100));
-    p.style.width = d<=RADIUS ? '100%' : Math.round((RADIUS/Math.max(1,d))*100)+'%';
-    p.style.background = d<=RADIUS ? '#16a34a' : '#ef4444';
-    if(d<=RADIUS){ 
-      b.textContent='Di Dalam 40m ✅'; b.className='badge-valid'; b.style.cssText='font-size:10px;font-weight:700;padding:5px 10px;border-radius:999px;background:#dcfce7;border:1px solid #bbf7d0;color:#166534';
-      if(circle) circle.setStyle({color:'#16a34a', fillColor:'#16a34a', fillOpacity:0.15});
-    } else { 
-      b.textContent='Di Luar '+Math.round(d)+'m ❌'; b.className='badge-invalid'; b.style.cssText='font-size:10px;font-weight:700;padding:5px 10px;border-radius:999px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b';
-      if(circle) circle.setStyle({color:'#ef4444', fillColor:'#ef4444', fillOpacity:0.12});
-    }
-    // Hapus marker lama
-    if(markerUser && map) map.removeLayer(markerUser);
-    if(lineToDevice && map) map.removeLayer(lineToDevice);
-    // Marker device - biru
-    const deviceIcon = L.divIcon({html:'<div style="width:18px;height:18px;background:#2563eb;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>', iconSize:[18,18], className:''});
-    markerUser = L.marker([pos.coords.latitude,pos.coords.longitude], {icon: deviceIcon}).addTo(map).bindPopup('<b>Posisi HP Kamu</b><br>'+Math.round(d)+'m dari sekolah<br>'+(d<=RADIUS ? '✅ Di dalam radius 40m' : '❌ Di luar radius'));
-    // Garis dari sekolah ke device
-    lineToDevice = L.polyline([[LAT,LNG],[pos.coords.latitude,pos.coords.longitude]], {color: d<=RADIUS ? '#16a34a' : '#ef4444', weight:2, dashArray:'6 6', opacity:0.8}).addTo(map);
-    // Fit bounds biar keliatan dua titik + radius
-    if(map){
-      const group = L.featureGroup([circle, markerUser, schoolMarker]);
-      map.fitBounds(group.getBounds().pad(0.3));
-    }
-  }, err=>{
-    let msg = err.message;
-    if(msg.includes('permissions policy') || msg.includes('disabled in this document')){
-      t.innerHTML='GPS diblokir di preview iframe.<br><span style="font-size:10px;color:#64748b">Buka di tab baru / GitHub Pages HTTPS untuk lihat 2 titik (sekolah 🏫 + HP ●)</span>';
-      if(statusL) statusL.textContent='Preview Blokir GPS';
-      b.textContent='Buka Tab Baru';
-      b.className='badge-invalid';
-      if(map) map.setView([LAT,LNG], 17);
-      // Simulasi titik device random 15m dari sekolah biar demo keliatan 2 titik di preview
-      const simLat = LAT + (Math.random()-0.5)*0.0002;
-      const simLng = LNG + (Math.random()-0.5)*0.0002;
-      const dSim = hitungJarak(simLat, simLng, LAT, LNG);
-      if(markerUser && map) map.removeLayer(markerUser);
-      if(lineToDevice && map) map.removeLayer(lineToDevice);
-      const deviceIcon = L.divIcon({html:'<div style="width:14px;height:14px;background:#94a3b8;border:2px solid white;border-radius:50%"></div>', iconSize:[14,14], className:''});
-      markerUser = L.marker([simLat, simLng], {icon: deviceIcon}).addTo(map).bindPopup('Simulasi posisi HP (preview)<br>'+Math.round(dSim)+'m dari sekolah');
-      lineToDevice = L.polyline([[LAT,LNG],[simLat, simLng]], {color:'#94a3b8', weight:1, dashArray:'4 4', opacity:0.5}).addTo(map);
-      return;
-    }
-    t.textContent='GPS gagal: '+msg+' (aktifkan lokasi HP & HTTPS)';
-    if(statusL) statusL.textContent='GPS Gagal';
-  }, {enableHighAccuracy:true, timeout:15000, maximumAge:0});
-}
-
-window.hitungJarak=function(lat1,lon1,lat2,lon2){
-  const R=6371000; const toRad=x=>x*Math.PI/180;
-  const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1);
-  const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
-
-window.mulaiScan=async function(){
-  const btn=document.getElementById('scanBtn');
-  btn.disabled=true; btn.textContent='Memvalidasi ID + Password + Lokasi...';
-  const now=new Date();
-  document.getElementById('jamWaktu').textContent=now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' WIB • Tepat Waktu';
-  const ids=['c1','c2','c3']; let i=0;
-  const iv=setInterval(async ()=>{
-    if(i<ids.length){
-      const el=document.getElementById(ids[i]);
-      el.innerHTML=ids[i]=='c1'?'ID Cocok <div>✅</div>':ids[i]=='c2'?'Lokasi &lt;40m <div>✅</div>':'Pass Valid <div>✅</div>';
-      el.style.background='#dcfce7'; i++;
-    } else {
-      clearInterval(iv);
-      document.getElementById('hasil').style.display='block';
-      const dataAbsen = {
-        gid: currentGuru.gid, nama: currentGuru.nama, nip: currentGuru.nip,
-        waktu: now.toISOString(), waktu_server: serverTimestamp(),
-        lat: LAT, lng: LNG, plus_code: PLUS, jarak_meter: Math.round(lastDistance),
-        radius_meter: RADIUS, status: lastDistance<=RADIUS ? 'VALID' : 'LUAR_RADIUS',
-        login_method: 'ID+PASSWORD'
-      };
-      try{
-        if(db){
-          const docRef = await addDoc(collection(db, "absensi"), dataAbsen);
-          document.getElementById('firebaseStatus').textContent = "✅ Tersimpan di Firestore ID: "+docRef.id;
-          const today = now.toISOString().split('T')[0];
-          await setDoc(doc(db, "rekap_harian", today+"_"+currentGuru.gid), dataAbsen, {merge:true});
-        } else {
-          document.getElementById('firebaseStatus').textContent = "⚠️ Mode offline - Firebase belum config, disimpan localStorage";
-        }
-        const riwayat=JSON.parse(localStorage.getItem('SI-ABSEN_RIWAYAT')||'[]');
-        riwayat.unshift(dataAbsen);
-        localStorage.setItem('SI-ABSEN_RIWAYAT', JSON.stringify(riwayat.slice(0,20)));
-      }catch(err){
-        document.getElementById('firebaseStatus').textContent = "❌ Gagal Firestore: "+err.message;
-      }
-      btn.disabled=false; btn.textContent='✅ Scan & Absen Sekarang';
-    }
-  },600);
-}
-
-
-window.toggleGantiPass=function(){
-  const f=document.getElementById('gantiPassForm');
-  f.classList.toggle('hidden');
-  const btn=document.getElementById('btnGantiPass');
-  btn.textContent = f.classList.contains('hidden') ? '✏️ Ganti' : '✕ Tutup';
-  btn.style.cssText = f.classList.contains('hidden') ? 'height:28px;padding:0 10px;font-size:10px;font-weight:700;border-radius:999px;border:1px solid #e2e8f0;background:white;color:#0f355c;cursor:pointer;flex-shrink:0' : 'height:28px;padding:0 10px;font-size:10px;font-weight:700;border-radius:999px;border:1px solid #0f355c;background:#0f355c;color:white;cursor:pointer;flex-shrink:0';
-  const isCustom = localStorage.getItem('SI-ABSEN_PASS_'+currentGuru.gid);
-  const statusText = isCustom ? 'Custom' : 'Default';
-  document.getElementById('currentPassInfo').innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:10px;color:#64748b"><span style="font-weight:700;color:#0f355c">'+statusText+'</span> • ••••••••</div><button onclick="lihatPass()" style="font-size:9px;background:white;border:1px solid #e2e8f0;border-radius:999px;padding:3px 8px;font-weight:700;color:#0f355c;cursor:pointer">👁️ Lihat</button></div>';
-}
-
-window.lihatPass=function(){
-  const cur = getEffectivePassword(currentGuru);
-  document.getElementById('currentPassInfo').innerHTML = '<div style="font-size:10px"><div style="font-weight:700;color:#0f355c">Aktif: <span style="font-family:monospace;background:white;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px">'+cur+'</span></div><div style="margin-top:4px"><button onclick="toggleGantiPass(); setTimeout(()=>toggleGantiPass(),80)" style="font-size:9px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:3px 8px;cursor:pointer">🙈 Tutup</button></div></div>';
-}
-
-window.simpanPasswordBaru=async function(){
-  const newP=document.getElementById('newPassInput').value.trim();
-  const confP=document.getElementById('confirmPassInput').value.trim();
-  const msg=document.getElementById('passChangeMsg');
-  msg.classList.remove('hidden');
-  if(!newP || newP.length<4){ msg.textContent='Password minimal 4 karakter'; msg.style.background='#fee2e2'; msg.style.color='#991b1b'; msg.style.border='1px solid #fecaca'; return; }
-  if(newP!==confP){ msg.textContent='Ulangi password tidak sama'; msg.style.background='#fee2e2'; msg.style.color='#991b1b'; msg.style.border='1px solid #fecaca'; return; }
-  localStorage.setItem('SI-ABSEN_PASS_'+currentGuru.gid, newP);
-  msg.textContent='✅ Password baru disimpan di HP ini!';
-  msg.style.background='#dcfce7'; msg.style.color='#166534'; msg.style.border='1px solid #bbf7d0';
+// KAMERA BENERAN
+window.startCamera=async()=>{
+  const el=document.getElementById('qrResult'); el.style.display='block'; el.textContent='Meminta izin kamera... (harus HTTPS)';
+  el.style.background='#fffbeb';
   try{
-    if(db){
-      const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-      await setDoc(doc(db, "users", currentGuru.gid), { password_custom: newP, updated_at: new Date().toISOString(), nama: currentGuru.nama }, {merge:true});
-      msg.textContent='✅ Password baru disimpan di HP & Firestore (gratis)! Sekarang pakai password baru untuk login berikutnya.';
-    }
-  }catch(e){
-    msg.textContent='✅ Disimpan lokal. Firestore gagal: '+e.message;
+    if(!html5QrCode) html5QrCode=new Html5Qrcode("reader");
+    await html5QrCode.start({facingMode:"environment"}, {fps:10, qrbox:{width:250,height:250}}, decoded=>{
+      qrScanned=true; qrValue=decoded; el.textContent="✅ QR Terdeteksi: "+decoded; el.style.background="#dcfce7";
+      const idQR=decoded.split('|')[0]?.trim().toUpperCase();
+      if(idQR && currentGuru && idQR!==currentGuru.gid){ el.textContent+=" ⚠️ QR untuk "+idQR+", kamu "+currentGuru.gid; el.style.background="#fee2e2"; }
+      else { el.textContent+=" • Cocok! Sekarang bisa absen"; document.getElementById('scanBtn').style.background="#16a34a"; }
+    });
+    document.getElementById('btnStartCam').classList.add('hidden'); document.getElementById('btnStopCam').classList.remove('hidden');
+  }catch(err){
+    el.textContent="❌ Kamera gagal: "+err.message+" - Solusi: 1) Harus HTTPS (GitHub Pages sudah), 2) Izinkan kamera di Chrome HP, 3) Jangan buka dari dalam aplikasi WA/FB, buka di Chrome langsung";
+    el.style.background="#fee2e2";
   }
-  document.getElementById('newPassInput').value=''; document.getElementById('confirmPassInput').value='';
-  setTimeout(()=>{ document.getElementById('gantiPassForm').classList.add('hidden'); const b=document.getElementById('btnGantiPass'); b.textContent='✏️ Ganti'; b.className='btn btn-outline'; b.style.cssText='height:36px;padding:0 14px;font-size:11px;border-radius:999px'; }, 2000);
+};
+window.stopCamera=async()=>{ try{ if(html5QrCode){ await html5QrCode.stop(); html5QrCode.clear(); } }catch(e){} document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStopCam').classList.add('hidden'); };
+
+window.doLogin=()=>{
+  const i=document.getElementById('gidInput').value.trim().toUpperCase(), p=document.getElementById('passInput').value.trim(), er=document.getElementById('loginError');
+  er.classList.add('hidden');
+  if(!i||!p){ er.textContent='Isi ID & Password'; er.classList.remove('hidden'); return; }
+  const g=GURUS.find(x=>x.gid.toUpperCase()===i);
+  if(!g){ er.textContent='ID tidak ditemukan'; er.classList.remove('hidden'); return; }
+  const eff=localStorage.getItem('SI-ABSEN_PASS_'+g.gid)||g.password;
+  if(eff!==p){ er.textContent='Password salah'; er.classList.remove('hidden'); return; }
+  currentGuru=g; localStorage.setItem('SI-ABSEN_GID',g.gid); showAbsenScreen();
+};
+function showAbsenScreen(){
+  if(!currentGuru){ const s=localStorage.getItem('SI-ABSEN_GID'); if(s) currentGuru=GURUS.find(g=>g.gid===s); }
+  if(!currentGuru) return;
+  document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('absenScreen').classList.remove('hidden');
+  document.getElementById('gidBadge').textContent=currentGuru.gid; document.getElementById('gidBadge').classList.remove('hidden');
+  document.getElementById('logoutBtn').classList.remove('hidden');
+  document.getElementById('namaGuru').textContent=currentGuru.nama; document.getElementById('nipGuru').textContent='NIP '+(currentGuru.nip||'-')+' • '+currentGuru.gid;
+  document.getElementById('inisialGuru').textContent=getInisial(currentGuru.nama);
+  setTimeout(()=>{ initMap(); cekLokasi(); },300);
 }
+window.logout=()=>{ localStorage.removeItem('SI-ABSEN_GID'); location.reload(); };
 
+window.mulaiScan=async()=>{
+  const btn=document.getElementById('scanBtn');
+  if(!currentGuru){ alert('Login dulu'); return; }
+  if(!qrScanned){ if(!confirm('Kamera QR belum scan. Tetap absen hanya pakai ID+Password? Klik OK untuk lanjut, Cancel untuk scan QR dulu.')) return; }
+  if(lastDistance===9999){ if(!confirm('GPS belum dapat lokasi. Tetap lanjut?')) return; }
+  btn.disabled=true; btn.textContent='⏳ Menyimpan...';
+  document.getElementById('hasil').style.display='block';
+  document.getElementById('jamWaktu').textContent=new Date().toLocaleTimeString('id-ID')+' WIB • Tepat Waktu';
+  document.getElementById('c1').innerHTML='ID Cocok <div>✅</div>'; document.getElementById('c1').style.background='#dcfce7';
+  document.getElementById('c2').innerHTML=`${Math.round(lastDistance)}m <div>${lastDistance<=RADIUS?'✅':'❌'}</div>`; document.getElementById('c2').style.background=lastDistance<=RADIUS?'#dcfce7':'#fee2e2';
+  document.getElementById('c3').innerHTML='Firebase <div>⏳</div>';
+  const data={
+    gid:currentGuru.gid, nama:currentGuru.nama, nip:currentGuru.nip,
+    waktu:new Date().toISOString(), waktu_server:serverTimestamp(),
+    lat:lastPos?lastPos.coords.latitude:LAT, lng:lastPos?lastPos.coords.longitude:LNG,
+    akurasi:lastPos?Math.round(lastPos.coords.accuracy):0,
+    plus_code:PLUS, jarak_meter:Math.round(lastDistance||0), radius_meter:RADIUS,
+    status:lastDistance<=RADIUS?'VALID':'LUAR_RADIUS',
+    login_method:'ID+PASSWORD'+(qrScanned?' + QR':''),
+    qr_value:qrValue||null, qr_valid:qrScanned
+  };
+  document.getElementById('lokasiStatus').textContent=`Jarak ${data.jarak_meter}m • ${data.status} • QR ${qrScanned?'OK':'Skip'}`;
+  try{
+    if(!db) throw new Error('Firestore belum konek - cek Rules Firebase');
+    const ref=await addDoc(collection(db,"absensi"), data);
+    document.getElementById('firebaseStatus').textContent="✅ Tersimpan di Firestore ID: "+ref.id;
+    document.getElementById('c3').innerHTML='Firebase OK <div>✅</div>'; document.getElementById('c3').style.background='#dcfce7';
+    await setDoc(doc(db,"rekap_harian", new Date().toISOString().split('T')[0]+"_"+currentGuru.gid), data, {merge:true});
+  }catch(e){
+    document.getElementById('firebaseStatus').textContent="❌ Gagal: "+e.message+" - Cek Firestore Rules allow read,write: if true";
+    document.getElementById('c3').innerHTML='Gagal <div>❌</div>'; document.getElementById('c3').style.background='#fee2e2';
+  }
+  btn.disabled=false; btn.textContent='✅ Absen Sekarang';
+};
 
-window.addEventListener('DOMContentLoaded', ()=>{
-  const saved=localStorage.getItem('SI-ABSEN_GID');
-  if(saved){ currentGuru=GURUS.find(g=>g.gid===saved); if(currentGuru) showAbsenScreen(); }
-  document.getElementById('gidInput').addEventListener('keypress', e=>{ if(e.key==='Enter') document.getElementById('passInput').focus(); });
-  document.getElementById('passInput').addEventListener('keypress', e=>{ if(e.key==='Enter') doLogin(); });
-  // contoh login random
-  const contoh = GURUS[0];
-  if(contoh){ document.getElementById('contohLogin').innerHTML = `${contoh.gid} / ${contoh.password} (${contoh.nama.split(',')[0]})<br/>${GURUS[1].gid} / ${GURUS[1].password}<br/>${GURUS[28].gid} / ${GURUS[28].password} (tanpa NIP)`; }
+document.addEventListener('DOMContentLoaded', ()=>{
+  const s=localStorage.getItem('SI-ABSEN_GID'); if(s){ currentGuru=GURUS.find(g=>g.gid===s); if(currentGuru) showAbsenScreen(); }
 });
 </script>
 </body>
