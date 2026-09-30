@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Absen Guru - SI-ABSEN ID + Password</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+body{margin:0;font-family:Inter,system-ui;background:#f8fafc;color:#0f172a}
+.header{height:64px;background:white;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:50}
+.container{max-width:480px;margin:0 auto;padding:16px}
+.card{background:white;border:1px solid #e2e8f0;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,0.04)}
+.btn{height:48px;border-radius:14px;font-weight:800;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;border:none;width:100%;font-family:Inter}
+.btn-primary{background:#0f355c;color:white}
+.btn-outline{background:white;border:1px solid #e2e8f0;color:#0f355c}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+#miniMap{height:180px;border-radius:14px}
+.viewfinder{background:#0b1220;border-radius:18px;height:260px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#94a3b8}
+.corner{position:absolute;width:28px;height:28px;border:3px solid #38bdf8}
+.input{width:100%;height:48px;border:1px solid #e2e8f0;border-radius:14px;padding:0 14px;font-size:14px;font-weight:600;font-family:Inter;box-sizing:border-box}
+.input:focus{outline:none;border-color:#0f355c;box-shadow:0 0 0 3px rgba(15,53,92,0.1)}
+.badge-valid{background:#dcfce7;border:1px solid #bbf7d0;color:#166534}
+.badge-invalid{background:#fee2e2;border:1px solid #fecaca;color:#991b1b}
+.hidden{display:none !important}
+.logo-img{width:40px;height:40px;border-radius:12px;background:transparent;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.logo-img img{width:100%;height:100%;object-fit:contain}
+</style>
+</head>
+<body>
+<header class="header">
+  <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+    <div class="logo-img"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.textContent='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'" alt="logo"/></div>
+    <div><div style="font-weight:800;color:#0f355c;font-size:12px">SI-ABSEN</div><div style="font-size:10px;color:#64748b">ID + Password • 40m</div></div>
+  </a>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span id="gidBadge" class="hidden" style="background:#e0f2fe;color:#0f355c;font-size:11px;font-weight:700;padding:6px 10px;border-radius:999px"></span>
+    <a id="logoutBtn" href="#" class="hidden" onclick="logout(); return false;" style="font-size:12px;color:#64748b;text-decoration:none">Logout</a>
+  </div>
+</header>
+
+<div class="container">
+  <!-- LOGIN SCREEN ID + PASSWORD -->
+  <div id="loginScreen">
+    <div class="card" style="margin-top:20px">
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="width:64px;height:64px;border-radius:20px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:28px">🔐</div>
+        <h2 style="margin:12px 0 6px;color:#0f355c;font-size:20px;font-weight:800">Login Guru</h2>
+        <p style="color:#64748b;font-size:13px;margin:0">Masukkan ID Privat + Password masing-masing</p>
+      </div>
+      
+      <div style="margin-top:16px">
+        <label style="font-size:12px;font-weight:700;color:#475569">ID PRIVAT (G-XXXXX)</label>
+        <input id="gidInput" class="input" placeholder="Contoh: G-83105" style="margin-top:6px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" />
+      </div>
+      <div style="margin-top:12px">
+        <label style="font-size:12px;font-weight:700;color:#475569">PASSWORD</label>
+        <div style="position:relative;margin-top:6px">
+          <input id="passInput" class="input" type="password" placeholder="Password guru" style="padding-right:44px"/>
+          <button type="button" onclick="togglePass()" style="position:absolute;right:6px;top:6px;height:36px;width:36px;border:none;background:#f1f5f9;border-radius:10px;cursor:pointer">👁️</button>
+        </div>
+        <div style="font-size:10px;color:#94a3b8;margin-top:6px">Default awal Brondong+4 digit NIP, tapi bisa diganti sendiri biar gampang diingat</div>
+        <div id="loginError" class="hidden" style="margin-top:8px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b;font-size:12px;padding:8px 12px;border-radius:10px"></div>
+        <div id="loginSuccess" class="hidden" style="margin-top:8px;background:#dcfce7;border:1px solid #bbf7d0;color:#166534;font-size:12px;padding:8px 12px;border-radius:10px"></div>
+      </div>
+
+      <button class="btn btn-primary" style="margin-top:16px;height:52px" onclick="doLogin()">Masuk dengan ID + Password →</button>
+
+      <div style="margin-top:14px;background:#f8fafc;border:1px dashed #e2e8f0;border-radius:12px;padding:10px 12px">
+        <div style="font-size:11px;font-weight:700;color:#64748b">CONTOH LOGIN VALID:</div>
+        <div style="font-size:11px;color:#475569;margin-top:4px;font-family:monospace" id="contohLogin">G-83105 / Brondong1004 (Husnul Anam)<br/>G-20839 / Brondong1004<br/>G-34817 (tanpa NIP) → password ada di admin</div>
+        <div style="font-size:10px;color:#94a3b8;margin-top:4px">Admin bisa lihat semua password di admin-absen.html</div>
+      </div>
+
+      <div style="text-align:center;margin-top:16px"><a href="index.html" style="font-size:12px;color:#64748b">← Kembali ke halaman awal</a></div>
+    </div>
+  </div>
+
+  <!-- ABSEN SCREEN -->
+  <div id="absenScreen" class="hidden">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:0.8px;color:#64748b">PROFIL GURU • LOGIN SUKSES</div>
+          <div id="namaGuru" style="font-weight:800;color:#0f355c;margin-top:4px;font-size:16px"></div>
+          <div id="nipGuru" style="font-size:12px;color:#64748b;margin-top:2px"></div>
+        </div>
+        <div id="inisialGuru" style="width:44px;height:44px;border-radius:999px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800"></div>
+      </div>
+
+    <div class="card" style="padding:12px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:12px">
+        <div style="flex:1">
+          <div style="font-size:9px;font-weight:800;letter-spacing:0.8px;color:#94a3b8">KEAMANAN AKUN</div>
+          <div style="font-weight:800;color:#0f355c;margin-top:2px;font-size:12px">Password Pribadi</div>
+          <div id="currentPassInfo" style="margin-top:6px;font-size:10px;color:#64748b"></div>
+        </div>
+        <button onclick="toggleGantiPass()" id="btnGantiPass" style="height:28px;padding:0 10px;font-size:10px;font-weight:700;border-radius:999px;border:1px solid #e2e8f0;background:white;color:#0f355c;cursor:pointer;flex-shrink:0">✏️ Ganti</button>
+      </div>
+      <div id="gantiPassForm" class="hidden" style="margin-top:12px;border-top:1px solid #f1f5f9;padding-top:12px">
+        <div style="display:grid;gap:8px">
+          <input id="newPassInput" class="input" type="password" placeholder="Password baru bebas" style="height:40px;font-size:12px"/>
+          <input id="confirmPassInput" class="input" type="password" placeholder="Ulangi password baru" style="height:40px;font-size:12px"/>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" style="flex:1;height:40px;font-size:12px" onclick="simpanPasswordBaru()">Simpan →</button>
+            <button class="btn btn-outline" style="flex:1;height:40px;font-size:12px" onclick="toggleGantiPass()">Batal</button>
+          </div>
+          <div id="passChangeMsg" class="hidden" style="font-size:11px;padding:8px 10px;border-radius:10px"></div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="card">
+      <div style="font-size:11px;font-weight:800;letter-spacing:0.8px;color:#64748b">STATUS LOKASI • 40m • 36R6+X89</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <div><div style="font-weight:800;color:#0f355c" id="statusLokasi">Mencari lokasi...</div><div style="font-size:12px;color:#64748b" id="locText">Menunggu GPS</div></div>
+        <div id="radiusBadge" style="font-size:11px;font-weight:700;padding:6px 10px;border-radius:999px" class="badge-valid">Di Dalam 40m</div>
+      </div>
+      <div style="height:8px;background:#e2e8f0;border-radius:999px;margin-top:12px;overflow:hidden"><div id="prog" style="height:100%;width:43%;background:#0f355c;border-radius:999px"></div></div>
+      <div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden"><div id="miniMap"></div></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn btn-outline" style="flex:1" onclick="cekLokasi()">📍 Cek Ulang</button>
+        <button class="btn btn-outline" style="flex:1" onclick="setModeMini('peta')" id="miniPeta">🗺️ Peta</button>
+        <button class="btn btn-outline" style="flex:1" onclick="setModeMini('satelit')" id="miniSat">🛰️ Sat</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:11px;font-weight:800;letter-spacing:0.8px;color:#64748b">SCANNER QR • ID + PASSWORD VALID</div>
+      <div class="viewfinder" style="margin-top:12px">
+        <div class="corner" style="top:18px;left:18px;border-right:none;border-bottom:none"></div>
+        <div class="corner" style="top:18px;right:18px;border-left:none;border-bottom:none"></div>
+        <div class="corner" style="bottom:18px;left:18px;border-right:none;border-top:none"></div>
+        <div class="corner" style="bottom:18px;right:18px;border-left:none;border-top:none"></div>
+        <div style="text-align:center">
+          <div style="font-size:13px;font-weight:700;color:#e2e0f0">QR ID Card Guru</div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:4px">Scan validasi ID + Password</div>
+          <div id="qrSim" style="margin-top:12px;background:rgba(255,255,255,0.1);border:1px dashed #334155;border-radius:10px;padding:8px 12px;font-size:10px;font-family:monospace;color:#cbd5e1">G-XXXXX|Nama|NIP|40m</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:14px;height:54px" id="scanBtn" onclick="mulaiScan()">✅ Scan & Absen Sekarang</button>
+      <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div id="c1" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;text-align:center;font-size:11px;font-weight:700;color:#475569">ID Cocok <div>⏳</div></div>
+        <div id="c2" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;text-align:center;font-size:11px;font-weight:700;color:#475569">Lokasi &lt;40m <div>⏳</div></div>
+        <div id="c3" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;text-align:center;font-size:11px;font-weight:700;color:#475569">Pass Valid <div>⏳</div></div>
+      </div>
+      <div id="hasil" style="display:none;margin-top:14px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:14px;padding:14px">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div id="hasilInisial" style="width:40px;height:40px;border-radius:999px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800"></div>
+          <div><div id="hasilNama" style="font-weight:800;color:#166534"></div><div id="hasilNip" style="font-size:11px;color:#15803d"></div></div>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:#166534;background:white;border:1px solid #bbf7d0;border-radius:10px;padding:8px 10px">
+          <div>✅ Absen berhasil (ID + Password valid)</div>
+          <div id="jamWaktu" style="margin-top:4px;font-weight:700"></div>
+          <div id="firebaseStatus" style="margin-top:4px;font-size:10px;color:#065f46"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const LAT=-6.9075625, LNG=112.2108125, PLUS="36R6+X89";
+let RADIUS=parseInt(localStorage.getItem('RADIUS_METER')||'40');
+let map, markerUser, circle, roadLayer, satLayer, MODE_MINI=localStorage.getItem('MAP_MODE')||'peta';
+let currentGuru=null;
+let db=null;
+let lastDistance=0;
+
+let cfg = null;
+try{
+  if (typeof window !== 'undefined' && window.firebaseConfig) cfg = window.firebaseConfig;
+  else if (typeof firebaseConfig !== 'undefined') cfg = firebaseConfig;
+  if(!cfg) throw new Error("firebaseConfig tidak ditemukan - pastikan firebase-config.js ada di folder yang sama");
+  const app = initializeApp(cfg);
+  db = getFirestore(app);
+  console.log("✅ Firestore terhubung", cfg.projectId);
+}catch(e){ console.warn("Firebase belum config", e); }
+
+const GURUS=[{"no": 1, "nama": "Husnul Anam, S.Pd, M.Pd", "nip": "196906101998021004", "gid": "G-83105", "password": "Brondong1004"}, {"no": 2, "nama": "Drs. Khoim Khoirul A, M.Pd", "nip": "196807161998021004", "gid": "G-20839", "password": "Brondong1004"}, {"no": 3, "nama": "Drs. Zainuddin, M.Pd", "nip": "196805221997031002", "gid": "G-94652", "password": "Brondong1002"}, {"no": 4, "nama": "Drs. Joko Sutomo", "nip": "196710211999031003", "gid": "G-72600", "password": "Brondong1003"}, {"no": 5, "nama": "Ishnafiyah, S.Ag", "nip": "197507151999032008", "gid": "G-32712", "password": "Brondong2008"}, {"no": 6, "nama": "Evi Irawati, S.Pd", "nip": "197302112000122004", "gid": "G-79374", "password": "Brondong2004"}, {"no": 7, "nama": "Hilmishobah, S.Pd, M.Pd", "nip": "197109082003121003", "gid": "G-10058", "password": "Brondong1003"}, {"no": 8, "nama": "Anis Mufadhilah, S.Pd", "nip": "197010282007012012", "gid": "G-58661", "password": "Brondong2012"}, {"no": 9, "nama": "Muhamad Nur Cahyo, S. Pd", "nip": "197106092007011019", "gid": "G-59237", "password": "Brondong1019"}, {"no": 10, "nama": "Dra. Sri Hartini", "nip": "196609182008012006", "gid": "G-84672", "password": "Brondong2006"}, {"no": 11, "nama": "M. Khusen, S.Pd", "nip": "197111042008011009", "gid": "G-40409", "password": "Brondong1009"}, {"no": 12, "nama": "Asri Pujitami, S.Pd", "nip": "198501182010012015", "gid": "G-18622", "password": "Brondong2015"}, {"no": 13, "nama": "Moh. Safi, S.Kom", "nip": "197607052011011006", "gid": "G-60160", "password": "Brondong1006"}, {"no": 14, "nama": "Fitri Komariyah, S.Pd", "nip": "197508012009022001", "gid": "G-62543", "password": "Brondong2001"}, {"no": 15, "nama": "Sudibyanto, S.Pd", "nip": "197804242008011017", "gid": "G-22804", "password": "Brondong1017"}, {"no": 16, "nama": "Nikmatus Solichah, S.Ag", "nip": "197403092014062001", "gid": "G-15682", "password": "Brondong2001"}, {"no": 17, "nama": "Mahriwati, S.Pd", "nip": "197408312021212003", "gid": "G-25556", "password": "Brondong2003"}, {"no": 18, "nama": "Yusuf Budiharjo, S.Pd", "nip": "198206072022211002", "gid": "G-37728", "password": "Brondong1002"}, {"no": 19, "nama": "Teguh Wahyu Widayat, S. Pd", "nip": "198305012023211008", "gid": "G-59221", "password": "Brondong1008"}, {"no": 20, "nama": "Mamluhah, S.Pd", "nip": "198310192023212010", "gid": "G-23021", "password": "Brondong2010"}, {"no": 21, "nama": "Sakiman, SE", "nip": "197010242024211002", "gid": "G-63923", "password": "Brondong1002"}, {"no": 22, "nama": "Slamet Mamik H, S.Pd", "nip": "197902122024211001", "gid": "G-16452", "password": "Brondong1001"}, {"no": 23, "nama": "Maghfiroh, S.Pd", "nip": "198204152024212005", "gid": "G-90272", "password": "Brondong2005"}, {"no": 24, "nama": "Selvi Putri Cornivia, S.Pd", "nip": "199812312024212016", "gid": "G-13652", "password": "Brondong2016"}, {"no": 25, "nama": "Dwi Chandra Puspita A, S.Pd", "nip": "199906212024212016", "gid": "G-82582", "password": "Brondong2016"}, {"no": 26, "nama": "Nanda Wijayanti, S.pd", "nip": "200007272025212022", "gid": "G-76875", "password": "Brondong2022"}, {"no": 27, "nama": "Bunga Cahyaning Atie, S.Pd", "nip": "200108222025212006", "gid": "G-18758", "password": "Brondong2006"}, {"no": 28, "nama": "Toni Wijayanto, S.Kom", "nip": "198210242023211005", "gid": "G-35462", "password": "Brondong1005"}, {"no": 29, "nama": "Maghfiroh, S.Pd", "nip": "-", "gid": "G-34817", "password": "Brondong1710"}, {"no": 30, "nama": "Abdullah Faqih, S.Pdi. M.Ag", "nip": "-", "gid": "G-13489", "password": "Brondong8967"}, {"no": 31, "nama": "Muhamad Yunus Anis, S.Pd", "nip": "-", "gid": "G-39875", "password": "Brondong7575"}, {"no": 32, "nama": "Imarotul Hasanah, S.Pd", "nip": "19800615210012003", "gid": "G-93715", "password": "Brondong2003"}, {"no": 33, "nama": "Nurul Hidayati, S.Pd", "nip": "197810052009022005", "gid": "G-62114", "password": "Brondong2005"}, {"no": 34, "nama": "Mutholiah", "nip": "197111172009012001", "gid": "G-70331", "password": "Brondong2001"}, {"no": 35, "nama": "Nyamin", "nip": "197205042025211004", "gid": "G-56461", "password": "Brondong1004"}, {"no": 36, "nama": "Wartiyaningsih, S.Pd", "nip": "199308122025212060", "gid": "G-78122", "password": "Brondong2060"}, {"no": 37, "nama": "Muzahidin, S.Pd", "nip": "198801042025211108", "gid": "G-14014", "password": "Brondong1108"}, {"no": 38, "nama": "Arum Rahmana, S.Pd", "nip": "199210192025212086", "gid": "G-88075", "password": "Brondong2086"}, {"no": 39, "nama": "R. Arif Nur Cahyono, S.Pus", "nip": "198004262025211045", "gid": "G-24520", "password": "Brondong1045"}, {"no": 40, "nama": "Solkan", "nip": "-", "gid": "G-81582", "password": "Brondong8298"}, {"no": 41, "nama": "Fatiha Sabila, SE", "nip": "-", "gid": "G-35965", "password": "Brondong6573"}, {"no": 42, "nama": "Ahmad Marzuq Al Himni, S. Kom", "nip": "-", "gid": "G-37286", "password": "Brondong8691"}, {"no": 43, "nama": "Dedy Ustman", "nip": "-", "gid": "G-25987", "password": "Brondong8718"}, {"no": 44, "nama": "Helmy Hartiningsih", "nip": "-", "gid": "G-41909", "password": "Brondong0953"}];
+
+let schoolMarker, lineToDevice;
+function initMap(){
+  if(map) map.remove();
+  map = L.map('miniMap',{zoomControl:false}).setView([LAT,LNG],17);
+  roadLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20, attribution:'&copy; Google Maps'});
+  satLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20, attribution:'&copy; Google Maps'});
+  if(MODE_MINI==='satelit') satLayer.addTo(map); else roadLayer.addTo(map);
+  circle=L.circle([LAT,LNG],{radius:RADIUS, color:'#0f355c', weight:2, dashArray:'8 8', fillColor:'#0f355c', fillOpacity:0.12}).addTo(map);
+  // Titik sekolah - ikon khusus
+  const schoolIcon = L.divIcon({html:'<div style="width:28px;height:28px;background:#0f355c;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,0.3)">🏫</div>', iconSize:[28,28], className:''});
+  schoolMarker = L.marker([LAT,LNG], {icon: schoolIcon}).addTo(map).bindPopup('<b>SMPN 1 Brondong</b><br>'+PLUS+'<br>Radius 40m • Titik pusat');
+  setTimeout(()=>map.invalidateSize(),300);
+  updateMiniToggle();
+}
+window.initMap=initMap;
+
+window.setModeMini=function(mode){
+  MODE_MINI=mode; localStorage.setItem('MAP_MODE',mode);
+  if(mode==='satelit'){ if(map.hasLayer(roadLayer)) map.removeLayer(roadLayer); satLayer.addTo(map); }
+  else { if(map.hasLayer(satLayer)) map.removeLayer(satLayer); roadLayer.addTo(map); }
+  updateMiniToggle();
+}
+function updateMiniToggle(){
+  document.getElementById('miniPeta').style.background=MODE_MINI==='peta'?'#0f355c':'white'; document.getElementById('miniPeta').style.color=MODE_MINI==='peta'?'white':'#64748b';
+  document.getElementById('miniSat').style.background=MODE_MINI==='satelit'?'#0f355c':'white'; document.getElementById('miniSat').style.color=MODE_MINI==='satelit'?'white':'#64748b';
+}
+
+window.getInisial=function(nama){
+  const parts=nama.trim().split(/\s+/);
+  if(parts.length>=2) return (parts[0][0]+parts[1][0]).toUpperCase();
+  return nama.substring(0,2).toUpperCase();
+}
+
+window.togglePass=function(){
+  const inp=document.getElementById('passInput');
+  inp.type = inp.type==='password' ? 'text' : 'password';
+}
+
+window.getEffectivePassword=function(guru){
+  // Cek password custom dari localStorage (biar guru bisa ganti sendiri biar ga lupa)
+  const custom = localStorage.getItem('SI-ABSEN_PASS_'+guru.gid);
+  if(custom) return custom;
+  return guru.password;
+}
+
+window.doLogin=function(){
+  const input=document.getElementById('gidInput').value.trim().toUpperCase();
+  const pass=document.getElementById('passInput').value.trim();
+  const errEl=document.getElementById('loginError');
+  const sucEl=document.getElementById('loginSuccess');
+  errEl.classList.add('hidden'); sucEl.classList.add('hidden');
+  if(!input || !pass){ errEl.textContent='Masukkan ID dan Password dulu'; errEl.classList.remove('hidden'); return; }
+  const guru=GURUS.find(g=>g.gid.toUpperCase()===input);
+  if(!guru){ errEl.innerHTML='ID <b>'+input+'</b> tidak ditemukan.'; errEl.classList.remove('hidden'); return; }
+  const effectivePass = getEffectivePassword(guru);
+  if(effectivePass !== pass){ errEl.innerHTML='Password salah untuk <b>'+input+'</b>. Coba ingat-ingat password pribadimu atau hubungi admin untuk reset.'; errEl.classList.remove('hidden'); return; }
+  currentGuru=guru;
+  localStorage.setItem('SI-ABSEN_GID', guru.gid);
+  localStorage.setItem('SI-ABSEN_NAMA', guru.nama);
+  sucEl.textContent='Login berhasil, mengalihkan...'; sucEl.classList.remove('hidden');
+  setTimeout(()=> showAbsenScreen(), 600);
+}
+
+function showAbsenScreen(){
+  if(!currentGuru){
+    const savedGid=localStorage.getItem('SI-ABSEN_GID');
+    if(savedGid) currentGuru=GURUS.find(g=>g.gid===savedGid);
+  }
+  if(!currentGuru) return;
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('absenScreen').classList.remove('hidden');
+  document.getElementById('gidBadge').textContent=currentGuru.gid;
+  document.getElementById('gidBadge').classList.remove('hidden');
+  document.getElementById('logoutBtn').classList.remove('hidden');
+  document.getElementById('namaGuru').textContent=currentGuru.nama;
+  const nipText=currentGuru.nip && currentGuru.nip!=='-' ? currentGuru.nip : '-';
+  document.getElementById('nipGuru').textContent='NIP '+nipText+' • '+currentGuru.gid+' • '+PLUS;
+  document.getElementById('inisialGuru').textContent=getInisial(currentGuru.nama);
+  document.getElementById('hasilNama').textContent=currentGuru.nama;
+  document.getElementById('hasilNip').textContent='NIP '+nipText+' • '+currentGuru.gid+' • VALID • '+PLUS;
+  document.getElementById('hasilInisial').textContent=getInisial(currentGuru.nama);
+  document.getElementById('qrSim').textContent=currentGuru.gid+'|'+currentGuru.nama+'|'+nipText+'|'+LAT+','+LNG;
+  setTimeout(()=>{ initMap(); cekLokasi(); },100);
+}
+
+window.logout=function(){
+  localStorage.removeItem('SI-ABSEN_GID'); localStorage.removeItem('SI-ABSEN_NAMA');
+  currentGuru=null;
+  document.getElementById('absenScreen').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('gidBadge').classList.add('hidden');
+  document.getElementById('logoutBtn').classList.add('hidden');
+  document.getElementById('gidInput').value=''; document.getElementById('passInput').value='';
+  document.getElementById('hasil').style.display='none';
+  ['c1','c2','c3'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ el.style.background='#f8fafc'; el.innerHTML=el.id==='c1'?'ID Cocok <div>⏳</div>':el.id==='c2'?'Lokasi &lt;40m <div>⏳</div>':'Pass Valid <div>⏳</div>'; }
+  });
+}
+
+window.cekLokasi=function(){
+  const t=document.getElementById('locText'), b=document.getElementById('radiusBadge'), p=document.getElementById('prog');
+  const statusL=document.getElementById('statusLokasi');
+  if(statusL) statusL.textContent='Mencari GPS...'; t.textContent='Mencari GPS...';
+  if(!navigator.geolocation){
+    t.textContent='Browser tidak support GPS';
+    if(statusL) statusL.textContent='GPS Tidak Support';
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const d=hitungJarak(pos.coords.latitude,pos.coords.longitude,LAT,LNG);
+    lastDistance=d;
+    if(statusL) statusL.textContent='Lokasi Terdeteksi';
+    t.innerHTML='Titik kamu <span style="color:#0f355c;font-weight:800">●</span> '+Math.round(d)+'m dari sekolah <span style="color:#0f355c">🏫</span> ('+PLUS+')';
+    const pct = Math.min(100, Math.round((RADIUS / Math.max(1,d))*100));
+    p.style.width = d<=RADIUS ? '100%' : Math.round((RADIUS/Math.max(1,d))*100)+'%';
+    p.style.background = d<=RADIUS ? '#16a34a' : '#ef4444';
+    if(d<=RADIUS){ 
+      b.textContent='Di Dalam 40m ✅'; b.className='badge-valid'; b.style.cssText='font-size:10px;font-weight:700;padding:5px 10px;border-radius:999px;background:#dcfce7;border:1px solid #bbf7d0;color:#166534';
+      if(circle) circle.setStyle({color:'#16a34a', fillColor:'#16a34a', fillOpacity:0.15});
+    } else { 
+      b.textContent='Di Luar '+Math.round(d)+'m ❌'; b.className='badge-invalid'; b.style.cssText='font-size:10px;font-weight:700;padding:5px 10px;border-radius:999px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b';
+      if(circle) circle.setStyle({color:'#ef4444', fillColor:'#ef4444', fillOpacity:0.12});
+    }
+    // Hapus marker lama
+    if(markerUser && map) map.removeLayer(markerUser);
+    if(lineToDevice && map) map.removeLayer(lineToDevice);
+    // Marker device - biru
+    const deviceIcon = L.divIcon({html:'<div style="width:18px;height:18px;background:#2563eb;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>', iconSize:[18,18], className:''});
+    markerUser = L.marker([pos.coords.latitude,pos.coords.longitude], {icon: deviceIcon}).addTo(map).bindPopup('<b>Posisi HP Kamu</b><br>'+Math.round(d)+'m dari sekolah<br>'+(d<=RADIUS ? '✅ Di dalam radius 40m' : '❌ Di luar radius'));
+    // Garis dari sekolah ke device
+    lineToDevice = L.polyline([[LAT,LNG],[pos.coords.latitude,pos.coords.longitude]], {color: d<=RADIUS ? '#16a34a' : '#ef4444', weight:2, dashArray:'6 6', opacity:0.8}).addTo(map);
+    // Fit bounds biar keliatan dua titik + radius
+    if(map){
+      const group = L.featureGroup([circle, markerUser, schoolMarker]);
+      map.fitBounds(group.getBounds().pad(0.3));
+    }
+  }, err=>{
+    let msg = err.message;
+    if(msg.includes('permissions policy') || msg.includes('disabled in this document')){
+      t.innerHTML='GPS diblokir di preview iframe.<br><span style="font-size:10px;color:#64748b">Buka di tab baru / GitHub Pages HTTPS untuk lihat 2 titik (sekolah 🏫 + HP ●)</span>';
+      if(statusL) statusL.textContent='Preview Blokir GPS';
+      b.textContent='Buka Tab Baru';
+      b.className='badge-invalid';
+      if(map) map.setView([LAT,LNG], 17);
+      // Simulasi titik device random 15m dari sekolah biar demo keliatan 2 titik di preview
+      const simLat = LAT + (Math.random()-0.5)*0.0002;
+      const simLng = LNG + (Math.random()-0.5)*0.0002;
+      const dSim = hitungJarak(simLat, simLng, LAT, LNG);
+      if(markerUser && map) map.removeLayer(markerUser);
+      if(lineToDevice && map) map.removeLayer(lineToDevice);
+      const deviceIcon = L.divIcon({html:'<div style="width:14px;height:14px;background:#94a3b8;border:2px solid white;border-radius:50%"></div>', iconSize:[14,14], className:''});
+      markerUser = L.marker([simLat, simLng], {icon: deviceIcon}).addTo(map).bindPopup('Simulasi posisi HP (preview)<br>'+Math.round(dSim)+'m dari sekolah');
+      lineToDevice = L.polyline([[LAT,LNG],[simLat, simLng]], {color:'#94a3b8', weight:1, dashArray:'4 4', opacity:0.5}).addTo(map);
+      return;
+    }
+    t.textContent='GPS gagal: '+msg+' (aktifkan lokasi HP & HTTPS)';
+    if(statusL) statusL.textContent='GPS Gagal';
+  }, {enableHighAccuracy:true, timeout:15000, maximumAge:0});
+}
+
+window.hitungJarak=function(lat1,lon1,lat2,lon2){
+  const R=6371000; const toRad=x=>x*Math.PI/180;
+  const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1);
+  const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+window.mulaiScan=async function(){
+  const btn=document.getElementById('scanBtn');
+  btn.disabled=true; btn.textContent='Memvalidasi ID + Password + Lokasi...';
+  const now=new Date();
+  document.getElementById('jamWaktu').textContent=now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' WIB • Tepat Waktu';
+  const ids=['c1','c2','c3']; let i=0;
+  const iv=setInterval(async ()=>{
+    if(i<ids.length){
+      const el=document.getElementById(ids[i]);
+      el.innerHTML=ids[i]=='c1'?'ID Cocok <div>✅</div>':ids[i]=='c2'?'Lokasi &lt;40m <div>✅</div>':'Pass Valid <div>✅</div>';
+      el.style.background='#dcfce7'; i++;
+    } else {
+      clearInterval(iv);
+      document.getElementById('hasil').style.display='block';
+      const dataAbsen = {
+        gid: currentGuru.gid, nama: currentGuru.nama, nip: currentGuru.nip,
+        waktu: now.toISOString(), waktu_server: serverTimestamp(),
+        lat: LAT, lng: LNG, plus_code: PLUS, jarak_meter: Math.round(lastDistance),
+        radius_meter: RADIUS, status: lastDistance<=RADIUS ? 'VALID' : 'LUAR_RADIUS',
+        login_method: 'ID+PASSWORD'
+      };
+      try{
+        if(db){
+          const docRef = await addDoc(collection(db, "absensi"), dataAbsen);
+          document.getElementById('firebaseStatus').textContent = "✅ Tersimpan di Firestore ID: "+docRef.id;
+          const today = now.toISOString().split('T')[0];
+          await setDoc(doc(db, "rekap_harian", today+"_"+currentGuru.gid), dataAbsen, {merge:true});
+        } else {
+          document.getElementById('firebaseStatus').textContent = "⚠️ Mode offline - Firebase belum config, disimpan localStorage";
+        }
+        const riwayat=JSON.parse(localStorage.getItem('SI-ABSEN_RIWAYAT')||'[]');
+        riwayat.unshift(dataAbsen);
+        localStorage.setItem('SI-ABSEN_RIWAYAT', JSON.stringify(riwayat.slice(0,20)));
+      }catch(err){
+        document.getElementById('firebaseStatus').textContent = "❌ Gagal Firestore: "+err.message;
+      }
+      btn.disabled=false; btn.textContent='✅ Scan & Absen Sekarang';
+    }
+  },600);
+}
+
+
+window.toggleGantiPass=function(){
+  const f=document.getElementById('gantiPassForm');
+  f.classList.toggle('hidden');
+  const btn=document.getElementById('btnGantiPass');
+  btn.textContent = f.classList.contains('hidden') ? '✏️ Ganti' : '✕ Tutup';
+  btn.style.cssText = f.classList.contains('hidden') ? 'height:28px;padding:0 10px;font-size:10px;font-weight:700;border-radius:999px;border:1px solid #e2e8f0;background:white;color:#0f355c;cursor:pointer;flex-shrink:0' : 'height:28px;padding:0 10px;font-size:10px;font-weight:700;border-radius:999px;border:1px solid #0f355c;background:#0f355c;color:white;cursor:pointer;flex-shrink:0';
+  const isCustom = localStorage.getItem('SI-ABSEN_PASS_'+currentGuru.gid);
+  const statusText = isCustom ? 'Custom' : 'Default';
+  document.getElementById('currentPassInfo').innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:10px;color:#64748b"><span style="font-weight:700;color:#0f355c">'+statusText+'</span> • ••••••••</div><button onclick="lihatPass()" style="font-size:9px;background:white;border:1px solid #e2e8f0;border-radius:999px;padding:3px 8px;font-weight:700;color:#0f355c;cursor:pointer">👁️ Lihat</button></div>';
+}
+
+window.lihatPass=function(){
+  const cur = getEffectivePassword(currentGuru);
+  document.getElementById('currentPassInfo').innerHTML = '<div style="font-size:10px"><div style="font-weight:700;color:#0f355c">Aktif: <span style="font-family:monospace;background:white;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px">'+cur+'</span></div><div style="margin-top:4px"><button onclick="toggleGantiPass(); setTimeout(()=>toggleGantiPass(),80)" style="font-size:9px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:3px 8px;cursor:pointer">🙈 Tutup</button></div></div>';
+}
+
+window.simpanPasswordBaru=async function(){
+  const newP=document.getElementById('newPassInput').value.trim();
+  const confP=document.getElementById('confirmPassInput').value.trim();
+  const msg=document.getElementById('passChangeMsg');
+  msg.classList.remove('hidden');
+  if(!newP || newP.length<4){ msg.textContent='Password minimal 4 karakter'; msg.style.background='#fee2e2'; msg.style.color='#991b1b'; msg.style.border='1px solid #fecaca'; return; }
+  if(newP!==confP){ msg.textContent='Ulangi password tidak sama'; msg.style.background='#fee2e2'; msg.style.color='#991b1b'; msg.style.border='1px solid #fecaca'; return; }
+  localStorage.setItem('SI-ABSEN_PASS_'+currentGuru.gid, newP);
+  msg.textContent='✅ Password baru disimpan di HP ini!';
+  msg.style.background='#dcfce7'; msg.style.color='#166534'; msg.style.border='1px solid #bbf7d0';
+  try{
+    if(db){
+      const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      await setDoc(doc(db, "users", currentGuru.gid), { password_custom: newP, updated_at: new Date().toISOString(), nama: currentGuru.nama }, {merge:true});
+      msg.textContent='✅ Password baru disimpan di HP & Firestore (gratis)! Sekarang pakai password baru untuk login berikutnya.';
+    }
+  }catch(e){
+    msg.textContent='✅ Disimpan lokal. Firestore gagal: '+e.message;
+  }
+  document.getElementById('newPassInput').value=''; document.getElementById('confirmPassInput').value='';
+  setTimeout(()=>{ document.getElementById('gantiPassForm').classList.add('hidden'); const b=document.getElementById('btnGantiPass'); b.textContent='✏️ Ganti'; b.className='btn btn-outline'; b.style.cssText='height:36px;padding:0 14px;font-size:11px;border-radius:999px'; }, 2000);
+}
+
+
+window.addEventListener('DOMContentLoaded', ()=>{
+  const saved=localStorage.getItem('SI-ABSEN_GID');
+  if(saved){ currentGuru=GURUS.find(g=>g.gid===saved); if(currentGuru) showAbsenScreen(); }
+  document.getElementById('gidInput').addEventListener('keypress', e=>{ if(e.key==='Enter') document.getElementById('passInput').focus(); });
+  document.getElementById('passInput').addEventListener('keypress', e=>{ if(e.key==='Enter') doLogin(); });
+  // contoh login random
+  const contoh = GURUS[0];
+  if(contoh){ document.getElementById('contohLogin').innerHTML = `${contoh.gid} / ${contoh.password} (${contoh.nama.split(',')[0]})<br/>${GURUS[1].gid} / ${GURUS[1].password}<br/>${GURUS[28].gid} / ${GURUS[28].password} (tanpa NIP)`; }
+});
+</script>
+</body>
+</html>
