@@ -10,7 +10,10 @@
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
-.header{height:64px;background:white;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:9999}
+.header{height:64px;background:white;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:50}
+.logo-box{display:flex;align-items:center;gap:10px}
+.logo-img{width:40px;height:40px;border-radius:12px;background:transparent;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;overflow:hidden}
+.logo-img img{width:100%;height:100%;object-fit:contain}
 .container{max-width:480px;margin:0 auto;padding:16px}
 .card{background:white;border:1px solid #e2e8f0;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.04);position:relative;z-index:1}
 .btn{height:48px;border-radius:14px;font-weight:800;display:flex;align-items:center;justify-content:center;border:none;width:100%;cursor:pointer;font-family:Inter}
@@ -37,8 +40,13 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 </head>
 <body>
 <header class="header">
-<div style="display:flex;align-items:center;gap:8px"><div style="width:36px;height:36px;border-radius:10px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800">QR</div><div><div style="font-weight:800;color:#0f355c;font-size:12px">SI-ABSEN</div><div style="font-size:10px;color:#64748b">KETAT + AUTO + FIX 4 BUG</div></div></div>
-<div><span id="gidBadge" class="hidden" style="background:#e0f2fe;color:#0f355c;font-size:11px;font-weight:700;padding:6px 10px;border-radius:999px"></span> <a id="logoutBtn" href="#" class="hidden" onclick="logout();return false;" style="font-size:12px;color:#64748b">Logout</a></div>
+<div class="logo-box">
+    <div class="logo-img"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'" alt="SI-ABSEN" style="width:100%;height:100%;object-fit:contain"/></div>
+    <div>
+      <div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SI-ABSEN</div>
+      <div style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.5px">SMPN 1 BRONDONG</div>
+    </div>
+  </div>
 </header>
 <div class="container">
 <div id="loginScreen"><div class="card" style="margin-top:20px"><div style="text-align:center"><div style="width:64px;height:64px;border-radius:20px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:28px">🔐</div><h2 style="color:#0f355c">Login Guru</h2><p style="font-size:12px;color:#64748b">Mode Ketat Anti Titip</p></div>
