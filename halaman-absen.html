@@ -3,37 +3,47 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>SI-ABSEN - MODE KETAT + AUTO SCAN</title>
+<title>SI-ABSEN - FIX 4 BUG Screenshot</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
-.header{height:64px;background:white;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:50}
+.header{height:64px;background:white;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:9999}
 .container{max-width:480px;margin:0 auto;padding:16px}
-.card{background:white;border:1px solid #e2e8f0;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card{background:white;border:1px solid #e2e8f0;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.04);position:relative;z-index:1}
 .btn{height:48px;border-radius:14px;font-weight:800;display:flex;align-items:center;justify-content:center;border:none;width:100%;cursor:pointer;font-family:Inter}
 .btn-primary{background:#0f355c;color:white}
 .btn-outline{background:white;border:1px solid #e2e8f0;color:#0f355c}
 .btn:disabled{opacity:.5}
-#miniMap{height:200px;border-radius:14px}
-#reader{width:100%;border-radius:18px;overflow:hidden;background:#000;min-height:280px}
+#miniMap{height:200px;border-radius:14px;position:relative;z-index:1}
+#reader{width:100%;border-radius:18px;overflow:hidden;background:#000;min-height:280px;position:relative;z-index:1}
 .hidden{display:none!important}
 .input{width:100%;height:48px;border:1px solid #e2e8f0;border-radius:14px;padding:0 14px;font-weight:600;box-sizing:border-box}
 .badge-valid{background:#dcfce7;border:1px solid #bbf7d0;color:#166534;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:700}
 .badge-invalid{background:#fee2e2;border:1px solid #fecaca;color:#991b1b;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:700}
+.leaflet-pane{z-index:1!important}
+.leaflet-top, .leaflet-bottom{z-index:2!important}
+/* MODAL CUSTOM - GANTI ALERT BIAR GAK MUNCUL github.io */
+#customAlert{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px}
+#customAlert.show{display:flex}
+#customAlert .modal{background:white;border-radius:20px;padding:0;width:100%;max-width:360px;box-shadow:0 20px 40px rgba(0,0,0,0.3);overflow:hidden;animation:pop .2s ease}
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+#customAlert .modal-header{padding:16px 20px;background:#0f355c;color:white;display:flex;justify-content:space-between;align-items:center}
+#customAlert .modal-body{padding:20px;color:#334155;font-size:14px;line-height:1.5}
+#customAlert .modal-footer{padding:12px 20px;display:flex;justify-content:flex-end;border-top:1px solid #e2e8f0}
 </style>
 </head>
 <body>
 <header class="header">
-<div style="display:flex;align-items:center;gap:8px"><div style="width:36px;height:36px;border-radius:10px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800">QR</div><div><div style="font-weight:800;color:#0f355c;font-size:12px">SI-ABSEN</div><div style="font-size:10px;color:#64748b">KETAT + AUTO + KM + Jam</div></div></div>
+<div style="display:flex;align-items:center;gap:8px"><div style="width:36px;height:36px;border-radius:10px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800">QR</div><div><div style="font-weight:800;color:#0f355c;font-size:12px">SI-ABSEN</div><div style="font-size:10px;color:#64748b">KETAT + AUTO + FIX 4 BUG</div></div></div>
 <div><span id="gidBadge" class="hidden" style="background:#e0f2fe;color:#0f355c;font-size:11px;font-weight:700;padding:6px 10px;border-radius:999px"></span> <a id="logoutBtn" href="#" class="hidden" onclick="logout();return false;" style="font-size:12px;color:#64748b">Logout</a></div>
 </header>
 <div class="container">
-<div id="loginScreen"><div class="card" style="margin-top:20px"><div style="text-align:center"><div style="width:64px;height:64px;border-radius:20px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:28px">🔐</div><h2 style="color:#0f355c">Login Guru</h2><p style="font-size:12px;color:#64748b">Mode Ketat Anti Titip Absen</p></div>
+<div id="loginScreen"><div class="card" style="margin-top:20px"><div style="text-align:center"><div style="width:64px;height:64px;border-radius:20px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:28px">🔐</div><h2 style="color:#0f355c">Login Guru</h2><p style="font-size:12px;color:#64748b">Mode Ketat Anti Titip</p></div>
 <div style="margin-top:16px"><label style="font-size:12px;font-weight:700">ID PRIVAT</label><input id="gidInput" class="input" placeholder="G-37286" style="margin-top:6px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"/></div>
-<div style="margin-top:12px"><label style="font-size:12px;font-weight:700">PASSWORD</label><div style="position:relative;margin-top:6px"><input id="passInput" class="input" type="password" placeholder="Brondong..." style="padding-right:44px"/><button type="button" id="eyeBtn" onclick="togglePass()" style="position:absolute;right:6px;top:6px;height:36px;width:36px;border:none;background:#f1f5f9;border-radius:10px;cursor:pointer">👁️</button></div><div id="loginError" class="hidden" style="margin-top:8px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b;font-size:12px;padding:8px 12px;border-radius:10px"></div></div>
+<div style="margin-top:12px"><label style="font-size:12px;font-weight:700">PASSWORD</label><div style="position:relative;margin-top:6px"><input id="passInput" class="input" type="password" placeholder="Brondong..." style="padding-right:50px"/><button type="button" id="eyeBtn" onclick="togglePass()" style="position:absolute;right:6px;top:6px;height:36px;width:36px;border:none;background:#f1f5f9;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><div id="loginError" class="hidden" style="margin-top:8px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b;font-size:12px;padding:8px 12px;border-radius:10px"></div></div>
 <button class="btn btn-primary" style="margin-top:16px;height:52px" onclick="doLogin()">Masuk →</button></div></div>
 
 <div id="absenScreen" class="hidden">
@@ -50,7 +60,7 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
   </div>
   <div id="gantiPassForm" class="hidden" style="margin-top:12px;border-top:1px solid #bae6fd;padding-top:12px">
     <div style="display:grid;gap:8px">
-      <input id="newPassInput" class="input" type="password" placeholder="Password baru min 4" style="height:42px;font-size:13px"/>
+      <div style="position:relative"><input id="newPassInput" class="input" type="password" placeholder="Password baru min 4" style="height:42px;font-size:13px;padding-right:44px"/><button type="button" onclick="toggleNewPass()" style="position:absolute;right:6px;top:6px;height:30px;width:30px;border:none;background:#f1f5f9;border-radius:8px;cursor:pointer"><svg id="eyeNew" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
       <input id="confirmPassInput" class="input" type="password" placeholder="Ulangi password baru" style="height:42px;font-size:13px"/>
       <div style="display:flex;gap:8px">
         <button class="btn btn-primary" style="flex:1;height:42px;font-size:13px" onclick="simpanPasswordBaru()">Simpan →</button>
@@ -61,18 +71,20 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
   </div>
 </div>
 
-<div class="card"><div style="font-size:11px;font-weight:800;color:#64748b">GPS • 40m • 36R6+X89</div><div id="statusLokasi" style="font-weight:800;color:#0f355c;margin-top:6px">Belum cek</div><div id="locText" style="font-size:12px;color:#64748b">Klik Cek Lokasi</div><div id="radiusBadge" style="margin-top:8px;display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:5px 10px;font-size:11px">Menunggu GPS</div><div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden"><div id="miniMap"></div></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="flex:1" onclick="cekLokasi()">📍 Cek Lokasi</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('peta')">Peta</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('satelit')">Sat</button></div></div>
+<div class="card" style="overflow:hidden"><div style="font-size:11px;font-weight:800;color:#64748b">GPS • 40m • 36R6+X89</div><div id="statusLokasi" style="font-weight:800;color:#0f355c;margin-top:6px">Belum cek</div><div id="locText" style="font-size:12px;color:#64748b">Klik Cek Lokasi</div><div id="radiusBadge" style="margin-top:8px;display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:5px 10px;font-size:11px">Menunggu GPS</div><div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;position:relative;z-index:1"><div id="miniMap"></div></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="flex:1" onclick="cekLokasi()">📍 Cek Lokasi</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('peta')">Peta</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('satelit')">Sat</button></div></div>
 
-<div class="card"><div style="font-size:11px;font-weight:800;color:#64748b">KAMERA QR • MODE KETAT + AUTO ABSEN</div>
+<div class="card"><div style="font-size:11px;font-weight:800;color:#64748b">KAMERA QR • MODE KETAT + AUTO</div>
 <div style="margin-top:10px"><div id="reader"></div><div id="qrResult" style="display:none;margin-top:8px;font-size:11px;padding:10px 12px;border-radius:10px;background:#f8fafc;border:1px dashed #e2e8f0;font-weight:600"></div></div>
 <div style="display:flex;gap:8px;margin-top:10px"><button id="btnStartCam" class="btn btn-primary" style="flex:1" onclick="startCamera()">📷 NYALAKAN KAMERA</button><button id="btnStopCam" class="btn btn-outline hidden" style="flex:1" onclick="stopCamera()">✕ Matikan Kamera</button></div>
-<div style="margin-top:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:8px 10px;font-size:10px;color:#166534"><b>🔒 MODE KETAT AKTIF:</b> QR harus milik sendiri. Jika scan QR orang lain → langsung DITOLAK + HP getar. Auto absen ketika QR cocok tanpa klik tombol.</div>
-<button class="btn btn-primary hidden" style="margin-top:12px;height:54px" id="scanBtn" onclick="mulaiScan()">✅ Absen Manual (Backup)</button>
+<button class="btn btn-primary hidden" style="margin-top:12px;height:54px" id="scanBtn" onclick="mulaiScan()">✅ Absen Manual</button>
 <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px"><div id="c1" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;text-align:center;font-size:11px;font-weight:700">ID <div>⏳</div></div><div id="c2" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;text-align:center;font-size:11px;font-weight:700">GPS <div>⏳</div></div><div id="c3" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;text-align:center;font-size:11px;font-weight:700">Jam <div>⏳</div></div></div>
 <div id="hasil" style="display:none;margin-top:14px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:14px;padding:14px"><div id="jamWaktu" style="font-weight:700;color:#166534"></div><div id="firebaseStatus" style="margin-top:4px;font-size:10px"></div><div id="lokasiStatus" style="margin-top:4px;font-size:10px;color:#64748b"></div></div>
 </div>
 </div>
 </div>
+
+<!-- MODAL CUSTOM GANTI ALERT - FIX BUG github.io -->
+<div id="customAlert"><div class="modal"><div class="modal-header"><div id="customAlertTitle" style="font-weight:800">ABSEN TUTUP</div><button onclick="closeCustomAlert()" style="background:none;border:none;color:white;font-size:20px;cursor:pointer">×</button></div><div class="modal-body" id="customAlertMsg"></div><div class="modal-footer"><button onclick="closeCustomAlert()" style="background:#0f355c;color:white;border:none;padding:8px 20px;border-radius:10px;font-weight:700;cursor:pointer">Oke</button></div></div></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -87,18 +99,18 @@ const firebaseConfig = {
   appId: "1:174884842248:web:8625540d5f3ff8b7f45abd"
 };
 let db=null;
-const fbInfo=document.getElementById('firebaseInfo');
 try{
   const app=initializeApp(firebaseConfig);
   db=getFirestore(app);
-  fbInfo.textContent='✅ Firebase: '+firebaseConfig.projectId+' • Mode Ketat'; fbInfo.style.background='#dcfce7'; fbInfo.style.color='#166534';
-}catch(e){ fbInfo.textContent='❌ Firebase gagal: '+e.message; fbInfo.style.background='#fee2e2'; }
+  document.getElementById('firebaseInfo').textContent='✅ Firebase: '+firebaseConfig.projectId+' • Ketat Auto';
+  document.getElementById('firebaseInfo').style.background='#dcfce7';
+}catch(e){ document.getElementById('firebaseInfo').textContent='❌ Firebase gagal: '+e.message; }
 
 const LAT=-6.9075625, LNG=112.2108125, PLUS="36R6+X89";
 let RADIUS=40;
 let map, markerUser, circle, roadLayer, satLayer, MODE_MINI=localStorage.getItem('MAP_MODE')||'peta';
 let currentGuru=null, lastDistance=9999, lastPos=null, html5QrCode=null, qrScanned=false, qrValue=null, schoolMarker, lineToDevice;
-let isProcessing=false; // cegah double auto-scan
+let isProcessing=false;
 
 const GURUS=[{"no":1,"nama":"Husnul Anam, S.Pd, M.Pd","nip":"196906101998021004","gid":"G-83105","password":"Brondong1004"},{"no":2,"nama":"Drs. Khoim Khoirul A, M.Pd","nip":"196807161998021004","gid":"G-20839","password":"Brondong1004"},{"no":3,"nama":"Drs. Zainuddin, M.Pd","nip":"196805221997031002","gid":"G-94652","password":"Brondong1002"},{"no":4,"nama":"Drs. Joko Sutomo","nip":"196710211999031003","gid":"G-72600","password":"Brondong1003"},{"no":5,"nama":"Ishnafiyah, S.Ag","nip":"197507151999032008","gid":"G-32712","password":"Brondong2008"},{"no":6,"nama":"Evi Irawati, S.Pd","nip":"197302112000122004","gid":"G-79374","password":"Brondong2004"},{"no":7,"nama":"Hilmishobah, S.Pd, M.Pd","nip":"197109082003121003","gid":"G-10058","password":"Brondong1003"},{"no":8,"nama":"Anis Mufadhilah, S.Pd","nip":"197010282007012012","gid":"G-58661","password":"Brondong2012"},{"no":9,"nama":"Muhamad Nur Cahyo, S. Pd","nip":"197106092007011019","gid":"G-59237","password":"Brondong1019"},{"no":10,"nama":"Dra. Sri Hartini","nip":"196609182008012006","gid":"G-84672","password":"Brondong2006"},{"no":11,"nama":"M. Khusen, S.Pd","nip":"197111042008011009","gid":"G-40409","password":"Brondong1009"},{"no":12,"nama":"Asri Pujitami, S.Pd","nip":"198501182010012015","gid":"G-18622","password":"Brondong2015"},{"no":13,"nama":"Moh. Safi, S.Kom","nip":"197607052011011006","gid":"G-60160","password":"Brondong1006"},{"no":14,"nama":"Fitri Komariyah, S.Pd","nip":"197508012009022001","gid":"G-62543","password":"Brondong2001"},{"no":15,"nama":"Sudibyanto, S.Pd","nip":"197804242008011017","gid":"G-22804","password":"Brondong1017"},{"no":16,"nama":"Nikmatus Solichah, S.Ag","nip":"197403092014062001","gid":"G-15682","password":"Brondong2001"},{"no":17,"nama":"Mahriwati, S.Pd","nip":"197408312021212003","gid":"G-25556","password":"Brondong2003"},{"no":18,"nama":"Yusuf Budiharjo, S.Pd","nip":"198206072022211002","gid":"G-37728","password":"Brondong1002"},{"no":19,"nama":"Teguh Wahyu Widayat, S. Pd","nip":"198305012023211008","gid":"G-59221","password":"Brondong1008"},{"no":20,"nama":"Mamluhah, S.Pd","nip":"198310192023212010","gid":"G-23021","password":"Brondong2010"},{"no":21,"nama":"Sakiman, SE","nip":"197010242024211002","gid":"G-63923","password":"Brondong1002"},{"no":22,"nama":"Slamet Mamik H, S.Pd","nip":"197902122024211001","gid":"G-16452","password":"Brondong1001"},{"no":23,"nama":"Maghfiroh, S.Pd","nip":"198204152024212005","gid":"G-90272","password":"Brondong2005"},{"no":24,"nama":"Selvi Putri Cornivia, S.Pd","nip":"199812312024212016","gid":"G-13652","password":"Brondong2016"},{"no":25,"nama":"Dwi Chandra Puspita A, S.Pd","nip":"199906212024212016","gid":"G-82582","password":"Brondong2016"},{"no":26,"nama":"Nanda Wijayanti, S.pd","nip":"200007272025212022","gid":"G-76875","password":"Brondong2022"},{"no":27,"nama":"Bunga Cahyaning Atie, S.Pd","nip":"200108222025212006","gid":"G-18758","password":"Brondong2006"},{"no":28,"nama":"Toni Wijayanto, S.Kom","nip":"198210242023211005","gid":"G-35462","password":"Brondong1005"},{"no":29,"nama":"Maghfiroh, S.Pd","nip":"-","gid":"G-34817","password":"Brondong1710"},{"no":30,"nama":"Abdullah Faqih, S.Pdi. M.Ag","nip":"-","gid":"G-13489","password":"Brondong8967"},{"no":31,"nama":"Muhamad Yunus Anis, S.Pd","nip":"-","gid":"G-39875","password":"Brondong7575"},{"no":32,"nama":"Imarotul Hasanah, S.Pd","nip":"19800615210012003","gid":"G-93715","password":"Brondong2003"},{"no":33,"nama":"Nurul Hidayati, S.Pd","nip":"197810052009022005","gid":"G-62114","password":"Brondong2005"},{"no":34,"nama":"Mutholiah","nip":"197111172009012001","gid":"G-70331","password":"Brondong2001"},{"no":35,"nama":"Nyamin","nip":"197205042025211004","gid":"G-56461","password":"Brondong1004"},{"no":36,"nama":"Wartiyaningsih, S.Pd","nip":"199308122025212060","gid":"G-78122","password":"Brondong2060"},{"no":37,"nama":"Muzahidin, S.Pd","nip":"198801042025211108","gid":"G-14014","password":"Brondong1108"},{"no":38,"nama":"Arum Rahmana, S.Pd","nip":"199210192025212086","gid":"G-88075","password":"Brondong2086"},{"no":39,"nama":"R. Arif Nur Cahyono, S.Pus","nip":"198004262025211045","gid":"G-24520","password":"Brondong1045"},{"no":40,"nama":"Solkan","nip":"-","gid":"G-81582","password":"Brondong8298"},{"no":41,"nama":"Fatiha Sabila, SE","nip":"-","gid":"G-35965","password":"Brondong6573"},{"no":42,"nama":"Ahmad Marzuq Al Himni, S. Kom","nip":"-","gid":"G-37286","password":"Brondong8691"},{"no":43,"nama":"Dedy Ustman","nip":"-","gid":"G-25987","password":"Brondong8718"},{"no":44,"nama":"Helmy Hartiningsih","nip":"-","gid":"G-41909","password":"Brondong0953"}];
 
@@ -115,9 +127,35 @@ function initMap(){
 window.setModeMini=(mode)=>{ MODE_MINI=mode; localStorage.setItem('MAP_MODE',mode); if(mode==='satelit'){ if(map.hasLayer(roadLayer)) map.removeLayer(roadLayer); satLayer.addTo(map); } else { if(map.hasLayer(satLayer)) map.removeLayer(satLayer); roadLayer.addTo(map); } };
 window.getInisial=(nama)=>{ const p=nama.trim().split(/\s+/); if(p.length>=2) return (p[0][0]+p[1][0]).toUpperCase(); return nama.substring(0,2).toUpperCase(); };
 window.formatJarak=(meter)=>{ const m=Math.round(meter||0); if(m>=1000){ const km=(m/1000).toFixed(m%1000===0?0:1); return km.replace('.0','')+' KM'; } return m+'m'; };
-window.getJenisAbsen=(date)=>{ const now=date||new Date(); const menit=now.getHours()*60+now.getMinutes(); if(menit>=6*60 && menit<=7*60+20) return {jenis:'MASUK', valid:true}; if(menit>=13*60+50 && menit<=20*60) return {jenis:'PULANG', valid:true}; if(menit<6*60) return {jenis:'BELUM_MULAI', valid:false, pesan:'Masuk buka 06:00-07:20'}; if(menit>7*60+20 && menit<13*60+50) return {jenis:'TUTUP_SIANG', valid:false, pesan:'Masuk tutup. Pulang 13:50-20:00'}; return {jenis:'SELESAI', valid:false, pesan:'Pulang sampai 20:00'}; };
+window.getJenisAbsen=(date)=>{ const now=date||new Date(); const menit=now.getHours()*60+now.getMinutes(); if(menit>=6*60 && menit<=7*60+20) return {jenis:'MASUK', valid:true}; if(menit>=13*60+50 && menit<=20*60) return {jenis:'PULANG', valid:true}; if(menit<6*60) return {jenis:'BELUM_MULAI', valid:false, pesan:'Absen Masuk buka jam 06:00 - 07:20'}; if(menit>7*60+20 && menit<13*60+50) return {jenis:'TUTUP_SIANG', valid:false, pesan:'Absen Masuk tutup. Tunggu Absen Pulang 13:50-20:00'}; return {jenis:'SELESAI', valid:false, pesan:'Absen Pulang hanya sampai jam 20:00'}; };
 window.cekJamAbsen=()=>{ const el=document.getElementById('jamInfo'); if(!el) return; const now=new Date(); const info=getJenisAbsen(now); const jamStr=now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' WIB'; el.style.display='block'; if(info.valid){ el.innerHTML='<span style="background:#dcfce7;border:1px solid #bbf7d0;color:#166534;padding:5px 10px;border-radius:999px;font-size:10px;font-weight:700">● '+info.jenis+' DIBUKA • '+jamStr+'</span>'; } else { el.innerHTML='<span style="background:#fee2e2;border:1px solid #fecaca;color:#991b1b;padding:5px 10px;border-radius:999px;font-size:10px;font-weight:700">● TUTUP • '+jamStr+' • '+info.pesan+'</span>'; } };
-window.togglePass=()=>{ const inp=document.getElementById('passInput'); const btn=document.getElementById('eyeBtn'); if(inp.type==='password'){ inp.type='text'; if(btn) btn.textContent='🙈'; } else { inp.type='password'; if(btn) btn.textContent='👁️'; } };
+
+// === FIX 1: ICON MATA PAKAI SVG, BUKAN EMOJI ===
+const eyeOpenSVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+const eyeClosedSVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.53 9.53a3 3 0 1 0 4.24 4.24"/><path d="M3 3l18 18"/></svg>';
+window.togglePass=()=>{
+  const inp=document.getElementById('passInput');
+  const btn=document.getElementById('eyeBtn');
+  if(!inp) return;
+  if(inp.type==='password'){ inp.type='text'; if(btn) btn.innerHTML=eyeClosedSVG; }
+  else { inp.type='password'; if(btn) btn.innerHTML=eyeOpenSVG; }
+};
+window.toggleNewPass=()=>{
+  const inp=document.getElementById('newPassInput');
+  if(!inp) return;
+  const btn=document.getElementById('eyeNew');
+  if(inp.type==='password'){ inp.type='text'; if(btn) btn.innerHTML=eyeClosedSVG; }
+  else { inp.type='password'; if(btn) btn.innerHTML=eyeOpenSVG; }
+};
+
+// === FIX 2: CUSTOM ALERT GANTI NATIVE ALERT BIAR GAK MUNCUL github.io ===
+window.showCustomAlert=(title, msg)=>{
+  document.getElementById('customAlertTitle').textContent=title;
+  document.getElementById('customAlertMsg').innerHTML=msg;
+  document.getElementById('customAlert').classList.add('show');
+};
+window.closeCustomAlert=()=>{ document.getElementById('customAlert').classList.remove('show'); };
+
 window.cekLokasi=()=>{
   const t=document.getElementById('locText'), b=document.getElementById('radiusBadge'), s=document.getElementById('statusLokasi');
   s.textContent='Mencari GPS...'; t.textContent='Mencari GPS...';
@@ -140,25 +178,24 @@ window.startCamera=async()=>{
   try{
     if(!html5QrCode) html5QrCode=new Html5Qrcode("reader");
     await html5QrCode.start({facingMode:"environment"}, {fps:10, qrbox:{width:250,height:250}}, async decoded=>{
-      if(isProcessing) return; // cegah double scan
+      if(isProcessing) return;
       const idQR=decoded.split('|')[0]?.trim().toUpperCase();
-      // MODE KETAT
+      const namaQR = GURUS.find(g=>g.gid.toUpperCase()===idQR)?.nama || idQR;
+      // === FIX 3: MODE KETAT TAMPIL NAMA, BUKAN ID ===
       if(idQR && currentGuru && idQR!==currentGuru.gid){
-        el.textContent="⛔ DITOLAK! Ini QR milik "+idQR+", kamu "+currentGuru.gid+" - Tidak bisa titip absen!";
-        el.style.background="#fee2e2"; el.style.color="#991b1b"; el.style.fontWeight="800";
+        const namaPemilik = GURUS.find(g=>g.gid.toUpperCase()===idQR)?.nama || idQR;
+        el.innerHTML=`⛔ DITOLAK!<br>Ini QR milik <b>${namaPemilik}</b> (${idQR}),<br>kamu login sebagai <b>${currentGuru.nama}</b> (${currentGuru.gid})<br><small>Tidak bisa titip absen!</small>`;
+        el.style.background="#fee2e2"; el.style.color="#991b1b"; el.style.fontWeight="700";
         document.getElementById('c1').innerHTML="QR Beda Guru <div>⛔</div>"; document.getElementById('c1').style.background="#fee2e2";
         if(navigator.vibrate) navigator.vibrate([200,100,200]);
         return;
       }
-      // QR COCOK -> AUTO ABSEN LANGSUNG
       qrScanned=true; qrValue=decoded;
-      el.textContent="✅ QR Cocok: "+decoded+" • AUTO ABSEN...";
+      el.textContent="✅ QR Cocok: "+(GURUS.find(g=>g.gid.toUpperCase()===idQR)?.nama||idQR)+" • AUTO ABSEN...";
       el.style.background="#dcfce7"; el.style.color="#166534";
       document.getElementById('c1').innerHTML="ID Cocok <div>✅</div>"; document.getElementById('c1').style.background="#dcfce7";
-      // AUTO PROSES
       isProcessing=true;
       document.getElementById('btnStartCam').disabled=true;
-      // stop kamera dulu biar fokus proses
       try{ await html5QrCode.stop(); }catch(e){}
       document.getElementById('btnStartCam').classList.add('hidden');
       document.getElementById('btnStopCam').classList.add('hidden');
@@ -192,22 +229,22 @@ function showAbsenScreen(){
   document.getElementById('inisialGuru').textContent=getInisial(currentGuru.nama);
   cekJamAbsen(); setInterval(cekJamAbsen,60000);
   const isCustom=localStorage.getItem('SI-ABSEN_PASS_'+currentGuru.gid);
-  document.getElementById('currentPassInfo').innerHTML='<div style="display:flex;justify-content:space-between"><div style="font-size:10px;color:#64748b"><span style="font-weight:700;color:#0f355c">'+(isCustom?'Custom':'Default')+'</span> • ••••••••</div><button onclick="lihatPass()" style="font-size:9px;background:white;border:1px solid #e2e8f0;border-radius:999px;padding:3px 8px;font-weight:700;color:#0f355c">👁️ Lihat</button></div>';
+  document.getElementById('currentPassInfo').innerHTML='<div style="display:flex;justify-content:space-between"><div style="font-size:10px;color:#64748b"><span style="font-weight:700;color:#0f355c">'+(isCustom?'Custom':'Default')+'</span> • ••••••••</div><button onclick="lihatPass()" style="font-size:9px;background:white;border:1px solid #e2e8f0;border-radius:999px;padding:3px 8px;font-weight:700;color:#0f355c">Lihat</button></div>';
   setTimeout(()=>{ initMap(); cekLokasi(); },300);
 }
 window.logout=()=>{ localStorage.removeItem('SI-ABSEN_GID'); location.reload(); };
 
-// AUTO ABSEN FUNCTION
 async function prosesAbsenOtomatis(){
   const now=new Date();
   const jamInfo=getJenisAbsen(now);
   if(!jamInfo.valid){
-    alert('⛔ '+jamInfo.pesan+'\nJam sekarang: '+now.toLocaleTimeString('id-ID')+' WIB');
-    cekJamAbsen(); 
+    // FIX 2: pakai custom modal, bukan alert native
+    showCustomAlert('ABSEN TUTUP', `⛔ ${jamInfo.pesan}<br><br>Jam sekarang: <b>${now.toLocaleTimeString('id-ID')} WIB</b><br><br><small>Aturan:<br>• Masuk: 06:00 - 07:20<br>• Pulang: 13:50 - 20:00</small>`);
+    cekJamAbsen();
     document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false;
+    document.getElementById('btnStartCam').textContent='📷 COBA LAGI';
     return;
   }
-  if(lastDistance===9999){ /* GPS belum, tapi tetap lanjut biar gak ngeselin */ }
   document.getElementById('hasil').style.display='block';
   document.getElementById('jamWaktu').textContent=now.toLocaleTimeString('id-ID')+' WIB • '+jamInfo.jenis+' • AUTO';
   const jarakText=formatJarak(lastDistance);
@@ -217,7 +254,6 @@ async function prosesAbsenOtomatis(){
     gid:currentGuru.gid, nama:currentGuru.nama, nip:currentGuru.nip,
     waktu:now.toISOString(), waktu_server:serverTimestamp(),
     lat:lastPos?lastPos.coords.latitude:LAT, lng:lastPos?lastPos.coords.longitude:LNG,
-    akurasi:lastPos?Math.round(lastPos.coords.accuracy):0,
     plus_code:PLUS, jarak_meter:Math.round(lastDistance||0), jarak_text:jarakText, radius_meter:RADIUS,
     status:lastDistance<=RADIUS?'VALID':'LUAR_RADIUS',
     jenis_absen:jamInfo.jenis,
@@ -236,7 +272,6 @@ async function prosesAbsenOtomatis(){
     document.getElementById('firebaseStatus').textContent="❌ Gagal: "+e.message;
     document.getElementById('c3').innerHTML='Gagal <div>❌</div>'; document.getElementById('c3').style.background='#fee2e2';
   }
-  // tampilkan tombol untuk scan lagi
   setTimeout(()=>{
     document.getElementById('btnStartCam').classList.remove('hidden');
     document.getElementById('btnStartCam').disabled=false;
@@ -252,8 +287,6 @@ window.simpanPasswordBaru=async()=>{ const newP=document.getElementById('newPass
 
 document.addEventListener('DOMContentLoaded', ()=>{
   const s=localStorage.getItem('SI-ABSEN_GID'); if(s){ currentGuru=GURUS.find(g=>g.gid===s); if(currentGuru) showAbsenScreen(); }
-  document.getElementById('gidInput').addEventListener('keypress', e=>{ if(e.key==='Enter') document.getElementById('passInput').focus(); });
-  document.getElementById('passInput').addEventListener('keypress', e=>{ if(e.key==='Enter') doLogin(); });
 });
 </script>
 </body>
