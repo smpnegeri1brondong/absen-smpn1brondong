@@ -37,7 +37,7 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 </head>
 <body>
 <header class="header">
-<div style="display:flex;align-items:center;gap:8px"><div style="width:36px;height:36px;border-radius:10px;background:transparent;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'" alt="SI-ABSEN" style="width:100%;height:100%;object-fit:contain"/></div><div><div style="font-weight:800;color:#0f355c;font-size:12px">SI-ABSEN</div><div style="font-size:10px;color:#64748b">ABSEN GTK</div></div></div>
+<div style="display:flex;align-items:center;gap:8px"><div style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'" alt="SI-ABSEN" style="width:100%;height:100%;object-fit:contain"/></div><div><div style="font-weight:800;color:#0f355c;font-size:12px">SI-ABSEN</div><div style="font-size:10px;color:#64748b">ABSEN GTK</div></div></div>
 <div><span id="gidBadge" class="hidden" style="background:#e0f2fe;color:#0f355c;font-size:11px;font-weight:700;padding:6px 10px;border-radius:999px"></span> <a id="logoutBtn" href="#" class="hidden" onclick="logout();return false;" style="font-size:12px;color:#64748b">Logout</a></div>
 </header>
 <div class="container">
@@ -312,7 +312,7 @@ window.logout=()=>{ localStorage.removeItem('SI-ABSEN_GID'); location.reload(); 
 async function prosesAbsenOtomatis(){
   const now=new Date();
   const jamInfo=getJenisAbsen(now);
-  if(!jamInfo.valid){
+  if(false && !jamInfo.valid){ // V4 FIX SEMUA MASUK LAPORAN
     // FIX 2: pakai custom modal, bukan alert native
     showCustomAlert('ABSEN TUTUP', `⛔ ${jamInfo.pesan}<br><br>Jam sekarang: <b>${now.toLocaleTimeString('id-ID')} WIB</b><br><br><small>Aturan:<br>• Masuk: 06:00 - 07:20<br>• Pulang: 13:50 - 20:00</small>`);
     cekJamAbsen();
@@ -331,8 +331,8 @@ async function prosesAbsenOtomatis(){
     lat:lastPos?lastPos.coords.latitude:LAT, lng:lastPos?lastPos.coords.longitude:LNG,
     plus_code:PLUS, jarak_meter:Math.round(lastDistance||0), jarak_text:jarakText, radius_meter:RADIUS,
     status:lastDistance<=RADIUS?'VALID':'LUAR_RADIUS',
-    jenis_absen:jamInfo.jenis,
-    login_method:'AUTO-QR',
+    jenis_absen:jamInfo.jenis, kategori_absen:jamInfo.kategori, label_absen:jamInfo.label, telat_menit:jamInfo.telatMenit||0, pesan_jam:jamInfo.pesan,
+    login_method:'AUTO-QR-V4',
     qr_value:qrValue||null, qr_valid:true, mode_ketat:true
   };
   document.getElementById('lokasiStatus').textContent=`Jarak ${jarakText} • ${data.status} • ${jamInfo.jenis} • AUTO`;
