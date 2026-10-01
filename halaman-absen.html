@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>SI-ABSEN - FIX 4 BUG Screenshot</title>
+<title>SI-ABSEN V6 - UI Cantik + Jam 07:30 Telat + 11:30-13:50 Pulang Awal + 13:50-21:00 Tepat</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -165,12 +165,25 @@ let map, markerUser, circle, roadLayer, satLayer, MODE_MINI=localStorage.getItem
 let currentGuru=null, lastDistance=9999, lastPos=null, html5QrCode=null, qrScanned=false, qrValue=null, schoolMarker, lineToDevice;
 let isProcessing=false;
 
+
 const GURUS=[{"no":1,"nama":"Husnul Anam, S.Pd, M.Pd","nip":"196906101998021004","gid":"G-83105","password":"snebron1004"},{"no":2,"nama":"Drs. Khoim Khoirul A, M.Pd","nip":"196807161998021004","gid":"G-20839","password":"snebron1004"},{"no":3,"nama":"Drs. Zainuddin, M.Pd","nip":"196805221997031002","gid":"G-94652","password":"snebron1002"},{"no":4,"nama":"Drs. Joko Sutomo","nip":"196710211999031003","gid":"G-72600","password":"snebron1003"},{"no":5,"nama":"Ishnafiyah, S.Ag","nip":"197507151999032008","gid":"G-32712","password":"snebron2008"},{"no":6,"nama":"Evi Irawati, S.Pd","nip":"197302112000122004","gid":"G-79374","password":"snebron2004"},{"no":7,"nama":"Hilmishobah, S.Pd, M.Pd","nip":"197109082003121003","gid":"G-10058","password":"snebron1003"},{"no":8,"nama":"Anis Mufadhilah, S.Pd","nip":"197010282007012012","gid":"G-58661","password":"snebron2012"},{"no":9,"nama":"Muhamad Nur Cahyo, S. Pd","nip":"197106092007011019","gid":"G-59237","password":"snebron1019"},{"no":10,"nama":"Dra. Sri Hartini","nip":"196609182008012006","gid":"G-84672","password":"snebron2006"},{"no":11,"nama":"M. Khusen, S.Pd","nip":"197111042008011009","gid":"G-40409","password":"snebron1009"},{"no":12,"nama":"Asri Pujitami, S.Pd","nip":"198501182010012015","gid":"G-18622","password":"snebron2015"},{"no":13,"nama":"Moh. Safi, S.Kom","nip":"197607052011011006","gid":"G-60160","password":"snebron1006"},{"no":14,"nama":"Fitri Komariyah, S.Pd","nip":"197508012009022001","gid":"G-62543","password":"snebron2001"},{"no":15,"nama":"Sudibyanto, S.Pd","nip":"197804242008011017","gid":"G-22804","password":"snebron1017"},{"no":16,"nama":"Nikmatus Solichah, S.Ag","nip":"197403092014062001","gid":"G-15682","password":"snebron2001"},{"no":17,"nama":"Mahriwati, S.Pd","nip":"197408312021212003","gid":"G-25556","password":"snebron2003"},{"no":18,"nama":"Yusuf Budiharjo, S.Pd","nip":"198206072022211002","gid":"G-37728","password":"snebron1002"},{"no":19,"nama":"Teguh Wahyu Widayat, S. Pd","nip":"198305012023211008","gid":"G-59221","password":"snebron1008"},{"no":20,"nama":"Mamluhah, S.Pd","nip":"198310192023212010","gid":"G-23021","password":"snebron2010"},{"no":21,"nama":"Sakiman, SE","nip":"197010242024211002","gid":"G-63923","password":"snebron1002"},{"no":22,"nama":"Slamet Mamik H, S.Pd","nip":"197902122024211001","gid":"G-16452","password":"snebron1001"},{"no":23,"nama":"Maghfiroh, S.Pd","nip":"198204152024212005","gid":"G-90272","password":"snebron2005"},{"no":24,"nama":"Selvi Putri Cornivia, S.Pd","nip":"199812312024212016","gid":"G-13652","password":"snebron2016"},{"no":25,"nama":"Dwi Chandra Puspita A, S.Pd","nip":"199906212024212016","gid":"G-82582","password":"snebron2016"},{"no":26,"nama":"Nanda Wijayanti, S.pd","nip":"200007272025212022","gid":"G-76875","password":"snebron2022"},{"no":27,"nama":"Bunga Cahyaning Atie, S.Pd","nip":"200108222025212006","gid":"G-18758","password":"snebron2006"},{"no":28,"nama":"Toni Wijayanto, S.Kom","nip":"198210242023211005","gid":"G-35462","password":"snebron1005"},{"no":29,"nama":"Maghfiroh, S.Pd","nip":"-","gid":"G-34817","password":"snebron1710"},{"no":30,"nama":"Abdullah Faqih, S.Pdi. M.Ag","nip":"-","gid":"G-13489","password":"snebron8967"},{"no":31,"nama":"Muhamad Yunus Anis, S.Pd","nip":"-","gid":"G-39875","password":"snebron7575"},{"no":32,"nama":"Imarotul Hasanah, S.Pd","nip":"19800615210012003","gid":"G-93715","password":"snebron2003"},{"no":33,"nama":"Nurul Hidayati, S.Pd","nip":"197810052009022005","gid":"G-62114","password":"snebron2005"},{"no":34,"nama":"Mutholiah","nip":"197111172009012001","gid":"G-70331","password":"snebron2001"},{"no":35,"nama":"Nyamin","nip":"197205042025211004","gid":"G-56461","password":"snebron1004"},{"no":36,"nama":"Wartiyaningsih, S.Pd","nip":"199308122025212060","gid":"G-78122","password":"snebron2060"},{"no":37,"nama":"Muzahidin, S.Pd","nip":"198801042025211108","gid":"G-14014","password":"snebron1108"},{"no":38,"nama":"Arum Rahmana, S.Pd","nip":"199210192025212086","gid":"G-88075","password":"snebron2086"},{"no":39,"nama":"R. Arif Nur Cahyono, S.Pus","nip":"198004262025211045","gid":"G-24520","password":"snebron1045"},{"no":40,"nama":"Solkan","nip":"-","gid":"G-81582","password":"snebron8298"},{"no":41,"nama":"Fatiha Sabila, SE","nip":"-","gid":"G-35965","password":"snebron6573"},{"no":42,"nama":"Ahmad Marzuq Al Himni, S. Kom","nip":"-","gid":"G-37286","password":"snebron8691"},{"no":43,"nama":"Dedy Ustman","nip":"-","gid":"G-25987","password":"snebron8718"},{"no":44,"nama":"Helmy Hartiningsih","nip":"-","gid":"G-41909","password":"snebron0953"}];
+
+// MIGRASI PASSWORD BRONDONG -> snebron
+try{
+  GURUS.forEach(g=>{
+    const k="SI-ABSEN_PASS_"+g.gid;
+    const v=localStorage.getItem(k);
+    if(v && v.toLowerCase().startsWith("brondong")){
+      const num=v.replace(/[^0-9]/g,"").slice(-4);
+      localStorage.setItem(k, "snebron"+num);
+    }
+  });
+}catch(e){}
 
 function initMap(){
   map=L.map('miniMap',{zoomControl:false}).setView([LAT,LNG],17);
-  roadLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20});
-  satLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20});
+  roadLayer=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19, attribution:'&copy; OSM'});
+  satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19, attribution:'&copy; Esri'});
   if(MODE_MINI==='satelit') satLayer.addTo(map); else roadLayer.addTo(map);
   circle=L.circle([LAT,LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f355c',fillOpacity:0.12}).addTo(map);
   const ic=L.divIcon({html:'<div style="width:28px;height:28px;background:#0f355c;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white">🏫</div>',iconSize:[28,28],className:''});
@@ -180,14 +193,19 @@ function initMap(){
 window.setModeMini=(mode)=>{ MODE_MINI=mode; localStorage.setItem('MAP_MODE',mode); if(mode==='satelit'){ if(map.hasLayer(roadLayer)) map.removeLayer(roadLayer); satLayer.addTo(map); } else { if(map.hasLayer(satLayer)) map.removeLayer(satLayer); roadLayer.addTo(map); } };
 window.getInisial=(nama)=>{ const p=nama.trim().split(/\s+/); if(p.length>=2) return (p[0][0]+p[1][0]).toUpperCase(); return nama.substring(0,2).toUpperCase(); };
 window.formatJarak=(meter)=>{ const m=Math.round(meter||0); if(m>=1000){ const km=(m/1000).toFixed(m%1000===0?0:1); return km.replace('.0','')+' KM'; } return m+'m'; };
-window.getJenisAbsen=(date)=>{ 
-  const now=date||new Date(); 
-  const menit=now.getHours()*60+now.getMinutes(); 
-  if(menit>=6*60 && menit<=7*60+30) return {jenis:'MASUK', valid:true}; 
-  if(menit>=13*60+50 && menit<=21*60) return {jenis:'PULANG', valid:true}; 
-  if(menit<6*60) return {jenis:'BELUM_MULAI', valid:false, pesan:'Absen Masuk buka jam 06:00 - 07:30'}; 
-  if(menit>7*60+20 && menit<13*60+50) return {jenis:'TUTUP_SIANG', valid:false, pesan:'Absen Masuk tutup. Tunggu Absen Pulang 13:50-21:00'}; 
-  return {jenis:'SELESAI', valid:false, pesan:'Absen Pulang hanya sampai jam 21:00'}; };
+window.getJenisAbsen=(d)=>{
+  const n=d||new Date(); const h=n.getHours(); const m=n.getMinutes(); const menit=h*60+m;
+  // 06:00-07:30 MASUK TEPAT WAKTU (boleh absen mulai jam 6)
+  if(menit>=360 && menit<=450){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Masuk Tepat Waktu'}; }
+  // 07:31-11:30 MASUK TELAT (>07:30 telat)
+  if(menit>=451 && menit<=690){ const telat=menit-450; return {jenis:'MASUK', kategori:'TELAT', label:`Telat ${telat} menit`, color:'telat', valid:true, telatMenit:telat, pesan:`Telat ${telat} menit dari 07:30`}; }
+  // 11:31-13:49 PULANG SEBELUM WAKTUNYA (pulang sebelum jam 13:50)
+  if(menit>=691 && menit<=829){ return {jenis:'PULANG', kategori:'PULANG_SEBELUM_WAKTUNYA', label:'Pulang Sebelum Waktunya', color:'awal', valid:true, telatMenit:0, pesan:'Pulang sebelum jam 13:50'}; }
+  // 13:50-21:00 PULANG TEPAT WAKTU (boleh pulang sampai jam 21:00)
+  if(menit>=830 && menit<=1260){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Pulang Tepat Waktu'}; }
+  // <06:00 atau >21:00 DILUAR JAM KERJA tapi TETAP MASUK LAPORAN
+  return {jenis:'DILUAR_JAM_KERJA', kategori:'DILUAR_JAM_KERJA', label:'Diluar Jam Kerja', color:'diluar', valid:true, telatMenit:0, pesan:'Diluar jam kerja 06:00-21:00 tapi TETAP TERCATAT di laporan'};
+};
 window.cekJamAbsen=()=>{ 
   const el=document.getElementById('jamInfo'); 
   if(!el) return; 
@@ -290,7 +308,14 @@ window.doLogin=()=>{
   if(!i||!p){ er.textContent='Isi ID & Password'; er.classList.remove('hidden'); return; }
   const g=GURUS.find(x=>x.gid.toUpperCase()===i);
   if(!g){ er.textContent='ID tidak ditemukan'; er.classList.remove('hidden'); return; }
-  const eff=localStorage.getItem('SI-ABSEN_PASS_'+g.gid)||g.password;
+  let stored=localStorage.getItem('SI-ABSEN_PASS_'+g.gid);
+  if(stored && stored.toLowerCase().startsWith('brondong')){
+    const num=stored.replace(/[^0-9]/g,'').slice(-4);
+    const migrated='snebron'+num;
+    localStorage.setItem('SI-ABSEN_PASS_'+g.gid, migrated);
+    stored=migrated;
+  }
+  const eff=stored||g.password;
   if(eff!==p){ er.textContent='Password salah'; er.classList.remove('hidden'); return; }
   currentGuru=g; localStorage.setItem('SI-ABSEN_GID',g.gid); showAbsenScreen();
 };
@@ -305,7 +330,7 @@ function showAbsenScreen(){
   cekJamAbsen(); setInterval(cekJamAbsen,60000);
   const isCustom=localStorage.getItem('SI-ABSEN_PASS_'+currentGuru.gid);
   document.getElementById('currentPassInfo').innerHTML='<div style="display:flex;justify-content:space-between"><div style="font-size:10px;color:#64748b"><span style="font-weight:700;color:#0f355c">'+(isCustom?'Custom':'Default')+'</span> • ••••••••</div><button onclick="lihatPass()" style="font-size:9px;background:white;border:1px solid #e2e8f0;border-radius:999px;padding:3px 8px;font-weight:700;color:#0f355c">Lihat</button></div>';
-  setTimeout(()=>{ initMap(); cekLokasi(); },300);
+  setTimeout(()=>{ initMap(); cekLokasi(); setTimeout(()=>{ if(map) map.invalidateSize(); },1000); },500);
 }
 window.logout=()=>{ localStorage.removeItem('SI-ABSEN_GID'); location.reload(); };
 
