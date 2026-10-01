@@ -180,20 +180,29 @@ function initMap(){
 window.setModeMini=(mode)=>{ MODE_MINI=mode; localStorage.setItem('MAP_MODE',mode); if(mode==='satelit'){ if(map.hasLayer(roadLayer)) map.removeLayer(roadLayer); satLayer.addTo(map); } else { if(map.hasLayer(satLayer)) map.removeLayer(satLayer); roadLayer.addTo(map); } };
 window.getInisial=(nama)=>{ const p=nama.trim().split(/\s+/); if(p.length>=2) return (p[0][0]+p[1][0]).toUpperCase(); return nama.substring(0,2).toUpperCase(); };
 window.formatJarak=(meter)=>{ const m=Math.round(meter||0); if(m>=1000){ const km=(m/1000).toFixed(m%1000===0?0:1); return km.replace('.0','')+' KM'; } return m+'m'; };
-window.getJenisAbsen=(d)=>{
-  const n=d||new Date(); const h=n.getHours(); const m=n.getMinutes(); const menit=h*60+m;
-  // 06:00-07:00 Tepat Waktu Masuk
-  if(menit>=360 && menit<=420){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Masuk Tepat Waktu'}; }
-  // 07:01-08:00 Telat Masuk
-  if(menit>420 && menit<=480){ const telat=menit-420; return {jenis:'MASUK', kategori:'TELAT', label:`Telat ${telat} menit`, color:'telat', valid:true, telatMenit:telat, pesan:`Telat ${telat} menit`}; }
-  // 08:01-13:50 Diluar Jam (sangat telat) tapi TETAP TERCATAT
-  if(menit>480 && menit<=830){ return {jenis:'MASUK', kategori:'DILUAR_JAM_KERJA', label:'Diluar Jam Kerja', color:'diluar', valid:true, telatMenit:menit-420, pesan:'Diluar jam masuk (sangat telat) tapi tetap tercatat'}; }
-  // 13:51-15:30 Pulang Tepat
-  if(menit>=831 && menit<=930){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Pulang Tepat Waktu'}; }
-  // 15:31-20:00 Pulang Telat/Diluar tapi tetap tercatat
-  if(menit>930 && menit<=1200){ return {jenis:'PULANG', kategori:'TELAT', label:'Pulang Telat', color:'telat', valid:true, telatMenit:0, pesan:'Pulang diluar jam tapi tetap tercatat'}; }
-  // <06:00 atau >20:00 Diluar Jam Kerja tapi TETAP MASUK LAPORAN (sesuai request)
-  return {jenis:'DILUAR_JAM_KERJA', kategori:'DILUAR_JAM_KERJA', label:'Diluar Jam Kerja', color:'diluar', valid:true, telatMenit:0, pesan:'Diluar jam kerja 06:00-20:00 tapi TETAP TERCATAT di laporan'};
+window.getJenisAbsen=(date)=>{ 
+  const now=date||new Date(); 
+  const menit=now.getHours()*60+now.getMinutes(); 
+  if(menit>=6*60 && menit<=7*60+30) return {jenis:'MASUK', valid:true}; 
+  if(menit>=13*60+50 && menit<=21*60) return {jenis:'PULANG', valid:true}; 
+  if(menit<6*60) return {jenis:'BELUM_MULAI', valid:false, pesan:'Absen Masuk buka jam 06:00 - 07:30'}; 
+  if(menit>7*60+20 && menit<13*60+50) return {jenis:'TUTUP_SIANG', valid:false, pesan:'Absen Masuk tutup. Tunggu Absen Pulang 13:50-21:00'}; 
+  return {jenis:'SELESAI', valid:false, pesan:'Absen Pulang hanya sampai jam 21:00'}; };
+window.cekJamAbsen=()=>{ 
+  const el=document.getElementById('jamInfo'); 
+  if(!el) return; 
+  const now=new Date(); 
+  const info=getJenisAbsen(now); 
+  const jamStr=now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' WIB'; 
+  el.style.display='block'; 
+  el.style.whiteSpace='normal'; 
+  el.style.lineHeight='1.5';
+  el.style.maxWidth='100%';
+  if(info.valid){ 
+    el.innerHTML='<span style="background:#dcfce7;border:1px solid #bbf7d0;color:#166534;padding:6px 12px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block;white-space:normal;line-height:1.4;max-width:100%;word-break:break-word">● '+info.jenis+' DIBUKA • '+jamStr+'</span>'; 
+  } else { 
+    el.innerHTML='<span style="background:#fee2e2;border:1px solid #fecaca;color:#991b1b;padding:8px 12px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block;white-space:normal;line-height:1.5;max-width:100%;word-break:break-word;overflow-wrap:break-word">● TUTUP • '+jamStr+' • '+info.pesan+'</span>'; 
+  } 
 };
 
 // === FIX 1: ICON MATA PAKAI SVG, BUKAN EMOJI ===
