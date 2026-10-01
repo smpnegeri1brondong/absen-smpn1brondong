@@ -112,7 +112,7 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 
 <div class="card" style="overflow:hidden"><div style="font-size:11px;font-weight:800;color:#64748b">GPS • 40m • 36R6+X89</div><div id="statusLokasi" style="font-weight:800;color:#0f355c;margin-top:6px">Belum cek</div><div id="locText" style="font-size:12px;color:#64748b">Klik Cek Lokasi</div><div id="radiusBadge" style="margin-top:8px;display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:5px 10px;font-size:11px">Menunggu GPS</div><div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;position:relative;z-index:1"><div id="miniMap"></div></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="flex:1" onclick="cekLokasi()">📍 Cek Lokasi</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('peta')">Peta</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('satelit')">Sat</button></div></div>
 
-<div class="card"><div style="font-size:11px;font-weight:800;color:#64748b">KAMERA QR • MODE KETAT + AUTO</div>
+<div class="card"><div style="font-size:11px;font-weight:800;color:#64748b">KAMERA QR • MODE AUTO</div>
 <div style="margin-top:10px"><div id="reader"></div><div id="qrResult" style="display:none;margin-top:8px;font-size:11px;padding:10px 12px;border-radius:10px;background:#f8fafc;border:1px dashed #e2e8f0;font-weight:600"></div></div>
 <div style="display:flex;gap:8px;margin-top:10px"><button id="btnStartCam" class="btn btn-primary" style="flex:1" onclick="startCamera()">📷 NYALAKAN KAMERA</button><button id="btnStopCam" class="btn btn-outline hidden" style="flex:1" onclick="stopCamera()">✕ Matikan Kamera</button></div>
 <button class="btn btn-primary hidden" style="margin-top:12px;height:54px" id="scanBtn" onclick="mulaiScan()">✅ Absen Manual</button>
@@ -155,7 +155,7 @@ let db=null;
 try{
   const app=initializeApp(firebaseConfig);
   db=getFirestore(app);
-  document.getElementById('firebaseInfo').textContent='✅ Firebase: '+firebaseConfig.projectId+' • Ketat Auto';
+  document.getElementById('firebaseInfo').textContent='✅ Firebase: '+firebaseConfig.projectId+'';
   document.getElementById('firebaseInfo').style.background='#dcfce7';
 }catch(e){ document.getElementById('firebaseInfo').textContent='❌ Firebase gagal: '+e.message; }
 
