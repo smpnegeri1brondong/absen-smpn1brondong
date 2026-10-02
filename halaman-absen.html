@@ -434,11 +434,11 @@ async function prosesAbsenOtomatis(){
     login_method:'AUTO-QR-V4',
     qr_value:qrValue||null, qr_valid:true, mode_ketat:true
   };
-  document.getElementById('lokasiStatus').textContent=`Jarak ${jarakText} • ${data.status} • ${jamInfo.jenis} • AUTO`;
+  document.getElementById('lokasiStatus').textContent=`Jarak ${jarakText} • ${data.status} • ${jamInfo.jenis}`;
   try{
     if(!db) throw new Error('Firestore belum konek');
     const ref=await addDoc(collection(db,"absensi"), data);
-    document.getElementById('firebaseStatus').textContent=`✅ ${jamInfo.jenis} Tersimpan (AUTO) ID: ${ref.id} • ${jarakText}`;
+    document.getElementById('firebaseStatus').textContent=`✅ ${jamInfo.jenis} Tersimpan • ${jarakText}`;
     document.getElementById('c3').innerHTML=`${jamInfo.jenis} OK <div>✅</div>`; document.getElementById('c3').style.background='#dcfce7';
     await setDoc(doc(db,"rekap_harian", now.toISOString().split('T')[0]+"_"+currentGuru.gid+"_"+jamInfo.jenis), data, {merge:true});
     if(navigator.vibrate) navigator.vibrate(200);
