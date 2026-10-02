@@ -81,8 +81,6 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
   <div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:10px 8px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)"><div style="font-size:16px">⚡</div><div style="font-size:9px;font-weight:800;color:#0f355c;margin-top:3px">Auto Absen</div><div style="font-size:8px;color:#64748b">QR Ketat</div></div>
 </div>
 
-<div style="text-align:center;margin-top:16px;font-size:9px;color:#94a3b8;line-height:1.4">© 2025 SMPN 1 Brondong • -6.8895, 112.2861 • v1.0 snebron edition<br>QR Geofencing • ID Privat Terjaga • Anti Titip Absen</div>
-
 </div>
 
 <div id="absenScreen"
@@ -111,7 +109,7 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
   </div>
 </div>
 
-<div class="card" style="overflow:hidden"><div style="font-size:11px;font-weight:800;color:#64748b">GPS • 40m • 36R6+X89</div><div id="statusLokasi" style="font-weight:800;color:#0f355c;margin-top:6px">Belum cek</div><div id="locText" style="font-size:12px;color:#64748b">Klik Cek Lokasi</div><div id="radiusBadge" style="margin-top:8px;display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:5px 10px;font-size:11px">Menunggu GPS</div><div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;position:relative;z-index:1"><div id="miniMap"></div></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="flex:1" onclick="cekLokasi()">📍 Cek Lokasi</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('peta')">Peta</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('satelit')">Sat</button></div></div>
+<div class="card" style="overflow:hidden"><div style="font-size:11px;font-weight:800;color:#64748b">GPS • </div><div id="statusLokasi" style="font-weight:800;color:#0f355c;margin-top:6px">Belum cek</div><div id="locText" style="font-size:12px;color:#64748b">Klik Cek Lokasi</div><div id="radiusBadge" style="margin-top:8px;display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:5px 10px;font-size:11px">Menunggu GPS</div><div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;position:relative;z-index:1"><div id="miniMap"></div></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="flex:1" onclick="cekLokasi()">📍 Cek Lokasi</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('peta')">Peta</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('satelit')">Sat</button></div></div>
 
 <div class="card"><div style="font-size:11px;font-weight:800;color:#64748b">KAMERA QR • MODE AUTO</div>
 <div style="margin-top:10px"><div id="reader"></div><div id="qrResult" style="display:none;margin-top:8px;font-size:11px;padding:10px 12px;border-radius:10px;background:#f8fafc;border:1px dashed #e2e8f0;font-weight:600"></div></div>
@@ -121,18 +119,16 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 <div id="hasil" style="display:none;margin-top:14px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:14px;padding:14px"><div id="jamWaktu" style="font-weight:700;color:#166534"></div><div id="firebaseStatus" style="margin-top:4px;font-size:10px"></div><div id="lokasiStatus" style="margin-top:4px;font-size:10px;color:#64748b"></div></div>
 </div>
 </div>
-<footer style="margin-top:20px;background:white;border-top:1px solid #e2e8f0;border-radius:20px 20px 0 0;padding:16px 14px;text-align:center">
-  <div style="display:flex;align-items:center;justify-content:center;gap:8px">
+<footer style="margin-top:20px;background:white;border-top:1px solid #e2e8f0;border-radius:20px 20px 0 0;padding:16px 14px;text-align:left">
+  <div style="display:flex;align-items:center;justify-content:flex-start;gap:8px">
     <div style="width:28px;height:28px;border-radius:8px;background:transparent;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'; this.parentElement.style.fontSize='10px'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'" alt="logo" style="width:100%;height:100%;object-fit:contain"/></div>
     <div style="text-align:left">
       <div style="font-weight:800;font-size:11px;color:#0f355c">SI-ABSEN — SMPN 1 Brondong</div>
-      <div style="font-size:9px;color:#94a3b8">QR Geofencing • ID Privat Terjaga • Anti Titip Absen • 36R6+X89</div>
+      <div style="font-size:9px;color:#94a3b8">QR Geofencing • ID Privat Terjaga • Anti Titip Absen</div>
     </div>
   </div>
   <div style="margin-top:10px;font-size:9px;color:#94a3b8;line-height:1.4;display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
     <span>© 2025 SMPN 1 Brondong, Lamongan</span>
-    <span>• -6.8895, 112.2861</span>
-    <span style="background:#0f172a;color:white;padding:3px 8px;border-radius:999px;font-weight:700">v1.0 • snebron edition</span>
   </div>
 </footer>
 </div>
