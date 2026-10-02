@@ -349,7 +349,7 @@ function findGuruByQR(idQR){
         return;
       }
       qrScanned=true; qrValue=decoded;
-      el.textContent="✅ QR Cocok: "+(findGuruByQR(idQR)?.nama||idQR)+(findGuruByQR(idQR)?.old_gids?.includes(idQR)||findGuruByQR(idQR)?.gid!==idQR?" (QR Lama)":"")+" • AUTO ABSEN...";
+      el.textContent="✅ QR Cocok: "+(findGuruByQR(idQR)?.nama||idQR)+(findGuruByQR(idQR)?.old_gids?.includes(idQR)||findGuruByQR(idQR)?.gid!==idQR?"":"")+" •";
       el.style.background="#dcfce7"; el.style.color="#166534";
       document.getElementById('c1').innerHTML="ID Cocok <div>✅</div>"; document.getElementById('c1').style.background="#dcfce7";
       isProcessing=true;
@@ -420,7 +420,7 @@ async function prosesAbsenOtomatis(){
     return;
   }
   document.getElementById('hasil').style.display='block';
-  document.getElementById('jamWaktu').textContent=now.toLocaleTimeString('id-ID')+' WIB • '+jamInfo.jenis+' • AUTO';
+  document.getElementById('jamWaktu').textContent=now.toLocaleTimeString('id-ID')+' WIB • '+jamInfo.jenis+'';
   const jarakText=formatJarak(lastDistance);
   document.getElementById('c2').innerHTML=`${jarakText} <div>${lastDistance<=RADIUS?'✅':'❌'}</div>`; document.getElementById('c2').style.background=lastDistance<=RADIUS?'#dcfce7':'#fee2e2';
   document.getElementById('c3').innerHTML=`${jamInfo.jenis} <div>⏳</div>`;
