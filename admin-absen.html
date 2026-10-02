@@ -1,5 +1,7 @@
 <!doctype html>
-<html lang="id"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Admin V5 - 20-70m Silent + Libur Sabtu Minggu + Live</title>
+<html lang="id"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SI-ABSEN/Admin</title>
+<link rel="icon" href="logo-smp2.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -159,8 +161,15 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 </head>
 <body>
 <header class="header">
-<div class="logo-box"><div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SI-ABSEN" style="width:100%;height:100%;object-fit:contain"/></div><div><div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SI-ABSEN</div><div style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.5px">Panel Admin • 36R6+X89</div></div></div></div>
-<div style="display:flex;gap:8px;align-items:center"><span id="authBadge" class="hidden badge badge-valid"></span><button id="logoutBtn" class="hidden btn-outline" style="height:36px;width:auto;padding:0 14px;font-size:12px" onclick="doLogout()">Logout</button></div>
+<div class="logo-box">
+  <div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SI-ABSEN" style="width:100%;height:100%;object-fit:contain"/></div>
+<div>
+  <div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SI-ABSEN</div>
+  <div style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.5px">Panel Admin •</div>
+</div>
+</div>
+</div>
+<div style="display:flex;gap:8px;align-items:center"><span id="authBadge" class="hidden badge badge-valid"></span><button id="logoutBtn" class="hidden btn-outline" style="height:50px;width:auto;padding: 14px;font-weight:900;font-size:12px" onclick="doLogout()">Logout</button></div>
 </header>
 
 <!-- LOGIN SCREEN - DESAIN SAMA KAYAK HALAMAN ABSEN -->
@@ -213,8 +222,8 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div id="adminContent" class="hidden">
 <div style="max-width:1350px;margin:0 auto;padding:16px 20px">
 <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
-<button id="tabLaporan" class="btn-tab active" onclick="switchTab('laporan')">📊 Laporan (Tepat/Telat/Diluar)</button>
-<button id="tabGuru" class="btn-tab" onclick="switchTab('guru')">👥 Data Guru + QR</button>
+<button id="tabLaporan" class="btn-tab active" onclick="switchTab('laporan')">📊 Laporan GTK</button>
+<button id="tabGuru" class="btn-tab" onclick="switchTab('guru')">👥 Data GTK + QR</button>
 <span id="authInfo" class="badge-auth" style="margin-left:auto"></span>
 </div>
 <div style="display:grid;grid-template-columns:320px 1fr;gap:16px">
@@ -224,7 +233,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div id="lastLoginInfo" style="font-size:9px;color:#94a3b8;margin-top:2px"></div>
 <label style="font-size:11px;font-weight:700;margin-top:14px;display:block">Radius Absen</label>
 <div style="display:flex;gap:8px;margin-top:6px"><input id="radiusInput" type="number" min="20" max="70" step="5" value="40" class="input" style="height:40px"/><button id="saveRadiusBtn" type="button" style="height:40px;padding:0 12px;background:#0f355c;color:white;border-radius:12px;display:flex;align-items:center;font-weight:700;border:none;cursor:pointer">m</button></div>
-<div style="font-size:10px;color:#64748b;margin-top:4px">Batas 20m-70m • Default 40m • Silent realtime ke halaman GTK • <span id="radiusLabel">40m</span></div>
+<div style="font-size:10px;color:#64748b;margin-top:4px">Batas 20m-70m • Default 40m • <span id="radiusLabel">40m</span></div>
 <div style="margin-top:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="font-size:10px;font-weight:800;color:#94a3b8">TITIK SEKOLAH</div><div style="font-weight:700;font-size:12px;color:#0f355c">-6.889583,112.286111</div><div style="font-size:10px;color:#64748b">36R6+X89 • 40m</div><div id="rekapInfo" style="margin-top:8px;background:white;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font-size:11px">Memuat...</div></div>
 <div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden"><div id="mapAdmin"></div></div>
 <div style="margin-top:12px;display:grid;gap:8px"><button class="btn btn-primary" style="height:40px" onclick="loadRekap()">🔄 Refresh Laporan</button><button class="btn btn-outline" style="height:40px" onclick="loadPasswords()">🔑 Load Password Custom</button></div>
@@ -232,10 +241,10 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div id="panelLaporan">
 <div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="font-weight:800;color:#0f355c">📊 Laporan Absen V5 - Semua Masuk Laporan <span id="liveBadge">🟢 Live - auto refresh aktif</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" style="height:36px;width:auto;padding:0 16px" onclick="exportExcel()">📥 Excel</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="exportCSV()">CSV</button><button class="btn" style="height:36px;width:auto;padding:0 16px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b" onclick="clearTest()">🗑️ Hapus Test</button></div></div>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:12px">
-<input id="filterTanggal" type="date" class="input" style="height:36px"/><select id="filterGuruSelect" class="input" style="height:36px"><option value="">Semua Guru</option></select>
+<input id="filterTanggal" type="date" class="input" style="height:36px"/><select id="filterGuruSelect" class="input" style="height:36px"><option value="">Semua GTK</option></select>
 <select id="filterKategori" class="input" style="height:36px"><option value="">Semua Kategori</option><option value="TEPAT_WAKTU">TEPAT_WAKTU</option><option value="TELAT">TELAT</option><option value="PULANG_SEBELUM_WAKTUNYA">PULANG_SEBELUM_WAKTUNYA</option><option value="BELUM_WAKTUNYA_PULANG">BELUM_WAKTUNYA_PULANG</option><option value="LIBUR_SABTU">LIBUR_SABTU</option><option value="LIBUR_MINGGU">LIBUR_MINGGU</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
 <select id="filterJenis" class="input" style="height:36px"><option value="">Semua Jenis</option><option value="MASUK">MASUK</option><option value="PULANG">PULANG</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
-<select id="filterStatus" class="input" style="height:36px"><option value="">VALID+LUAR_RADIUS</option><option value="VALID">VALID</option><option value="LUAR_RADIUS">LUAR_RADIUS</option></select>
+<select id="filterStatus" class="input" style="height:36px"><option value="">Validasi</option><option value="VALID">VALID</option><option value="LUAR_RADIUS">LUAR_RADIUS</option></select>
 <input id="searchLaporan" class="input" placeholder="Cari nama..." style="height:36px"/>
 </div>
 <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="height:36px;flex:1" onclick="loadRekap()">🔄 Tampilkan</button><button class="btn btn-outline" style="height:36px;width:120px" onclick="resetFilter()">Reset</button></div>
@@ -251,11 +260,11 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
   <div style="display:flex;align-items:center;gap:10px"><span id="bulkCount" style="font-weight:800">0 dipilih</span></div>
   <div style="display:flex;gap:8px"><button style="background:white;color:#0f172a;height:36px;padding:0 14px;border-radius:8px;font-weight:800;border:none;cursor:pointer" onclick="exportTerpilih()">Export Terpilih</button><button style="background:#fecaca;color:#991b1b;height:36px;padding:0 14px;border-radius:8px;font-weight:800;border:1px solid #fecaca;cursor:pointer" onclick="hapusTerpilih()">Hapus Terpilih</button><button style="background:#334155;color:white;height:36px;padding:0 14px;border-radius:8px;font-weight:700;border:none;cursor:pointer" onclick="batalPilih()">Batal</button></div>
 </div>
-<div class="table-wrap" style="margin-top:12px"><table><thead><tr><th style="padding:10px;text-align:left"><input type="checkbox" id="checkAllLaporan" onchange="toggleAllLaporan(this)"> Tgl/Jam</th><th>Guru</th><th>GID</th><th>Jenis</th><th>Kategori</th><th>Radius</th><th>Jarak</th><th>Telat</th><th>Plus Code</th></tr></thead><tbody id="laporanBody"><tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:20px">Klik Tampilkan</td></tr></tbody></table></div>
+<div class="table-wrap" style="margin-top:12px"><table><thead><tr><th style="padding:10px;text-align:left"><input type="checkbox" id="checkAllLaporan" onchange="toggleAllLaporan(this)"> Tgl/Jam</th><th>GTK</th><th>GID</th><th>Jenis</th><th>Kategori</th><th>Radius</th><th>Jarak</th><th>Telat</th><th>Plus Code</th></tr></thead><tbody id="laporanBody"><tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:20px">Klik Tampilkan</td></tr></tbody></table></div>
 <div id="laporanCards" style="display:none;margin-top:12px"></div>
 </div>
 <div id="panelGuru" class="hidden">
-<div class="card" style="margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center"><div style="font-weight:800;color:#0f355c">Daftar 44 GTK + QR Privat</div><div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap"><input id="searchGuru" class="input" placeholder="Cari nama / GID..." style="width:200px;height:36px"/><button class="btn btn-outline" style="height:36px;width:auto;padding:0 12px;font-size:11px" onclick="openTambahGTK()">+ Tambah GTK Baru</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="loadPasswords()">Load</button></div><div id="totalGuruInfo" style="font-size:11px;color:#64748b;width:100%">44 guru</div></div>
+<div class="card" style="margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center"><div style="font-weight:800;color:#0f355c">Daftar GTK + QR Privat</div><div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap"><input id="searchGuru" class="input" placeholder="Cari nama / GID..." style="width:200px;height:36px"/><button class="btn btn-outline" style="height:36px;width:auto;padding:0 12px;font-size:11px" onclick="openTambahGTK()">+ Tambah GTK Baru</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="loadPasswords()">Load</button></div><div id="totalGuruInfo" style="font-size:11px;color:#64748b;width:100%">44 GTK</div></div>
 
 <div id="modalTambahGTK" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px">
   <div class="card" style="width:100%;max-width:480px;background:white;border-radius:20px;padding:20px;max-height:90vh;overflow:auto">
@@ -281,7 +290,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
       <div>
         <div style="font-size:13px;font-weight:700;margin-bottom:6px">Password Auto</div>
         <input id="newPassPreview" class="input" placeholder="Auto snebronXXXX" readonly style="background:#f8fafc" />
-        <div style="font-size:10px;color:#64748b;margin-top:4px">snebron + 4 digit NIP / GID</div>
+        <div style="font-size:10px;color:#64748b;margin-top:4px">snebron + 4 digit NIP / random honorer</div>
       </div>
     </div>
     <div style="margin-top:8px;display:flex;gap:8px">
@@ -291,12 +300,6 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
     <div style="display:flex;gap:10px;margin-top:20px">
       <button style="flex:1;height:48px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700" onclick="closeTambahGTK()">Batal</button>
       <button style="flex:1;height:48px;border-radius:12px;border:none;background:#0f172a;color:white;font-weight:800" onclick="simpanGTKBaru()">💾 Simpan & Sinkron</button>
-    </div>
-    <div style="margin-top:10px;font-size:11px;color:#64748b;background:#f8fafc;padding:10px;border-radius:10px;border:1px solid #e2e8f0">
-      <b>Logika Auto:</b><br/>
-      • Punya NIP → GID = G- + random 5 digit unik (beda dari NIP), Password = snebron + 4 digit akhir NIP<br/>
-      • Tanpa NIP (-) → GID = G- + random 5 digit unik, Password = snebron + random 4 digit (beda dari GID)<br/>
-      • Sudah sinkron ke halaman absen via Firestore gurus + CUSTOM_GURUS_V5
     </div>
   </div>
 </div>
@@ -503,7 +506,7 @@ function ubahPassword(gid){
   })();
 }
 function hapusGuru(gid){
-  if(!confirm('Hapus Guru '+gid+'?')) return;
+  if(!confirm('Hapus GTK '+gid+'?')) return;
   (async()=>{
     try{
       // hapus dari custom localStorage
@@ -661,7 +664,7 @@ window.simpanGTKBaru=simpanGTKBaru;
 window.openTambahGTK=openTambahGTK;
 window.closeTambahGTK=closeTambahGTK;
 
-function renderGurus(filter=''){const grid=document.getElementById('guruGrid');if(!grid)return;grid.innerHTML='';let list=gurus;if(filter){const f=filter.toLowerCase();list=gurus.filter(g=>g.nama.toLowerCase().includes(f)||g.gid.toLowerCase().includes(f));}document.getElementById('totalGuruInfo').textContent=list.length+' guru';list.forEach((g,i)=>{const isHonorer=g.nip==='-'||!g.nip;const custom=customPassMap[g.gid];const div=document.createElement('div');div.className='card';div.style.display='flex';div.style.flexDirection='column';div.style.gap='12px';const qrId='qr-'+i+'-'+g.gid;div.innerHTML=`<div style="display:flex;gap:12px"><div id="${qrId}" style="width:84px;height:84px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer" title="Klik untuk preview QR"></div><div style="flex:1"><div style="font-weight:800;color:#0f355c;font-size:14px">${g.nama} ${isHonorer?'<span style="background:#fef3c7;color:#92400e;font-size:9px;padding:2px 6px;border-radius:999px">HONORER</span>':''}</div><div style="font-size:11px;color:#64748b;margin-top:2px">NIP: ${g.nip||'-'} • ${g.gid}</div><div style="margin-top:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="font-size:9px;color:#94a3b8;font-weight:700">DEFAULT</div><div style="font-family:monospace;font-weight:800;font-size:13px">${g.password}</div>${custom && custom.password_custom && custom.password_custom!==g.password ? `<div style="margin-top:6px;border-top:1px solid #e2e8f0;padding-top:6px"><div style="font-size:9px;color:#dc2626;font-weight:700">CUSTOM</div><div style="font-family:monospace;font-weight:800;color:#dc2626;font-size:13px">${custom.password_custom}</div></div>` : ''}</div></div></div>
+function renderGurus(filter=''){const grid=document.getElementById('guruGrid');if(!grid)return;grid.innerHTML='';let list=gurus;if(filter){const f=filter.toLowerCase();list=gurus.filter(g=>g.nama.toLowerCase().includes(f)||g.gid.toLowerCase().includes(f));}document.getElementById('totalGuruInfo').textContent=list.length+' GTK';list.forEach((g,i)=>{const isHonorer=g.nip==='-'||!g.nip;const custom=customPassMap[g.gid];const div=document.createElement('div');div.className='card';div.style.display='flex';div.style.flexDirection='column';div.style.gap='12px';const qrId='qr-'+i+'-'+g.gid;div.innerHTML=`<div style="display:flex;gap:12px"><div id="${qrId}" style="width:84px;height:84px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer" title="Klik untuk preview QR"></div><div style="flex:1"><div style="font-weight:800;color:#0f355c;font-size:14px">${g.nama} ${isHonorer?'<span style="background:#fef3c7;color:#92400e;font-size:9px;padding:2px 6px;border-radius:999px">HONORER</span>':''}</div><div style="font-size:11px;color:#64748b;margin-top:2px">NIP: ${g.nip||'-'} • ${g.gid}</div><div style="margin-top:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="font-size:9px;color:#94a3b8;font-weight:700">DEFAULT</div><div style="font-family:monospace;font-weight:800;font-size:13px">${g.password}</div>${custom && custom.password_custom && custom.password_custom!==g.password ? `<div style="margin-top:6px;border-top:1px solid #e2e8f0;padding-top:6px"><div style="font-size:9px;color:#dc2626;font-weight:700">CUSTOM</div><div style="font-family:monospace;font-weight:800;color:#dc2626;font-size:13px">${custom.password_custom}</div></div>` : ''}</div></div></div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
   <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="directDownloadQR('${g.gid}','${g.nama}')">⬇️ Download QR</button>
   <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="copyDataQR('${g.gid}','${g.nama}','${g.nip}')">📋 Copy Data QR</button>
@@ -669,7 +672,7 @@ function renderGurus(filter=''){const grid=document.getElementById('guruGrid');i
   <button style="height:40px;border-radius:12px;border:1px solid #fecaca;background:#fee2e2;font-weight:700;color:#991b1b;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="resetPassword('${g.gid}')">🔄 Reset</button>
   <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="copyPass('${g.gid}')">📋 Copy Pass</button>
   <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="openEditGuru('${g.gid}')">✏️ Edit</button>
-  <button style="height:40px;border-radius:12px;border:1px solid #fecaca;background:#fee2e2;font-weight:700;color:#991b1b;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;grid-column:span 2" onclick="hapusGuru('${g.gid}')">🗑️ Hapus Guru</button>
+  <button style="height:40px;border-radius:12px;border:1px solid #fecaca;background:#fee2e2;font-weight:700;color:#991b1b;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;grid-column:span 2" onclick="hapusGuru('${g.gid}')">🗑️ Hapus GTK</button>
 </div>`;;grid.appendChild(div);setTimeout(()=>{const el=document.getElementById(qrId);if(!el)return;el.innerHTML='';new QRCode(el,{text:`${g.gid}`,width:84,height:84,colorDark:"#0f355c",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M}); el.style.cursor='pointer'; el.title='Klik untuk download QR'; el.onclick=()=>downloadQR(g.gid,g.nama); },100);});grid.querySelectorAll('button[data-act="reset"]').forEach(b=>{b.onclick=async()=>{const gid=b.dataset.gid;if(!confirm('Reset '+gid+'?'))return;try{await deleteDoc(doc(db,"users",gid));alert('✅ Reset!');delete customPassMap[gid];renderGurus(document.getElementById('searchGuru').value);}catch(e){alert(e.message);}};});grid.querySelectorAll('button[data-act="copy"]').forEach(b=>{b.onclick=()=>{const g=gurus.find(x=>x.gid===b.dataset.gid);const c=customPassMap[b.dataset.gid];const t=c?c.password_custom:g.password;navigator.clipboard.writeText(t).then(()=>alert('Copied: '+t));};});}
 document.getElementById('searchGuru').oninput=()=>{renderGurus(document.getElementById('searchGuru').value);};
 async function loadRekap(){const grid=document.getElementById('laporanBody');grid.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px">Memuat...</td></tr>';try{const q=query(collection(db,"absensi"),orderBy("waktu","desc"),limit(1000));const snap=await getDocs(q);allAbsen=[];snap.forEach(d=>{const data=d.data();data._id=d.id;allAbsen.push(data);});applyFilter();document.getElementById('rekapInfo').textContent=`${allAbsen.length} data dimuat`;}catch(e){grid.innerHTML=`<tr><td colspan="9" style="color:red">${e.message}</td></tr>`;}}
@@ -1001,7 +1004,7 @@ try{ renderGurus = window.renderGurus; }catch(e){}
 
 <div id="modalEditGuru" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px">
   <div class="card" style="width:100%;max-width:460px;background:white;border-radius:20px;padding:20px">
-    <div style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;color:#0f172a">✏️ Edit Guru</div>
+    <div style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;color:#0f172a">✏️ Edit GTK</div>
     <div style="margin-top:16px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">Nama Lengkap</div><input id="editNamaLengkap" class="input" style="height:48px;border-radius:12px" placeholder="Nama Lengkap"/></div>
     <div style="margin-top:12px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">NIP (isi - jika honorer)</div><input id="editNIP" class="input" style="height:48px;border-radius:12px" placeholder="NIP"/></div>
     <div style="margin-top:12px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">GID (kosongkan auto G-XXXXX)</div><input id="editGID" class="input" style="height:48px;border-radius:12px" placeholder="G-XXXXX"/></div>
