@@ -80,7 +80,7 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
   <div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:10px 8px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)"><div style="font-size:16px">⚡</div><div style="font-size:9px;font-weight:800;color:#0f355c;margin-top:3px">Auto Absen</div><div style="font-size:8px;color:#64748b">QR Ketat</div></div>
 </div>
 
-<div style="text-align:center;margin-top:16px;font-size:9px;color:#94a3b8;line-height:1.4">© 2025 SMPN 1 Brondong • -6.9075, 112.2108 • v1.0 snebron edition<br>QR Geofencing • ID Privat Terjaga • Anti Titip Absen</div>
+<div style="text-align:center;margin-top:16px;font-size:9px;color:#94a3b8;line-height:1.4">© 2025 SMPN 1 Brondong • -6.8895, 112.2861 • v1.0 snebron edition<br>QR Geofencing • ID Privat Terjaga • Anti Titip Absen</div>
 
 </div>
 
@@ -130,7 +130,7 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
   </div>
   <div style="margin-top:10px;font-size:9px;color:#94a3b8;line-height:1.4;display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
     <span>© 2025 SMPN 1 Brondong, Lamongan</span>
-    <span>• -6.9075, 112.2108</span>
+    <span>• -6.8895, 112.2861</span>
     <span style="background:#0f172a;color:white;padding:3px 8px;border-radius:999px;font-weight:700">v1.0 • snebron edition</span>
   </div>
 </footer>
@@ -141,7 +141,7 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCSi5QKL-MapUUdGLV4OuiXupXa3XmRKvg",
@@ -156,10 +156,39 @@ try{
   const app=initializeApp(firebaseConfig);
   db=getFirestore(app);
   document.getElementById('firebaseInfo').textContent='✅ Firebase: '+firebaseConfig.projectId+'';
+
+  // === SYNC GURU DINAMIS DARI ADMIN ===
+  window.loadGurusFromFirestore = async () => {
+    try{
+      if(!db) return;
+      const snap = await getDocs(collection(db, "gurus"));
+      if(snap.empty) return;
+      let custom = [];
+      snap.forEach(d=>{
+        const g = d.data();
+        if(g.gid && g.nama){
+          custom.push({no:g.no||999, nama:g.nama, nip:g.nip||'-', gid:g.gid, password:g.password||g.password_default||'snebron0000'});
+        }
+      });
+      if(custom.length>0){
+        // Merge: custom overwrite default by gid, plus new gurus
+        const map = new Map();
+        GURUS.forEach(g=>map.set(g.gid, g));
+        custom.forEach(g=>map.set(g.gid, {...map.get(g.gid), ...g, nama:g.nama, nip:g.nip, gid:g.gid}));
+        GURUS.length=0;
+        map.forEach(v=>GURUS.push(v));
+        console.log('✅ GURUS synced dari Firestore:', GURUS.length);
+        document.getElementById('firebaseInfo').textContent = '✅ Firebase: '+firebaseConfig.projectId+' • '+GURUS.length+' guru synced';
+      }
+    }catch(e){ console.log('Gagal load gurus:', e); }
+  };
+  // Panggil setelah init
+  setTimeout(()=>{ window.loadGurusFromFirestore(); }, 800);
+
   document.getElementById('firebaseInfo').style.background='#dcfce7';
 }catch(e){ document.getElementById('firebaseInfo').textContent='❌ Firebase gagal: '+e.message; }
 
-const LAT=-6.9075625, LNG=112.2108125, PLUS="36R6+X89";
+const LAT=-6.889583, LNG=112.286111, PLUS="36R6+X89";
 let RADIUS=40;
 let map, markerUser, circle, roadLayer, satLayer, MODE_MINI=localStorage.getItem('MAP_MODE')||'peta';
 let currentGuru=null, lastDistance=9999, lastPos=null, html5QrCode=null, qrScanned=false, qrValue=null, schoolMarker, lineToDevice;
@@ -182,7 +211,7 @@ try{
 
 function initMap(){
   map=L.map('miniMap',{zoomControl:false}).setView([LAT,LNG],17);
-  roadLayer=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19, attribution:'&copy; OSM'});
+  roadLayer=L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20, subdomains:['0','1','2','3'], attribution:'&copy; Google'});
   satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19, attribution:'&copy; Esri'});
   if(MODE_MINI==='satelit') satLayer.addTo(map); else roadLayer.addTo(map);
   circle=L.circle([LAT,LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f355c',fillOpacity:0.12}).addTo(map);
@@ -337,6 +366,10 @@ window.logout=()=>{ localStorage.removeItem('SI-ABSEN_GID'); location.reload(); 
 async function prosesAbsenOtomatis(){
   const now=new Date();
   const jamInfo=getJenisAbsen(now);
+  if(jamInfo.kategori==='PULANG_SEBELUM_WAKTUNYA' || jamInfo.kategori==='BELUM_WAKTUNYA_PULANG' || jamInfo.jenis==='LIBUR'){
+    setTimeout(()=>{ showCustomAlert('BELUM WAKTUNYA PULANG', `⚠️ <b>${jamInfo.label}</b><br><br>${jamInfo.pesan}<br><br>Absen kamu <b>TETAP TERCATAT</b> di laporan agar admin tau, tapi kamu masih bisa absen lagi nanti pas jam pulang yang benar.<br><br>Jam sekarang: <b>${now.toLocaleTimeString('id-ID')} WIB</b>`); }, 300);
+  }
+
   if(false && !jamInfo.valid){ // V4 FIX SEMUA MASUK LAPORAN
     // FIX 2: pakai custom modal, bukan alert native
     showCustomAlert('ABSEN TUTUP', `⛔ ${jamInfo.pesan}<br><br>Jam sekarang: <b>${now.toLocaleTimeString('id-ID')} WIB</b><br><br><small>Aturan:<br>• Masuk: 06:00 - 07:20<br>• Pulang: 13:50 - 20:00</small>`);
