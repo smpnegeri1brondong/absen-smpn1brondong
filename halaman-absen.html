@@ -240,8 +240,8 @@ window.formatJarak=(meter)=>{ const m=Math.round(meter||0); if(m>=1000){ const k
 window.getJenisAbsen=(d)=>{
   const n=d||new Date(); const day=n.getDay(); const h=n.getHours(); const m=n.getMinutes(); const menit=h*60+m;
   // Sabtu = libur, Minggu = libur
-  if(day===6){ return {jenis:'LIBUR', kategori:'LIBUR_SABTU', label:'Libur Sabtu', color:'libur', valid:true, telatMenit:0, pesan:'Hari Sabtu libur - TETAP TERCATAT di laporan'}; }
-  if(day===0){ return {jenis:'LIBUR', kategori:'LIBUR_MINGGU', label:'Libur Minggu', color:'libur', valid:true, telatMenit:0, pesan:'Hari Minggu libur - TETAP TERCATAT di laporan'}; }
+  if(day===6){ return {jenis:'LIBUR', kategori:'LIBUR_SABTU', label:'Libur Sabtu', color:'libur', valid:true, telatMenit:0, pesan:'Hari Sabtu libur'}; }
+  if(day===0){ return {jenis:'LIBUR', kategori:'LIBUR_MINGGU', label:'Libur Minggu', color:'libur', valid:true, telatMenit:0, pesan:'Hari Minggu libur'}; }
   // Jumat: pulang lebih awal 10:00
   if(day===5){
     if(menit>=360 && menit<=450){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Jumat Masuk Tepat Waktu'}; }
@@ -406,7 +406,7 @@ async function prosesAbsenOtomatis(){
   const now=new Date();
   const jamInfo=getJenisAbsen(now);
   if(jamInfo.jenis==='LIBUR'){
-    setTimeout(()=>{ showCustomAlert('HARI LIBUR', `🏖️ <b>${jamInfo.label}</b><br><br>${jamInfo.pesan}<br><br>Absen kamu <b>TETAP TERCATAT</b> di laporan sebagai <b>${jamInfo.label}</b> agar admin tau kamu absen di hari libur.<br><br>Jam sekarang: <b>${now.toLocaleTimeString('id-ID')} WIB</b>`); }, 300);
+    setTimeout(()=>{ showCustomAlert('HARI LIBUR HEYY', `🏖️ <b>Terlalu Rajin Mas</b><br><br>${jamInfo.pesan}<br><br>Absen kamu <b>TETAP TERCATAT</b> di laporan sebagai <b>${jamInfo.label}</b> agar admin tau kamu absen di hari libur.<br><br>Jam sekarang: <b>${now.toLocaleTimeString('id-ID')} WIB</b>`); }, 300);
   } else if(jamInfo.kategori==='PULANG_SEBELUM_WAKTUNYA' || jamInfo.kategori==='BELUM_WAKTUNYA_PULANG'){
     setTimeout(()=>{ showCustomAlert('BELUM WAKTUNYA PULANG', `⚠️ <b>${jamInfo.label}</b><br><br>${jamInfo.pesan}<br><br>Absen kamu <b>TETAP TERCATAT</b> di laporan agar admin tau, tapi kamu masih bisa absen lagi nanti pas jam pulang yang benar.<br><br>Jam sekarang: <b>${now.toLocaleTimeString('id-ID')} WIB</b>`); }, 300);
   }
