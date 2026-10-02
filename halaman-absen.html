@@ -154,8 +154,9 @@ const firebaseConfig = {
 let db=null;
 try{
   const app=initializeApp(firebaseConfig);
-  db=getFirestore(app);
+  db=getFirestore(app); window.db=db;
   document.getElementById('firebaseInfo').textContent='✅ Firebase: '+firebaseConfig.projectId+'';
+  window.db=db;
 
   // === SYNC GURU DINAMIS DARI ADMIN ===
   window.loadGurusFromFirestore = async () => {
@@ -188,8 +189,12 @@ try{
   document.getElementById('firebaseInfo').style.background='#dcfce7';
 }catch(e){ document.getElementById('firebaseInfo').textContent='❌ Firebase gagal: '+e.message; }
 
-const LAT=-6.889583, LNG=112.286111, PLUS="36R6+X89";
-let RADIUS=40;
+const LAT=-6.9075625, LNG=112.2108125, PLUS="36R5+VX Tlogoretno"; // SMPN 1 Brondong sync dengan admin Adminnn-LOGIN-MATA-ENTER-FORGOT.html
+let CURRENT_LAT=-6.9075625, CURRENT_LNG=112.2108125, RADIUS=40;
+const MIN_R=20, MAX_R=70, DEF_R=40;
+function clampR(v){ let n=parseInt(v); if(isNaN(n)) return DEF_R; if(n<MIN_R) return MIN_R; if(n>MAX_R) return MAX_R; return n; }
+
+// RADIUS already defined above
 let map, markerUser, circle, roadLayer, satLayer, MODE_MINI=localStorage.getItem('MAP_MODE')||'peta';
 let currentGuru=null, lastDistance=9999, lastPos=null, html5QrCode=null, qrScanned=false, qrValue=null, schoolMarker, lineToDevice;
 let isProcessing=false;
@@ -210,31 +215,51 @@ try{
 }catch(e){}
 
 function initMap(){
-  map=L.map('miniMap',{zoomControl:false}).setView([LAT,LNG],17);
+  // Load saved school location from admin
+  try{
+    const slat = localStorage.getItem('SCHOOL_LAT') || localStorage.getItem('LAT');
+    const slng = localStorage.getItem('SCHOOL_LNG') || localStorage.getItem('LNG');
+    if(slat && slng){ CURRENT_LAT=parseFloat(slat); CURRENT_LNG=parseFloat(slng); }
+    const lr = localStorage.getItem('RADIUS_CUSTOM') || localStorage.getItem('RADIUS_METER');
+    if(lr){ RADIUS=clampR(lr); }
+  }catch(e){}
+  map=L.map('miniMap',{zoomControl:false}).setView([CURRENT_LAT,CURRENT_LNG],17);
   roadLayer=L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20, subdomains:['0','1','2','3'], attribution:'&copy; Google'});
   satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19, attribution:'&copy; Esri'});
   if(MODE_MINI==='satelit') satLayer.addTo(map); else roadLayer.addTo(map);
-  circle=L.circle([LAT,LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f355c',fillOpacity:0.12}).addTo(map);
+  circle=L.circle([CURRENT_LAT,CURRENT_LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f355c',fillOpacity:0.12}).addTo(map);
   const ic=L.divIcon({html:'<div style="width:28px;height:28px;background:#0f355c;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white">🏫</div>',iconSize:[28,28],className:''});
-  schoolMarker=L.marker([LAT,LNG],{icon:ic}).addTo(map);
+  schoolMarker=L.marker([CURRENT_LAT,CURRENT_LNG],{icon:ic}).addTo(map);
+  window.map=map; window.circle=circle; window.schoolMarker=schoolMarker; window.roadLayer=roadLayer; window.satLayer=satLayer;
   setTimeout(()=>map.invalidateSize(),300);
 }
 window.setModeMini=(mode)=>{ MODE_MINI=mode; localStorage.setItem('MAP_MODE',mode); if(mode==='satelit'){ if(map.hasLayer(roadLayer)) map.removeLayer(roadLayer); satLayer.addTo(map); } else { if(map.hasLayer(satLayer)) map.removeLayer(satLayer); roadLayer.addTo(map); } };
 window.getInisial=(nama)=>{ const p=nama.trim().split(/\s+/); if(p.length>=2) return (p[0][0]+p[1][0]).toUpperCase(); return nama.substring(0,2).toUpperCase(); };
 window.formatJarak=(meter)=>{ const m=Math.round(meter||0); if(m>=1000){ const km=(m/1000).toFixed(m%1000===0?0:1); return km.replace('.0','')+' KM'; } return m+'m'; };
 window.getJenisAbsen=(d)=>{
-  const n=d||new Date(); const h=n.getHours(); const m=n.getMinutes(); const menit=h*60+m;
-  // 06:00-07:30 MASUK TEPAT WAKTU (boleh absen mulai jam 6)
-  if(menit>=360 && menit<=450){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Masuk Tepat Waktu'}; }
-  // 07:31-11:30 MASUK TELAT (>07:30 telat)
-  if(menit>=451 && menit<=690){ const telat=menit-450; return {jenis:'MASUK', kategori:'TELAT', label:`Telat ${telat} menit`, color:'telat', valid:true, telatMenit:telat, pesan:`Telat ${telat} menit dari 07:30`}; }
-  // 11:31-13:49 PULANG SEBELUM WAKTUNYA (pulang sebelum jam 13:50)
-  if(menit>=691 && menit<=829){ return {jenis:'PULANG', kategori:'PULANG_SEBELUM_WAKTUNYA', label:'Pulang Sebelum Waktunya', color:'awal', valid:true, telatMenit:0, pesan:'Pulang sebelum jam 13:50'}; }
-  // 13:50-21:00 PULANG TEPAT WAKTU (boleh pulang sampai jam 21:00)
-  if(menit>=830 && menit<=1260){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Pulang Tepat Waktu'}; }
-  // <06:00 atau >21:00 DILUAR JAM KERJA tapi TETAP MASUK LAPORAN
+  const n=d||new Date(); const day=n.getDay(); const h=n.getHours(); const m=n.getMinutes(); const menit=h*60+m;
+  // Sabtu = libur, Minggu = libur
+  if(day===6){ return {jenis:'LIBUR', kategori:'LIBUR_SABTU', label:'Libur Sabtu', color:'libur', valid:true, telatMenit:0, pesan:'Hari Sabtu libur - TETAP TERCATAT di laporan'}; }
+  if(day===0){ return {jenis:'LIBUR', kategori:'LIBUR_MINGGU', label:'Libur Minggu', color:'libur', valid:true, telatMenit:0, pesan:'Hari Minggu libur - TETAP TERCATAT di laporan'}; }
+  // Jumat: pulang lebih awal 10:00
+  if(day===5){
+    if(menit>=360 && menit<=450){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Jumat Masuk Tepat Waktu'}; }
+    if(menit>=451 && menit<=540){ const telat=menit-450; return {jenis:'MASUK', kategori:'TELAT', label:`Telat ${telat} menit`, color:'telat', valid:true, telatMenit:telat, pesan:`Jumat Telat ${telat} menit dari 07:30`}; }
+    if(menit>=541 && menit<=599){ return {jenis:'PULANG', kategori:'BELUM_WAKTUNYA_PULANG', label:'Belum Waktunya Pulang', color:'awal', valid:true, telatMenit:0, pesan:'Jumat belum waktunya pulang, pulang jam 10:00'}; }
+    if(menit>=600 && menit<=1260){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Jumat Pulang Tepat Waktu'}; }
+  } else {
+    // Senin-Kamis
+    if(menit>=360 && menit<=450){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Masuk Tepat Waktu'}; }
+    if(menit>=451 && menit<=690){ const telat=menit-450; return {jenis:'MASUK', kategori:'TELAT', label:`Telat ${telat} menit`, color:'telat', valid:true, telatMenit:telat, pesan:`Telat ${telat} menit dari 07:30`}; }
+    if(menit>=691 && menit<=829){ return {jenis:'PULANG', kategori:'PULANG_SEBELUM_WAKTUNYA', label:'Pulang Sebelum Waktunya', color:'awal', valid:true, telatMenit:0, pesan:'Pulang sebelum jam 13:50'}; }
+    if(menit>=830 && menit<=1260){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Pulang Tepat Waktu'}; }
+  }
   return {jenis:'DILUAR_JAM_KERJA', kategori:'DILUAR_JAM_KERJA', label:'Diluar Jam Kerja', color:'diluar', valid:true, telatMenit:0, pesan:'Diluar jam kerja 06:00-21:00 tapi TETAP TERCATAT di laporan'};
 };
+window.getKategoriAbsenV5 = window.getJenisAbsen;
+window.getKategori = window.getJenisAbsen;
+window.getKategoriAbsen = window.getJenisAbsen;
+
 window.cekJamAbsen=()=>{ 
   const el=document.getElementById('jamInfo'); 
   if(!el) return; 
@@ -282,14 +307,14 @@ window.cekLokasi=()=>{
   const t=document.getElementById('locText'), b=document.getElementById('radiusBadge'), s=document.getElementById('statusLokasi');
   s.textContent='Mencari GPS...'; t.textContent='Mencari GPS...';
   navigator.geolocation.getCurrentPosition(p=>{
-    lastPos=p; const d=hitungJarak(p.coords.latitude,p.coords.longitude,LAT,LNG); lastDistance=d;
+    lastPos=p; const d=hitungJarak(p.coords.latitude,p.coords.longitude,CURRENT_LAT,CURRENT_LNG); lastDistance=d;
     s.textContent='Lokasi Terdeteksi'; const jarakText=formatJarak(d);
     t.innerHTML=`${jarakText} dari sekolah (${PLUS})`; b.textContent=d<=RADIUS?`Di Dalam ${RADIUS}m ✅`:`Di Luar ${jarakText} ❌`; b.className=d<=RADIUS?'badge-valid':'badge-invalid';
     if(markerUser&&map) map.removeLayer(markerUser);
     if(lineToDevice&&map) map.removeLayer(lineToDevice);
     const ic=L.divIcon({html:'<div style="width:18px;height:18px;background:#2563eb;border:3px solid white;border-radius:50%"></div>',iconSize:[18,18],className:''});
     markerUser=L.marker([p.coords.latitude,p.coords.longitude],{icon:ic}).addTo(map);
-    lineToDevice=L.polyline([[LAT,LNG],[p.coords.latitude,p.coords.longitude]],{color:d<=RADIUS?'#16a34a':'#ef4444',weight:2,dashArray:'6 6'}).addTo(map);
+    lineToDevice=L.polyline([[CURRENT_LAT,CURRENT_LNG],[p.coords.latitude,p.coords.longitude]],{color:d<=RADIUS?'#16a34a':'#ef4444',weight:2,dashArray:'6 6'}).addTo(map);
     const g=L.featureGroup([circle,markerUser,schoolMarker]); map.fitBounds(g.getBounds().pad(0.4));
     document.getElementById('c2').innerHTML=`${jarakText} <div>${d<=RADIUS?'✅':'❌'}</div>`;
   }, e=>{ t.textContent='GPS gagal: '+e.message; }, {enableHighAccuracy:true, timeout:15000});
@@ -301,11 +326,21 @@ window.startCamera=async()=>{
     if(!html5QrCode) html5QrCode=new Html5Qrcode("reader");
     await html5QrCode.start({facingMode:"environment"}, {fps:10, qrbox:{width:250,height:250}}, async decoded=>{
       if(isProcessing) return;
-      const idQR=decoded.split('|')[0]?.trim().toUpperCase();
-      const namaQR = GURUS.find(g=>g.gid.toUpperCase()===idQR)?.nama || idQR;
+      
+function findGuruByQR(idQR){
+  const up = (idQR||'').toUpperCase();
+  let g = GURUS.find(x=>x.gid.toUpperCase()===up);
+  if(g) return g;
+  g = GURUS.find(x=> (x.old_gids||[]).map(v=>String(v).toUpperCase()).includes(up));
+  return g||null;
+}
+
+  const idQR=decoded.split('|')[0]?.trim().toUpperCase();
+      const namaQR = findGuruByQR(idQR)?.nama || idQR;
       // === FIX 3: MODE KETAT TAMPIL NAMA, BUKAN ID ===
-      if(idQR && currentGuru && idQR!==currentGuru.gid){
-        const namaPemilik = GURUS.find(g=>g.gid.toUpperCase()===idQR)?.nama || idQR;
+      const guruQR = findGuruByQR(idQR);
+  if(idQR && currentGuru && guruQR && guruQR.gid!==currentGuru.gid){
+        const namaPemilik = findGuruByQR(idQR)?.nama || idQR;
         el.innerHTML=`⛔ DITOLAK!<br>Ini QR milik <b>${namaPemilik}</b> (${idQR}),<br>kamu login sebagai <b>${currentGuru.nama}</b> (${currentGuru.gid})<br><small>Tidak bisa titip absen!</small>`;
         el.style.background="#fee2e2"; el.style.color="#991b1b"; el.style.fontWeight="700";
         document.getElementById('c1').innerHTML="QR Beda GTK <div>⛔</div>"; document.getElementById('c1').style.background="#fee2e2";
@@ -313,7 +348,7 @@ window.startCamera=async()=>{
         return;
       }
       qrScanned=true; qrValue=decoded;
-      el.textContent="✅ QR Cocok: "+(GURUS.find(g=>g.gid.toUpperCase()===idQR)?.nama||idQR)+" • AUTO ABSEN...";
+      el.textContent="✅ QR Cocok: "+(findGuruByQR(idQR)?.nama||idQR)+(findGuruByQR(idQR)?.old_gids?.includes(idQR)||findGuruByQR(idQR)?.gid!==idQR?" (QR Lama)":"")+" • AUTO ABSEN...";
       el.style.background="#dcfce7"; el.style.color="#166534";
       document.getElementById('c1').innerHTML="ID Cocok <div>✅</div>"; document.getElementById('c1').style.background="#dcfce7";
       isProcessing=true;
@@ -331,13 +366,16 @@ window.startCamera=async()=>{
 };
 window.stopCamera=async()=>{ try{ if(html5QrCode){ await html5QrCode.stop(); html5QrCode.clear(); } }catch(e){} document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStopCam').classList.add('hidden'); document.getElementById('btnStartCam').disabled=false; isProcessing=false; };
 
+window.customPassMap = window.customPassMap || {};
 window.doLogin=()=>{
   const i=document.getElementById('gidInput').value.trim().toUpperCase(), p=document.getElementById('passInput').value.trim(), er=document.getElementById('loginError');
   er.classList.add('hidden');
   if(!i||!p){ er.textContent='Isi ID & Password'; er.classList.remove('hidden'); return; }
   const g=GURUS.find(x=>x.gid.toUpperCase()===i);
-  if(!g){ er.textContent='ID tidak ditemukan'; er.classList.remove('hidden'); return; }
-  let stored=localStorage.getItem('SI-ABSEN_PASS_'+g.gid);
+  if(!g){ er.textContent='ID tidak ditemukan ('+i+') - cek di admin'; er.classList.remove('hidden'); return; }
+  let stored=null;
+  if(window.customPassMap && window.customPassMap[g.gid]) stored=window.customPassMap[g.gid];
+  if(!stored) stored=localStorage.getItem('SI-ABSEN_PASS_'+g.gid);
   if(stored && stored.toLowerCase().startsWith('brondong')){
     const num=stored.replace(/[^0-9]/g,'').slice(-4);
     const migrated='snebron'+num;
@@ -345,7 +383,7 @@ window.doLogin=()=>{
     stored=migrated;
   }
   const eff=stored||g.password;
-  if(eff!==p){ er.textContent='Password salah'; er.classList.remove('hidden'); return; }
+  if(eff!==p){ er.textContent='Password salah. Default: '+g.password+' | cek custom di admin'; er.classList.remove('hidden'); return; }
   currentGuru=g; localStorage.setItem('SI-ABSEN_GID',g.gid); showAbsenScreen();
 };
 function showAbsenScreen(){
@@ -366,7 +404,9 @@ window.logout=()=>{ localStorage.removeItem('SI-ABSEN_GID'); location.reload(); 
 async function prosesAbsenOtomatis(){
   const now=new Date();
   const jamInfo=getJenisAbsen(now);
-  if(jamInfo.kategori==='PULANG_SEBELUM_WAKTUNYA' || jamInfo.kategori==='BELUM_WAKTUNYA_PULANG' || jamInfo.jenis==='LIBUR'){
+  if(jamInfo.jenis==='LIBUR'){
+    setTimeout(()=>{ showCustomAlert('HARI LIBUR', `🏖️ <b>${jamInfo.label}</b><br><br>${jamInfo.pesan}<br><br>Absen kamu <b>TETAP TERCATAT</b> di laporan sebagai <b>${jamInfo.label}</b> agar admin tau kamu absen di hari libur.<br><br>Jam sekarang: <b>${now.toLocaleTimeString('id-ID')} WIB</b>`); }, 300);
+  } else if(jamInfo.kategori==='PULANG_SEBELUM_WAKTUNYA' || jamInfo.kategori==='BELUM_WAKTUNYA_PULANG'){
     setTimeout(()=>{ showCustomAlert('BELUM WAKTUNYA PULANG', `⚠️ <b>${jamInfo.label}</b><br><br>${jamInfo.pesan}<br><br>Absen kamu <b>TETAP TERCATAT</b> di laporan agar admin tau, tapi kamu masih bisa absen lagi nanti pas jam pulang yang benar.<br><br>Jam sekarang: <b>${now.toLocaleTimeString('id-ID')} WIB</b>`); }, 300);
   }
 
@@ -386,7 +426,7 @@ async function prosesAbsenOtomatis(){
   const data={
     gid:currentGuru.gid, nama:currentGuru.nama, nip:currentGuru.nip,
     waktu:now.toISOString(), waktu_server:serverTimestamp(),
-    lat:lastPos?lastPos.coords.latitude:LAT, lng:lastPos?lastPos.coords.longitude:LNG,
+    lat:lastPos?lastPos.coords.latitude:CURRENT_LAT, lng:lastPos?lastPos.coords.longitude:CURRENT_LNG,
     plus_code:PLUS, jarak_meter:Math.round(lastDistance||0), jarak_text:jarakText, radius_meter:RADIUS,
     status:lastDistance<=RADIUS?'VALID':'LUAR_RADIUS',
     jenis_absen:jamInfo.jenis, kategori_absen:jamInfo.kategori, label_absen:jamInfo.label, telat_menit:jamInfo.telatMenit||0, pesan_jam:jamInfo.pesan,
@@ -428,6 +468,164 @@ window.simpanPasswordBaru=async()=>{ const newP=document.getElementById('newPass
 document.addEventListener('DOMContentLoaded', ()=>{
   const s=localStorage.getItem('SI-ABSEN_GID'); if(s){ currentGuru=GURUS.find(g=>g.gid===s); if(currentGuru) showAbsenScreen(); }
 });
+
+// === PATCH KONEK ADMIN TERBARU - MAP + RADIUS + GURU + PASSWORD ===
+async function startAdminSync(){
+  try{
+    const {doc, collection, onSnapshot, getDocs} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d = window.db || db;
+    if(!d) return;
+    
+    // 1. Sync settings/config - radius + lat/lng
+    try{
+      const ref = doc(d, "settings", "config");
+      onSnapshot(ref, (snap)=>{
+        if(!snap.exists()) return;
+        const data=snap.data();
+        if(data.radius!==undefined){
+          let r=clampR(data.radius);
+          if(r!==RADIUS){
+            RADIUS=r;
+            localStorage.setItem('RADIUS_CUSTOM', String(r));
+            localStorage.setItem('RADIUS_METER', String(r));
+            try{ if(window.circle) window.circle.setRadius(r); }catch(e){}
+            console.log("✅ Radius sync from admin:", r);
+          }
+        }
+        let nLat = data.latitude || data.lat;
+        let nLng = data.longitude || data.lng || data.lon;
+        if(nLat && nLng){
+          nLat=parseFloat(nLat); nLng=parseFloat(nLng);
+          if(nLat!==CURRENT_LAT || nLng!==CURRENT_LNG){
+            CURRENT_LAT=nLat; CURRENT_LNG=nLng;
+            localStorage.setItem('SCHOOL_LAT', String(nLat));
+            localStorage.setItem('SCHOOL_LNG', String(nLng));
+            try{
+              if(window.circle) window.circle.setLatLng([nLat,nLng]);
+              if(window.schoolMarker) window.schoolMarker.setLatLng([nLat,nLng]);
+              if(window.map) window.map.setView([nLat,nLng], 17);
+            }catch(e){}
+            console.log("✅ Lokasi sync from admin:", nLat, nLng);
+          }
+        }
+      });
+    }catch(e){ console.log("settings sync fail", e); }
+    
+    // 2. Sync gurus collection realtime
+    try{
+      const col = collection(d, "gurus");
+      onSnapshot(col, (snap)=>{
+        let changed=false;
+        snap.docChanges().forEach(ch=>{
+          const data=ch.doc.data();
+          const gid=data.gid||data.GID||ch.doc.id;
+          if(ch.type==="removed"){
+            let idx=GURUS.findIndex(g=>g.gid===gid);
+            if(idx>-1){ GURUS.splice(idx,1); changed=true; }
+            // kalau yang dihapus adalah yang lagi login, logout
+            try{ if(typeof currentGuru!=='undefined' && currentGuru && currentGuru.gid===gid){ currentGuru=null; localStorage.removeItem('SI-ABSEN_GID'); } }catch(e){}
+          } else {
+            let ex=GURUS.find(g=>g.gid===gid);
+            if(ex){
+              ex.nama=data.nama||data.Nama; ex.old_gids=data.old_gids||ex.old_gids||[]||ex.nama;
+              ex.nip=data.nip||data.NIP||ex.nip;
+              ex.password=data.password||ex.password;
+              changed=true;
+              // FIX: kalau yang diedit adalah GTK yang lagi login, update currentGuru langsung tanpa login ulang
+              try{
+                if(typeof currentGuru!=='undefined' && currentGuru && currentGuru.gid===gid){
+                  currentGuru.nama = ex.nama;
+                  currentGuru.nip = ex.nip;
+                  // jangan overwrite password session, tapi update di GURUS aja
+                  const nameEl = document.getElementById('currentGuruName') || document.getElementById('guruNameDisplay') || document.getElementById('namaGuru');
+                  if(nameEl) nameEl.textContent = ex.nama;
+                  const nipEl = document.getElementById('currentGuruNIP') || document.getElementById('nipDisplay');
+                  if(nipEl) nipEl.textContent = ex.nip||'-';
+                }
+              }catch(e){}
+            } else {
+              GURUS.push({no:GURUS.length+1, nama:data.nama||data.Nama, nip:data.nip||data.NIP||'-', gid:gid, password:data.password||'snebron0000'});
+              changed=true;
+            }
+          }
+        });
+        if(changed) console.log("✅ GURUS sync:", GURUS.length);
+      });
+    }catch(e){ console.log("gurus sync fail", e); }
+    
+    // 3. Sync custom passwords from users collection
+    try{
+      const usersCol = collection(d, "users");
+      const snap = await getDocs(usersCol);
+      snap.forEach(docSnap=>{
+        const data=docSnap.data();
+        const gid=data.gid||docSnap.id;
+        const custom=data.password_custom||data.password;
+        if(custom && gid){
+          window.customPassMap[gid]=custom;
+          try{ localStorage.setItem('SI-ABSEN_PASS_'+gid, custom); }catch(e){}
+        }
+      });
+      console.log("✅ Custom passwords loaded:", Object.keys(window.customPassMap).length);
+      // realtime also
+      onSnapshot(usersCol, (snap)=>{
+        snap.docChanges().forEach(ch=>{
+          const data=ch.doc.data();
+          const gid=data.gid||ch.doc.id;
+          const custom=data.password_custom;
+          if(custom){
+            window.customPassMap[gid]=custom;
+            try{ localStorage.setItem('SI-ABSEN_PASS_'+gid, custom); }catch(e){}
+          }
+        });
+      });
+    }catch(e){ console.log("users sync fail", e); }
+    
+  }catch(e){ console.log("startAdminSync fail", e); }
+}
+setTimeout(startAdminSync, 1000);
+
+// Merge CUSTOM_GURUS_V5 from localStorage (admin)
+function mergeCustomGurus(){
+  try{
+    let map={};
+    GURUS.forEach(g=>{ map[g.gid]={...g}; });
+    let customs=[];
+    try{ customs=JSON.parse(localStorage.getItem('CUSTOM_GURUS_V5')||'[]'); }catch(e){ customs=[]; }
+    customs.forEach(cc=>{
+      if(cc.deleted){ delete map[cc.gid]; return; }
+      if(cc.isNew || !map[cc.gid]){
+        map[cc.gid]={no:Object.keys(map).length+1, nama:cc.nama, nip:cc.nip||'-', gid:cc.gid, password:cc.password||'snebron0000'};
+      } else {
+        let ex=map[cc.gid]||map[cc.originalGID];
+        if(ex){
+          ex.nama=cc.nama||ex.nama; ex.nip=cc.nip||ex.nip;
+          if(cc.gid!==cc.originalGID && cc.originalGID){ delete map[cc.originalGID]; map[cc.gid]=ex; ex.gid=cc.gid; }
+          if(cc.password) ex.password=cc.password;
+        }
+      }
+    });
+    GURUS=Object.values(map);
+    console.log("✅ GURUS merged with CUSTOM_GURUS_V5:", GURUS.length);
+  }catch(e){ console.log("mergeCustom err", e); }
+}
+mergeCustomGurus();
+window.addEventListener('focus', ()=>{ mergeCustomGurus(); });
+window.addEventListener('storage', (e)=>{ if(e.key==='CUSTOM_GURUS_V5') mergeCustomGurus(); });
+
+// Enter bisa login di laptop
+document.addEventListener('DOMContentLoaded', ()=>{
+  const gidInput=document.getElementById('gidInput');
+  const passInput=document.getElementById('passInput');
+  if(gidInput){
+    gidInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); passInput?.focus(); } });
+  }
+  if(passInput){
+    passInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); doLogin(); } });
+  }
+});
+// === END PATCH KONEK ADMIN ===
+
 </script>
 </body>
 </html>
