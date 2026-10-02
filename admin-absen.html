@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Admin V4 - Login Sama Kayak Absen</title>
+<html lang="id"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Admin V5 - 20-70m Silent + Libur Sabtu Minggu + Live</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -29,7 +29,134 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 .badge-tepat{background:#dcfce7;border-color:#bbf7d0;color:#166534}
 .badge-telat{background:#fef3c7;border-color:#fde68a;color:#92400e}
 .badge-diluar{background:#fee2e2;border-color:#fecaca;color:#991b1b}
-</style></head>
+
+.badge-libur{background:#fee2e2;border-color:#fecaca;color:#991b1b}
+.badge-belum{background:#ffedd5;border-color:#fed7aa;color:#9a3412}
+.badge-awal{background:#fef9c3;border-color:#fde68a;color:#854d0e}
+#liveBadge{background:#dcfce7;color:#166534;padding:3px 8px;border-radius:999px;font-size:10px;margin-left:6px}
+</style>
+<style>
+/* === RESPONSIVE HP FIX - hanya tampilan, tidak sentuh tombol/fungsi === */
+@media (max-width: 768px){
+  #adminContent > div { padding:12px !important; }
+  #adminContent div[style*="grid-template-columns:320px 1fr"]{
+    grid-template-columns:1fr !important;
+    gap:12px !important;
+  }
+  #adminContent .card[style*="position:sticky"]{
+    position:static !important;
+    top:auto !important;
+  }
+  #mapAdmin{ height:200px !important; }
+  .table-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .table-wrap table{ min-width:600px; }
+  /* guru grid jadi 1 kolom di HP */
+  #guruGrid{ grid-template-columns:1fr !important; }
+  /* bulk bar jadi column di HP */
+  #bulkBar{ flex-direction:column !important; align-items:stretch !important; gap:10px !important; }
+  #bulkBar > div{ justify-content:space-between; }
+  /* header tabs wrap */
+  #adminContent > div > div[style*="display:flex;gap:10px"]{ flex-wrap:wrap; }
+}
+@media (max-width: 480px){
+  #qrModal > div{ max-width:95% !important; }
+  #modalEditGuru .card, #modalTambahGTK .card{ max-width:95% !important; margin:10px; }
+  .card{ border-radius:14px !important; padding:12px !important; }
+}
+</style>
+
+
+<style>
+/* LAPORAN HP FIX - data guru aman tidak disentuh */
+@media (max-width: 768px){
+  #panelLaporan .card > div[style*="display:flex;justify-content:space-between"]{
+    flex-direction:column !important;
+    align-items:stretch !important;
+  }
+  #panelLaporan .card > div[style*="display:flex;justify-content:space-between"] > div:last-child{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:8px !important;
+  }
+  #panelLaporan div[style*="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))"]{
+    grid-template-columns:1fr !important;
+    gap:10px !important;
+  }
+  #panelLaporan div[style*="display:flex;gap:8px;margin-top:10px"]{
+    flex-direction:column !important;
+  }
+  #panelLaporan div[style*="display:flex;gap:8px;margin-top:10px"] button{
+    width:100% !important;
+  }
+  #panelLaporan div[style*="grid-template-columns:repeat(4,1fr)"]{
+    grid-template-columns:1fr 1fr !important;
+    gap:8px !important;
+  }
+  #panelLaporan .table-wrap{
+    margin-left:-12px;
+    margin-right:-12px;
+    border-radius:0 !important;
+  }
+  #panelLaporan thead th{
+    font-size:11px !important;
+    padding:8px 6px !important;
+    white-space:nowrap;
+  }
+  #panelLaporan tbody td{
+    font-size:12px !important;
+    padding:8px 6px !important;
+  }
+}
+@media (max-width: 480px){
+  #panelLaporan div[style*="grid-template-columns:repeat(4,1fr)"]{
+    grid-template-columns:1fr 1fr !important;
+  }
+  #filterTanggal, #filterGuruSelect, #filterKategori, #filterJenis, #filterStatus, #searchLaporan{
+    height:44px !important;
+    font-size:14px !important;
+  }
+}
+</style>
+
+
+<style>
+/* Card view for laporan - seperti image_07ed30.png */
+#laporanCards .lap-card{
+  background:white;
+  border:1px solid #e2e8f0;
+  border-radius:16px;
+  padding:14px 16px;
+  margin-bottom:12px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+#laporanCards .lap-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 0;
+  border-bottom:1px solid #f1f5f9;
+  gap:10px;
+}
+#laporanCards .lap-row:last-child{ border-bottom:none; }
+#laporanCards .lap-label{ font-size:12px; font-weight:700; color:#64748b; letter-spacing:.3px; }
+#laporanCards .lap-value{ font-size:13px; font-weight:600; color:#0f172a; text-align:right; }
+#laporanCards .badge-pill{ padding:4px 12px; border-radius:999px; font-size:11px; font-weight:700; border:1px solid; }
+#laporanCards .badge-diluar{ background:#fee2e2; border-color:#fecaca; color:#991b1b; }
+#laporanCards .badge-luar{ background:#fee2e2; border-color:#fecaca; color:#991b1b; }
+#laporanCards .badge-valid{ background:#dcfce7; border-color:#bbf7d0; color:#166534; }
+#laporanCards .badge-gid{ background:#f1f5f9; border-color:#e2e8f0; color:#334155; font-size:11px; }
+
+@media (max-width: 768px){
+  #panelLaporan .table-wrap{ display:none !important; }
+  #laporanCards{ display:block !important; }
+}
+@media (min-width: 769px){
+  #laporanCards{ display:none !important; }
+  #panelLaporan .table-wrap{ display:block !important; }
+}
+</style>
+
+</head>
 <body>
 <header class="header">
 <div class="logo-box"><div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SI-ABSEN" style="width:100%;height:100%;object-fit:contain"/></div><div><div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SI-ABSEN</div><div style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.5px">Panel Admin • 36R6+X89</div></div></div></div>
@@ -52,7 +179,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <label style="font-size:11px;font-weight:800;letter-spacing:.5px;color:#475569">PASSWORD</label>
 <div style="position:relative;margin-top:6px">
 <input id="adminPass" class="input" type="password" placeholder="••••••••" style="padding-right:48px"/>
-<button type="button" id="eyeBtn" style="position:absolute;right:6px;top:6px;height:36px;width:36px;border:none;background:#f1f5f9;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center">👁️</button>
+<button type="button" id="eyeBtn" style="position:absolute;right:6px;top:6px;height:36px;width:36px;border:none;background:#f1f5f9;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7Z" stroke="#0f355c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="#0f355c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="1.5" fill="#0f355c"/></svg></button>
 </div>
 </div>
 
@@ -96,16 +223,17 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div id="authUid" style="font-size:9px;color:#94a3b8;margin-top:4px"></div>
 <div id="lastLoginInfo" style="font-size:9px;color:#94a3b8;margin-top:2px"></div>
 <label style="font-size:11px;font-weight:700;margin-top:14px;display:block">Radius Absen</label>
-<div style="display:flex;gap:8px;margin-top:6px"><input id="radiusInput" type="number" value="40" class="input" style="height:40px"/><span style="height:40px;padding:0 12px;background:#0f355c;color:white;border-radius:12px;display:flex;align-items:center;font-weight:700">m</span></div>
-<div style="margin-top:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="font-size:10px;font-weight:800;color:#94a3b8">TITIK SEKOLAH</div><div style="font-weight:700;font-size:12px;color:#0f355c">-6.9075625, 112.2108125</div><div style="font-size:10px;color:#64748b">36R6+X89 • 40m</div><div id="rekapInfo" style="margin-top:8px;background:white;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font-size:11px">Memuat...</div></div>
+<div style="display:flex;gap:8px;margin-top:6px"><input id="radiusInput" type="number" min="20" max="70" step="5" value="40" class="input" style="height:40px"/><button id="saveRadiusBtn" type="button" style="height:40px;padding:0 12px;background:#0f355c;color:white;border-radius:12px;display:flex;align-items:center;font-weight:700;border:none;cursor:pointer">m</button></div>
+<div style="font-size:10px;color:#64748b;margin-top:4px">Batas 20m-70m • Default 40m • Silent realtime ke halaman GTK • <span id="radiusLabel">40m</span></div>
+<div style="margin-top:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="font-size:10px;font-weight:800;color:#94a3b8">TITIK SEKOLAH</div><div style="font-weight:700;font-size:12px;color:#0f355c">-6.889583,112.286111</div><div style="font-size:10px;color:#64748b">36R6+X89 • 40m</div><div id="rekapInfo" style="margin-top:8px;background:white;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font-size:11px">Memuat...</div></div>
 <div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden"><div id="mapAdmin"></div></div>
 <div style="margin-top:12px;display:grid;gap:8px"><button class="btn btn-primary" style="height:40px" onclick="loadRekap()">🔄 Refresh Laporan</button><button class="btn btn-outline" style="height:40px" onclick="loadPasswords()">🔑 Load Password Custom</button></div>
 </div>
 <div id="panelLaporan">
-<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="font-weight:800;color:#0f355c">📊 Laporan Absen V4 - Semua Masuk Laporan</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" style="height:36px;width:auto;padding:0 16px" onclick="exportExcel()">📥 Excel</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="exportCSV()">CSV</button><button class="btn" style="height:36px;width:auto;padding:0 16px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b" onclick="clearTest()">🗑️ Hapus Test</button></div></div>
+<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="font-weight:800;color:#0f355c">📊 Laporan Absen V5 - Semua Masuk Laporan <span id="liveBadge">🟢 Live - auto refresh aktif</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" style="height:36px;width:auto;padding:0 16px" onclick="exportExcel()">📥 Excel</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="exportCSV()">CSV</button><button class="btn" style="height:36px;width:auto;padding:0 16px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b" onclick="clearTest()">🗑️ Hapus Test</button></div></div>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:12px">
 <input id="filterTanggal" type="date" class="input" style="height:36px"/><select id="filterGuruSelect" class="input" style="height:36px"><option value="">Semua Guru</option></select>
-<select id="filterKategori" class="input" style="height:36px"><option value="">Semua Kategori</option><option value="TEPAT_WAKTU">TEPAT_WAKTU</option><option value="TELAT">TELAT</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
+<select id="filterKategori" class="input" style="height:36px"><option value="">Semua Kategori</option><option value="TEPAT_WAKTU">TEPAT_WAKTU</option><option value="TELAT">TELAT</option><option value="PULANG_SEBELUM_WAKTUNYA">PULANG_SEBELUM_WAKTUNYA</option><option value="BELUM_WAKTUNYA_PULANG">BELUM_WAKTUNYA_PULANG</option><option value="LIBUR_SABTU">LIBUR_SABTU</option><option value="LIBUR_MINGGU">LIBUR_MINGGU</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
 <select id="filterJenis" class="input" style="height:36px"><option value="">Semua Jenis</option><option value="MASUK">MASUK</option><option value="PULANG">PULANG</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
 <select id="filterStatus" class="input" style="height:36px"><option value="">VALID+LUAR_RADIUS</option><option value="VALID">VALID</option><option value="LUAR_RADIUS">LUAR_RADIUS</option></select>
 <input id="searchLaporan" class="input" placeholder="Cari nama..." style="height:36px"/>
@@ -118,10 +246,62 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div style="background:#fee2e2;border:1px solid #fecaca;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#991b1b">DILUAR JAM</div><div id="totalDiluar" style="font-weight:800;font-size:18px;color:#991b1b">0</div></div>
 </div>
 </div>
-<div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Tgl/Jam</th><th>Guru</th><th>GID</th><th>Jenis</th><th>Kategori</th><th>Radius</th><th>Jarak</th><th>Telat</th><th>Plus Code</th></tr></thead><tbody id="laporanBody"><tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:20px">Klik Tampilkan</td></tr></tbody></table></div>
+
+<div id="bulkBar" style="display:none;background:#0f172a;color:white;border-radius:12px;padding:12px 16px;align-items:center;justify-content:space-between;margin-top:12px;margin-bottom:12px;box-shadow:0 4px 12px rgba(0,0,0,.2)">
+  <div style="display:flex;align-items:center;gap:10px"><span id="bulkCount" style="font-weight:800">0 dipilih</span></div>
+  <div style="display:flex;gap:8px"><button style="background:white;color:#0f172a;height:36px;padding:0 14px;border-radius:8px;font-weight:800;border:none;cursor:pointer" onclick="exportTerpilih()">Export Terpilih</button><button style="background:#fecaca;color:#991b1b;height:36px;padding:0 14px;border-radius:8px;font-weight:800;border:1px solid #fecaca;cursor:pointer" onclick="hapusTerpilih()">Hapus Terpilih</button><button style="background:#334155;color:white;height:36px;padding:0 14px;border-radius:8px;font-weight:700;border:none;cursor:pointer" onclick="batalPilih()">Batal</button></div>
+</div>
+<div class="table-wrap" style="margin-top:12px"><table><thead><tr><th style="padding:10px;text-align:left"><input type="checkbox" id="checkAllLaporan" onchange="toggleAllLaporan(this)"> Tgl/Jam</th><th>Guru</th><th>GID</th><th>Jenis</th><th>Kategori</th><th>Radius</th><th>Jarak</th><th>Telat</th><th>Plus Code</th></tr></thead><tbody id="laporanBody"><tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:20px">Klik Tampilkan</td></tr></tbody></table></div>
+<div id="laporanCards" style="display:none;margin-top:12px"></div>
 </div>
 <div id="panelGuru" class="hidden">
-<div class="card" style="margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center"><div style="font-weight:800;color:#0f355c">👥 Daftar 44 GTK + QR Privat</div><div style="margin-left:auto;display:flex;gap:8px"><input id="searchGuru" class="input" placeholder="Cari nama / GID..." style="width:200px;height:36px"/><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="loadPasswords()">🔑 Load</button></div><div id="totalGuruInfo" style="font-size:11px;color:#64748b;width:100%">44 guru</div></div>
+<div class="card" style="margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center"><div style="font-weight:800;color:#0f355c">Daftar 44 GTK + QR Privat</div><div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap"><input id="searchGuru" class="input" placeholder="Cari nama / GID..." style="width:200px;height:36px"/><button class="btn btn-outline" style="height:36px;width:auto;padding:0 12px;font-size:11px" onclick="openTambahGTK()">+ Tambah GTK Baru</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="loadPasswords()">Load</button></div><div id="totalGuruInfo" style="font-size:11px;color:#64748b;width:100%">44 guru</div></div>
+
+<div id="modalTambahGTK" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px">
+  <div class="card" style="width:100%;max-width:480px;background:white;border-radius:20px;padding:20px;max-height:90vh;overflow:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font-weight:800;font-size:16px;color:#0f172a">➕ Tambah GTK Baru - Auto GID</div>
+      <button onclick="closeTambahGTK()" style="width:32px;height:32px;border-radius:8px;border:1px solid #e2e8f0;background:white">✕</button>
+    </div>
+    <div style="margin-top:16px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:6px">Nama Lengkap <span style="color:red">*</span></div>
+      <input id="newNama" class="input" placeholder="Contoh: Budi Santoso, S.Pd" />
+    </div>
+    <div style="margin-top:12px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:6px">NIP (isi - jika honorer)</div>
+      <input id="newNIP" class="input" placeholder="18 digit NIP atau - " oninput="autoFillGIDPass()" onblur="autoFillGIDPass()" />
+      <div id="autoInfo" style="font-size:11px;color:#0f355c;margin-top:6px;background:#f0f9ff;padding:6px 8px;border-radius:8px;border:1px dashed #bae6fd">Ketik NIP → GID & password auto dibuat</div>
+    </div>
+    <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px">GID Auto</div>
+        <input id="newGID" class="input" placeholder="Auto G-XXXXX" readonly style="background:#f8fafc" />
+        <div style="font-size:10px;color:#64748b;margin-top:4px">Otomatis dari NIP / random honorer</div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px">Password Auto</div>
+        <input id="newPassPreview" class="input" placeholder="Auto snebronXXXX" readonly style="background:#f8fafc" />
+        <div style="font-size:10px;color:#64748b;margin-top:4px">snebron + 4 digit NIP / GID</div>
+      </div>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <button class="btn btn-outline" style="flex:1;height:40px;font-size:12px" onclick="autoFillGIDPass()">🔄 Generate Ulang GID</button>
+      <button class="btn btn-outline" style="flex:1;height:40px;font-size:12px" onclick="document.getElementById('newGID').value='';autoFillGIDPass()">♻️ Random Honorer</button>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button style="flex:1;height:48px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700" onclick="closeTambahGTK()">Batal</button>
+      <button style="flex:1;height:48px;border-radius:12px;border:none;background:#0f172a;color:white;font-weight:800" onclick="simpanGTKBaru()">💾 Simpan & Sinkron</button>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:#64748b;background:#f8fafc;padding:10px;border-radius:10px;border:1px solid #e2e8f0">
+      <b>Logika Auto:</b><br/>
+      • Punya NIP → GID = G- + random 5 digit unik (beda dari NIP), Password = snebron + 4 digit akhir NIP<br/>
+      • Tanpa NIP (-) → GID = G- + random 5 digit unik, Password = snebron + random 4 digit (beda dari GID)<br/>
+      • Sudah sinkron ke halaman absen via Firestore gurus + CUSTOM_GURUS_V5
+    </div>
+  </div>
+</div>
+
+
 <div id="guruGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px"></div>
 </div>
 </div>
@@ -136,30 +316,698 @@ const LAT=-6.9075625, LNG=112.2108125; let RADIUS=40;
 const gurus=[{"no":1,"nama":"Husnul Anam, S.Pd, M.Pd","nip":"196906101998021004","gid":"G-83105","password":"snebron1004"},{"no":2,"nama":"Drs. Khoim Khoirul A, M.Pd","nip":"196807161998021004","gid":"G-20839","password":"snebron1004"},{"no":3,"nama":"Drs. Zainuddin, M.Pd","nip":"196805221997031002","gid":"G-94652","password":"snebron1002"},{"no":4,"nama":"Drs. Joko Sutomo","nip":"196710211999031003","gid":"G-72600","password":"snebron1003"},{"no":5,"nama":"Ishnafiyah, S.Ag","nip":"197507151999032008","gid":"G-32712","password":"snebron2008"},{"no":6,"nama":"Evi Irawati, S.Pd","nip":"197302112000122004","gid":"G-79374","password":"snebron2004"},{"no":7,"nama":"Hilmishobah, S.Pd, M.Pd","nip":"197109082003121003","gid":"G-10058","password":"snebron1003"},{"no":8,"nama":"Anis Mufadhilah, S.Pd","nip":"197010282007012012","gid":"G-58661","password":"snebron2012"},{"no":9,"nama":"Muhamad Nur Cahyo, S. Pd","nip":"197106092007011019","gid":"G-59237","password":"snebron1019"},{"no":10,"nama":"Dra. Sri Hartini","nip":"196609182008012006","gid":"G-84672","password":"snebron2006"},{"no":11,"nama":"M. Khusen, S.Pd","nip":"197111042008011009","gid":"G-40409","password":"snebron1009"},{"no":12,"nama":"Asri Pujitami, S.Pd","nip":"198501182010012015","gid":"G-18622","password":"snebron2015"},{"no":13,"nama":"Moh. Safi, S.Kom","nip":"197607052011011006","gid":"G-60160","password":"snebron1006"},{"no":14,"nama":"Fitri Komariyah, S.Pd","nip":"197508012009022001","gid":"G-62543","password":"snebron2001"},{"no":15,"nama":"Sudibyanto, S.Pd","nip":"197804242008011017","gid":"G-22804","password":"snebron1017"},{"no":16,"nama":"Nikmatus Solichah, S.Ag","nip":"197403092014062001","gid":"G-15682","password":"snebron2001"},{"no":17,"nama":"Mahriwati, S.Pd","nip":"197408312021212003","gid":"G-25556","password":"snebron2003"},{"no":18,"nama":"Yusuf Budiharjo, S.Pd","nip":"198206072022211002","gid":"G-37728","password":"snebron1002"},{"no":19,"nama":"Teguh Wahyu Widayat, S. Pd","nip":"198305012023211008","gid":"G-59221","password":"snebron1008"},{"no":20,"nama":"Mamluhah, S.Pd","nip":"198310192023212010","gid":"G-23021","password":"snebron2010"},{"no":21,"nama":"Sakiman, SE","nip":"197010242024211002","gid":"G-63923","password":"snebron1002"},{"no":22,"nama":"Slamet Mamik H, S.Pd","nip":"197902122024211001","gid":"G-16452","password":"snebron1001"},{"no":23,"nama":"Maghfiroh, S.Pd","nip":"198204152024212005","gid":"G-90272","password":"snebron2005"},{"no":24,"nama":"Selvi Putri Cornivia, S.Pd","nip":"199812312024212016","gid":"G-13652","password":"snebron2016"},{"no":25,"nama":"Dwi Chandra Puspita A, S.Pd","nip":"199906212024212016","gid":"G-82582","password":"snebron2016"},{"no":26,"nama":"Nanda Wijayanti, S.pd","nip":"200007272025212022","gid":"G-76875","password":"snebron2022"},{"no":27,"nama":"Bunga Cahyaning Atie, S.Pd","nip":"200108222025212006","gid":"G-18758","password":"snebron2006"},{"no":28,"nama":"Toni Wijayanto, S.Kom","nip":"198210242023211005","gid":"G-35462","password":"snebron1005"},{"no":29,"nama":"Maghfiroh, S.Pd","nip":"-","gid":"G-34817","password":"snebron1710"},{"no":30,"nama":"Abdullah Faqih, S.Pdi. M.Ag","nip":"-","gid":"G-13489","password":"snebron8967"},{"no":31,"nama":"Muhamad Yunus Anis, S.Pd","nip":"-","gid":"G-39875","password":"snebron7575"},{"no":32,"nama":"Imarotul Hasanah, S.Pd","nip":"19800615210012003","gid":"G-93715","password":"snebron2003"},{"no":33,"nama":"Nurul Hidayati, S.Pd","nip":"197810052009022005","gid":"G-62114","password":"snebron2005"},{"no":34,"nama":"Mutholiah","nip":"197111172009012001","gid":"G-70331","password":"snebron2001"},{"no":35,"nama":"Nyamin","nip":"197205042025211004","gid":"G-56461","password":"snebron1004"},{"no":36,"nama":"Wartiyaningsih, S.Pd","nip":"199308122025212060","gid":"G-78122","password":"snebron2060"},{"no":37,"nama":"Muzahidin, S.Pd","nip":"198801042025211108","gid":"G-14014","password":"snebron1108"},{"no":38,"nama":"Arum Rahmana, S.Pd","nip":"199210192025212086","gid":"G-88075","password":"snebron2086"},{"no":39,"nama":"R. Arif Nur Cahyono, S.Pus","nip":"198004262025211045","gid":"G-24520","password":"snebron1045"},{"no":40,"nama":"Solkan","nip":"-","gid":"G-81582","password":"snebron8298"},{"no":41,"nama":"Fatiha Sabila, SE","nip":"-","gid":"G-35965","password":"snebron6573"},{"no":42,"nama":"Ahmad Marzuq Al Himni, S. Kom","nip":"-","gid":"G-37286","password":"snebron8691"},{"no":43,"nama":"Dedy Ustman","nip":"-","gid":"G-25987","password":"snebron8718"},{"no":44,"nama":"Helmy Hartiningsih","nip":"-","gid":"G-41909","password":"snebron0953"}];
 const firebaseConfig={apiKey:"AIzaSyCSi5QKL-MapUUdGLV4OuiXupXa3XmRKvg",authDomain:"smpn1-brondong-absen.firebaseapp.com",projectId:"smpn1-brondong-absen",storageBucket:"smpn1-brondong-absen.firebasestorage.app",messagingSenderId:"174884842248",appId:"1:174884842248:web:8625540d5f3ff8b7f45abd"};
 let app,db,auth,allAbsen=[];
-try{app=initializeApp(firebaseConfig);db=getFirestore(app);auth=getAuth(app);document.getElementById('authConfigInfo').innerHTML=`✅ Terhubung ke <b>${firebaseConfig.projectId}</b><br>Auth OK • Silakan login`;onAuthStateChanged(auth,(user)=>{if(user){document.getElementById('adminLoginScreen').classList.add('hidden');document.getElementById('adminContent').classList.remove('hidden');document.getElementById('authBadge').textContent=`✅ ${user.email}`;document.getElementById('authBadge').classList.remove('hidden');document.getElementById('logoutBtn').classList.remove('hidden');document.getElementById('authInfo').textContent=`✅ ${user.email}`;document.getElementById('authUid').textContent=`UID: ${user.uid.slice(0,16)}...`;document.getElementById('lastLoginInfo').textContent=`Login: ${user.metadata.lastSignInTime||''}`;initMap();initGuruSelect();renderGurus();loadRekap();}else{document.getElementById('adminLoginScreen').classList.remove('hidden');document.getElementById('adminContent').classList.add('hidden');document.getElementById('authBadge').classList.add('hidden');document.getElementById('logoutBtn').classList.add('hidden');}});}catch(e){document.getElementById('authConfigInfo').innerHTML=`❌ ${e.message}`;}
-const eyeOpen=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
-const eyeClosed=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.53 9.53a3 3 0 1 0 4.24 4.24"/><path d="M3 3l18 18"/></svg>`;
+try{app=initializeApp(firebaseConfig);db=getFirestore(app);auth=getAuth(app);document.getElementById('authConfigInfo').innerHTML=`✅ Terhubung ke <b>${firebaseConfig.projectId}</b><br>Auth OK • Silakan login`;onAuthStateChanged(auth,(user)=>{if(user){document.getElementById('adminLoginScreen').classList.add('hidden');document.getElementById('adminContent').classList.remove('hidden');document.getElementById('authBadge').textContent=`✅ ${user.email}`;document.getElementById('authBadge').classList.remove('hidden');document.getElementById('logoutBtn').classList.remove('hidden');document.getElementById('authInfo').textContent=`✅ ${user.email}`;document.getElementById('authUid').textContent=`UID: ${user.uid.slice(0,16)}...`;document.getElementById('lastLoginInfo').textContent=`Login: ${user.metadata.lastSignInTime||''}`;initMap();initGuruSelect();loadGurusFromFirestore().then(()=>{ renderGurus(); });loadPasswords();loadRekap();}else{document.getElementById('adminLoginScreen').classList.remove('hidden');document.getElementById('adminContent').classList.add('hidden');document.getElementById('authBadge').classList.add('hidden');document.getElementById('logoutBtn').classList.add('hidden');}});}catch(e){document.getElementById('authConfigInfo').innerHTML=`❌ ${e.message}`;}
+setTimeout(()=>{ if(typeof loadGurusFromFirestore==='function') loadGurusFromFirestore(); }, 1000);
+const eyeOpen=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7Z" stroke="#0f355c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="#0f355c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="1.5" fill="#0f355c"/></svg>`;
+const eyeClosed=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3l18 18M10.58 10.58a3 3 0 0 0 4.24 4.24M9.53 9.53A10.07 10.07 0 0 0 2.39 12c1.73 3.89 6 7 11 7a9.96 9.96 0 0 0 4.22-1M14.12 14.12A3 3 0 0 1 9.88 9.88" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 function showErr(t,type){const el=document.getElementById('adminLoginError');el.innerHTML=t;el.classList.remove('hidden');el.style.background=type==='info'?'#f0f9ff':'#fee2e2';el.style.border=type==='info'?'1px solid #bae6fd':'1px solid #fecaca';el.style.color=type==='info'?'#0369a1':'#991b1b';}
 document.getElementById('eyeBtn').onclick=()=>{const i=document.getElementById('adminPass');const b=document.getElementById('eyeBtn');if(i.type==='password'){i.type='text';b.innerHTML=eyeClosed;}else{i.type='password';b.innerHTML=eyeOpen;}};
+
+// Enter to login - laptop
+document.getElementById('adminPass')?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('loginBtn')?.click(); } });
+document.getElementById('adminEmail')?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('adminPass')?.focus(); } });
+
 document.getElementById('loginBtn').onclick=async()=>{const email=document.getElementById('adminEmail').value.trim().replace('@@','@');const pass=document.getElementById('adminPass').value.trim();const btn=document.getElementById('loginBtn');if(!email||!pass){showErr('Isi email dan password','error');return;}btn.textContent='⏳ Mengecek...';btn.disabled=true;try{await signInWithEmailAndPassword(auth,email,pass);}catch(e){let m=e.message;if(e.code==='auth/invalid-credential')m='❌ Email atau password salah! Cek lagi.';if(e.code==='auth/invalid-email')m='❌ Format email salah!';if(e.code==='auth/too-many-requests')m='❌ Terlalu banyak percobaan, tunggu sebentar.';showErr(m,'error');}btn.textContent='Masuk Secure →';btn.disabled=false;};
-document.getElementById('forgotBtn').onclick=async()=>{const email=document.getElementById('adminEmail').value.trim().replace('@@','@');if(!email){showErr('Isi email dulu untuk reset!','error');return;}try{await sendPasswordResetEmail(auth,email);showErr(`✅ Email reset terkirim ke <b>${email}</b>. Cek inbox/spam.`,'info');}catch(e){showErr(e.message,'error');}};
+document.getElementById('forgotBtn').onclick=async()=>{
+  const email=document.getElementById('adminEmail').value.trim().replace('@@','@');
+  if(!email){showErr('Isi email dulu untuk reset! Contoh: smpnegeri1brondong@gmail.com','error');return;}
+  const btn=document.getElementById('forgotBtn');
+  btn.textContent='⏳ Mengirim...'; btn.disabled=true;
+  try{
+    await sendPasswordResetEmail(auth,email);
+    showErr(`✅ Email reset terkirim ke <b>${email}</b>. Cek inbox/spam folder, klik link reset. Kalau tidak ada, cek di Firebase Auth apakah email terdaftar.`,'info');
+  }catch(e){
+    let m=e.message;
+    if(e.code==='auth/user-not-found') m='❌ Email tidak terdaftar di Firebase Auth! Daftarkan dulu di Firebase Console → Authentication → Users';
+    if(e.code==='auth/invalid-email') m='❌ Format email salah';
+    showErr(m,'error');
+  }
+  btn.textContent='Lupa Password? Reset via Email';
+  btn.disabled=false;
+};
 window.doLogout=async()=>{await signOut(auth);};
 window.switchTab=(tab)=>{document.getElementById('tabLaporan').classList.toggle('active',tab==='laporan');document.getElementById('tabGuru').classList.toggle('active',tab==='guru');document.getElementById('panelLaporan').classList.toggle('hidden',tab!=='laporan');document.getElementById('panelGuru').classList.toggle('hidden',tab!=='guru');if(tab==='guru') setTimeout(()=>renderGurus(),100);};
-function initMap(){const map=L.map('mapAdmin',{zoomControl:false}).setView([LAT,LNG],16);L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20}).addTo(map);L.circle([LAT,LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f4c81',fillOpacity:0.12}).addTo(map);L.marker([LAT,LNG]).addTo(map);}
+let mapAdmin, adminCircle, adminMarker;
+function initMap(){mapAdmin=L.map('mapAdmin',{zoomControl:false}).setView([LAT,LNG],16);L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20}).addTo(mapAdmin);adminCircle=L.circle([LAT,LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f4c81',fillOpacity:0.12}).addTo(mapAdmin);adminMarker=L.marker([LAT,LNG]).addTo(mapAdmin); window.mapAdmin=mapAdmin; window.adminCircle=adminCircle; window.circle=adminCircle; }
 function initGuruSelect(){const sel=document.getElementById('filterGuruSelect');gurus.forEach(g=>{const o=document.createElement('option');o.value=g.gid;o.textContent=`${g.gid} - ${g.nama}`;sel.appendChild(o);});}
 let customPassMap={};
 async function loadPasswords(){document.getElementById('rekapInfo').textContent='Memuat...';try{const snap=await getDocs(collection(db,"users"));customPassMap={};snap.forEach(d=>{customPassMap[d.id]=d.data();});document.getElementById('rekapInfo').innerHTML=`✅ ${snap.size} custom password`;renderGurus();}catch(e){document.getElementById('rekapInfo').innerHTML=`❌ ${e.message}`;}}
 window.loadPasswords=loadPasswords;
-function renderGurus(filter=''){const grid=document.getElementById('guruGrid');if(!grid)return;grid.innerHTML='';let list=gurus;if(filter){const f=filter.toLowerCase();list=gurus.filter(g=>g.nama.toLowerCase().includes(f)||g.gid.toLowerCase().includes(f));}document.getElementById('totalGuruInfo').textContent=list.length+' guru';list.forEach((g,i)=>{const isHonorer=g.nip==='-'||!g.nip;const custom=customPassMap[g.gid];const div=document.createElement('div');div.className='card';div.style.display='flex';div.style.flexDirection='column';div.style.gap='12px';const qrId='qr-'+i+'-'+g.gid;div.innerHTML=`<div style="display:flex;gap:12px"><div id="${qrId}" style="width:84px;height:84px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px"></div><div style="flex:1"><div style="font-weight:800;color:#0f355c;font-size:13px">${g.nama} ${isHonorer?'<span style="background:#fef3c7;color:#92400e;font-size:9px;padding:2px 6px;border-radius:999px">HONORER</span>':''}</div><div style="font-size:11px;color:#64748b">NIP: ${g.nip||'-'} • ${g.gid}</div><div style="margin-top:6px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:8px"><div style="font-size:9px;color:#94a3b8">DEFAULT</div><div style="font-family:monospace;font-weight:800">${g.password}</div>${custom?`<div style="margin-top:6px;border-top:1px solid #e2e8f0;padding-top:6px"><div style="font-size:9px;color:#dc2626">CUSTOM</div><div style="font-family:monospace;font-weight:800;color:#dc2626">${custom.password_custom}</div></div>`:''}</div></div></div><div style="display:flex;gap:6px"><button class="btn" style="flex:1;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;height:36px" data-gid="${g.gid}" data-act="reset">🔄 Reset</button><button class="btn" style="flex:1;background:#0f355c;color:white;height:36px" data-gid="${g.gid}" data-act="copy">📋 Copy</button></div>`;grid.appendChild(div);setTimeout(()=>{const el=document.getElementById(qrId);if(!el)return;el.innerHTML='';new QRCode(el,{text:`${g.gid}|${g.nama}|${g.nip}`,width:84,height:84,colorDark:"#0f355c",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});},100);});grid.querySelectorAll('button[data-act="reset"]').forEach(b=>{b.onclick=async()=>{const gid=b.dataset.gid;if(!confirm('Reset '+gid+'?'))return;try{await deleteDoc(doc(db,"users",gid));alert('✅ Reset!');delete customPassMap[gid];renderGurus(document.getElementById('searchGuru').value);}catch(e){alert(e.message);}};});grid.querySelectorAll('button[data-act="copy"]').forEach(b=>{b.onclick=()=>{const g=gurus.find(x=>x.gid===b.dataset.gid);const c=customPassMap[b.dataset.gid];const t=c?c.password_custom:g.password;navigator.clipboard.writeText(t).then(()=>alert('Copied: '+t));};});}
+
+async function loadGurusFromFirestore(){
+  try{
+    if(typeof db==='undefined' || !db) return;
+    const {collection, getDocs} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const snap = await getDocs(collection(db, "gurus"));
+    if(snap.empty) return;
+    let map={};
+    // map dari gurus statis
+    gurus.forEach(g=>{ map[g.gid]=g; });
+    snap.forEach(d=>{
+      const data=d.data();
+      const gid=data.gid||data.GID||d.id;
+      if(!gid) return;
+      if(map[gid]){
+        // update existing
+        map[gid].nama = data.nama||data.Nama||map[gid].nama;
+        map[gid].nip = data.nip||data.NIP||map[gid].nip;
+        if(data.password) map[gid].password = data.password;
+        map[gid].gid = gid;
+      } else {
+        // new guru from Firestore
+        map[gid] = {no:Object.keys(map).length+1, nama:data.nama||data.Nama||'-', nip:data.nip||data.NIP||'-', gid:gid, password:data.password||'snebron0000'};
+      }
+    });
+    // merge CUSTOM_GURUS_V5 juga biar edit lokal yang belum ke Firestore tetap kebaca
+    try{
+      let customs=JSON.parse(localStorage.getItem('CUSTOM_GURUS_V5')||'[]');
+      customs.forEach(cc=>{
+        if(cc.deleted){ delete map[cc.gid]; return; }
+        if(map[cc.gid]){
+          map[cc.gid].nama = cc.nama||map[cc.gid].nama;
+          map[cc.gid].nip = cc.nip||map[cc.gid].nip;
+          if(cc.password) map[cc.gid].password = cc.password;
+        } else if(!cc.deleted){
+          map[cc.gid] = {no:Object.keys(map).length+1, nama:cc.nama, nip:cc.nip||'-', gid:cc.gid, password:cc.password||'snebron0000'};
+        }
+      });
+    }catch(e){}
+    // replace gurus array
+    const newList = Object.values(map);
+    gurus.length=0;
+    newList.forEach(g=>gurus.push(g));
+    console.log('✅ gurus loaded dari Firestore:', gurus.length);
+    if(typeof renderGurus==='function') renderGurus(document.getElementById('searchGuru')?.value||'');
+  }catch(e){ console.log('loadGurus fail', e.message); }
+}
+window.loadGurusFromFirestore=loadGurusFromFirestore;
+
+
+
+function downloadQR(gid, nama){
+  // find original small QR to get data
+  let el = document.getElementById('qr-'+gid) || document.querySelector(`[id$='-${gid}']`);
+  if(!el){
+    const all = document.querySelectorAll('[id^="qr-"]');
+    for(const a of all){ if(a.id.includes(gid)){ el=a; break; } }
+  }
+  // Instead of auto download, open modal
+  openQRModal(gid, nama);
+}
+function openQRModal(gid, nama){
+  const modal = document.getElementById('qrModal');
+  const box = document.getElementById('qrModalBox');
+  const namaEl = document.getElementById('qrModalNama');
+  const gidEl = document.getElementById('qrModalGID');
+  const dlBtn = document.getElementById('qrModalDownloadBtn');
+  if(!modal || !box) return;
+  const g = (typeof gurus!=='undefined') ? gurus.find(x=>x.gid===gid) : null;
+  const nip = g ? g.nip : '';
+  namaEl.textContent = nama || (g?g.nama:gid);
+  gidEl.textContent = gid + (nip ? ' • '+nip : '');
+  box.innerHTML='';
+  // generate large QR 240x240
+  new QRCode(box, {text: `${gid}`, width:240, height:240, colorDark:"#0f355c", colorLight:"#ffffff", correctLevel:QRCode.CorrectLevel.M});
+  modal.classList.remove('hidden');
+  modal.style.display='flex';
+  dlBtn.onclick=()=>{
+    const canvas = box.querySelector('canvas');
+    const img = box.querySelector('img');
+    let dataURL='';
+    if(canvas) dataURL=canvas.toDataURL('image/png');
+    else if(img) dataURL=img.src;
+    if(!dataURL) return;
+    const a=document.createElement('a');
+    a.download=`QR-${gid}-${(nama||'').replace(/[^a-zA-Z0-9]/g,'_')}.png`;
+    a.href=dataURL;
+    a.click();
+  };
+}
+function closeQRModal(){
+  const modal=document.getElementById('qrModal');
+  if(modal){ modal.classList.add('hidden'); modal.style.display='none'; document.getElementById('qrModalBox').innerHTML=''; }
+}
+window.downloadQR=downloadQR;
+window.openQRModal=openQRModal;
+window.closeQRModal=closeQRModal;
+// close on backdrop click
+document.addEventListener('click', (e)=>{ const m=document.getElementById('qrModal'); if(e.target===m) closeQRModal(); });
+
+// Separate function for direct download without modal (for the 📥 QR button if user wants direct)
+function directDownloadQR(gid, nama){
+  let el = document.getElementById('qr-'+gid) || document.querySelector(`[id$='-${gid}']`);
+  if(!el){
+    const all = document.querySelectorAll('[id^="qr-"]');
+    for(const a of all){ if(a.id.includes(gid)){ el=a; break; } }
+  }
+  if(!el) return;
+  const canvas=el.querySelector('canvas');
+  const img=el.querySelector('img');
+  let dataURL='';
+  if(canvas) dataURL=canvas.toDataURL();
+  else if(img) dataURL=img.src;
+  else return;
+  const a=document.createElement('a');
+  a.download=`QR-${gid}-${(nama||'').replace(/[^a-zA-Z0-9]/g,'_')}.png`;
+  a.href=dataURL;
+  a.click();
+}
+window.directDownloadQR=directDownloadQR;
+
+
+
+function copyDataQR(gid, nama, nip){
+  const text = `${gid}`;
+  navigator.clipboard.writeText(text).then(()=>alert('✅ Copy Data QR: '+text)).catch(()=>{ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); alert('✅ Copied'); });
+}
+function copyPass(gid){
+  const g = gurus.find(x=>x.gid===gid);
+  const custom = (typeof customPassMap!=='undefined') ? customPassMap[gid] : null;
+  const t = custom ? custom.password_custom : (g?g.password:'');
+  navigator.clipboard.writeText(t).then(()=>alert('✅ Password copied: '+t));
+}
+function resetPassword(gid){
+  if(!confirm('Reset password '+gid+'?')) return;
+  (async()=>{
+    try{ const {doc, deleteDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"); const d = window.db || (typeof db!=='undefined'?db:null); if(d){ await deleteDoc(doc(d,"users",gid)); } if(typeof customPassMap!=='undefined'){ delete customPassMap[gid]; } alert('✅ Reset!'); if(typeof renderGurus==='function') renderGurus(document.getElementById('searchGuru')?.value||''); }catch(e){ alert(e.message); }
+  })();
+}
+function ubahPassword(gid){
+  const g = gurus.find(x=>x.gid===gid);
+  const cur = (customPassMap && customPassMap[gid]) ? customPassMap[gid].password_custom : '';
+  const baru = prompt('Ubah Password untuk '+ (g?g.nama:gid) + '\nKosongkan untuk batal\nCurrent custom: ' + (cur||'(default)'), cur||'');
+  if(baru===null) return;
+  if(baru.trim()===''){ alert('Batal'); return; }
+  (async()=>{
+    try{ const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"); const d = window.db || (typeof db!=='undefined'?db:null); if(d){ await setDoc(doc(d,"users",gid), {password_custom:baru.trim(), gid:gid, updated_at:new Date().toISOString()}, {merge:true}); } if(typeof customPassMap!=='undefined'){ customPassMap[gid]={password_custom:baru.trim()}; } alert('✅ Password diubah'); if(typeof renderGurus==='function') renderGurus(document.getElementById('searchGuru')?.value||''); }catch(e){ alert(e.message); }
+  })();
+}
+function hapusGuru(gid){
+  if(!confirm('Hapus Guru '+gid+'?')) return;
+  (async()=>{
+    try{
+      // hapus dari custom localStorage
+      const LS='CUSTOM_GURUS_V5';
+      let customs=[]; try{ customs=JSON.parse(localStorage.getItem(LS)||'[]'); }catch(e){ customs=[]; }
+      let ex=customs.find(c=>c.gid===gid);
+      if(ex) ex.deleted=true; else customs.push({gid:gid,deleted:true});
+      localStorage.setItem(LS, JSON.stringify(customs));
+      // hapus dari array gurus
+      const idx=gurus.findIndex(x=>x.gid===gid);
+      if(idx>-1) gurus.splice(idx,1);
+      // coba hapus dari Firestore gurus (optional)
+      try{ const {doc, deleteDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"); const d=window.db||db; if(d){ await deleteDoc(doc(d,"gurus",gid)); } }catch(e){}
+      alert('✅ Guru dihapus');
+      renderGurus(document.getElementById('searchGuru')?.value||'');
+    }catch(e){ alert(e.message); }
+  })();
+}
+let editingGID=null;
+function openEditGuru(gid){
+  const g=gurus.find(x=>x.gid===gid);
+  if(!g) return;
+  editingGID=gid;
+  document.getElementById('editNamaLengkap').value=g.nama;
+  document.getElementById('editNIP').value=g.nip||'';
+  document.getElementById('editGID').value=g.gid;
+  document.getElementById('editPassDefault').value=g.password;
+  document.getElementById('modalEditGuru').classList.remove('hidden');
+  document.getElementById('modalEditGuru').style.display='flex';
+}
+function closeEditGuru(){
+  document.getElementById('modalEditGuru').classList.add('hidden');
+  document.getElementById('modalEditGuru').style.display='none';
+  editingGID=null;
+}
+function updateGuru(){
+  if(!editingGID) return;
+  const nama=document.getElementById('editNamaLengkap').value.trim();
+  const nip=document.getElementById('editNIP').value.trim()||'-';
+  let gid=document.getElementById('editGID').value.trim()||editingGID;
+  const pass=document.getElementById('editPassDefault').value.trim();
+  if(!nama){ alert('Nama wajib'); return; }
+  (async()=>{
+    try{
+      const {doc, setDoc, getDoc, deleteDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      const d = (typeof db!=='undefined'?db:null);
+      if(!d) throw new Error('db belum siap');
+      const oldG = (typeof gurus!=='undefined'? gurus.find(x=>x.gid===editingGID) : null);
+      const oldPass = oldG ? oldG.password : '';
+      const isPassChanged = pass && pass !== oldPass;
+      // ambil old_gids dari doc lama biar alias chain gak putus
+      let prevOldGids = oldG ? (oldG.old_gids||[]) : [];
+      try{
+        const oldSnap = await getDoc(doc(d, "gurus", editingGID));
+        if(oldSnap.exists()){
+          const od = oldSnap.data();
+          if(od.old_gids && Array.isArray(od.old_gids)) prevOldGids = od.old_gids;
+        }
+      }catch(e){}
+      let newOldGids = [...prevOldGids];
+      if(gid!==editingGID && !newOldGids.includes(editingGID)) newOldGids.push(editingGID);
+      // FIX alias: simpan old_gids di doc baru
+      await setDoc(doc(d, "gurus", gid), {gid:gid, GID:gid, nama:nama, Nama:nama, nip:nip, NIP:nip, password:pass||oldPass, old_gids:newOldGids, updated_at:new Date().toISOString(), updated_by:'admin'}, {merge:true});
+      if(gid!==editingGID){ try{ await deleteDoc(doc(d, "gurus", editingGID)); }catch(e){} }
+      if(isPassChanged){
+        try{ await setDoc(doc(d, "users", gid), {gid:gid, password:pass, password_custom:pass, nama:nama, nip:nip, updated_at:new Date().toISOString()}, {merge:true}); if(gid!==editingGID){ try{ await deleteDoc(doc(d, "users", editingGID)); }catch(e){} } }catch(e){}
+        try{ localStorage.setItem('SI-ABSEN_PASS_'+gid, pass); }catch(e){}
+      }
+      const LS='CUSTOM_GURUS_V5';
+      let customs=[]; try{ customs=JSON.parse(localStorage.getItem(LS)||'[]'); }catch(e){ customs=[]; }
+      let ex=customs.find(c=>c.gid===editingGID);
+      if(ex){ ex.nama=nama; ex.nip=nip; ex.gid=gid; ex.old_gids=newOldGids; if(isPassChanged) ex.password=pass; ex.isNew=ex.isNew||false; }
+      else{ customs.push({gid:gid, nama:nama, nip:nip, old_gids:newOldGids, password:(isPassChanged?pass:undefined), isNew:false, originalGID:editingGID}); }
+      if(gid!==editingGID){ customs.push({gid:editingGID, deleted:true}); }
+      localStorage.setItem(LS, JSON.stringify(customs));
+      let idx=gurus.findIndex(x=>x.gid===editingGID);
+      if(idx>-1){ gurus[idx].nama=nama; gurus[idx].nip=nip; gurus[idx].gid=gid; gurus[idx].old_gids=newOldGids; if(isPassChanged) gurus[idx].password=pass; }
+      closeEditGuru(); renderGurus(document.getElementById('searchGuru')?.value||'');
+    }catch(e){ alert('Gagal update: '+(e.message||e)); console.error(e); }
+  })();
+}
+window.copyDataQR=copyDataQR;
+window.copyPass=copyPass;
+window.resetPassword=resetPassword;
+window.ubahPassword=ubahPassword;
+window.hapusGuru=hapusGuru;
+window.openEditGuru=openEditGuru;
+window.closeEditGuru=closeEditGuru;
+window.updateGuru=updateGuru;
+
+
+function simpanGTKBaru(){
+  const nama=document.getElementById('newNamaLengkap').value.trim();
+  const nipRaw=document.getElementById('newNIPBaru').value.trim();
+  const nip=nipRaw||'-';
+  let gid=document.getElementById('newGIDBaru').value.trim();
+  let passInput=document.getElementById('newPassBaru').value.trim();
+  if(!nama){ alert('Nama wajib diisi'); return; }
+  // LOGIKA BARU:
+  // - GID selalu acak 5 digit, gak ngikut NIP / password
+  // - Password: kalau ada NIP ambil 4 digit akhir NIP, kalau honorer (-) random 4 digit
+  function genRandomGID(){
+    let ng;
+    do{ ng='G-'+Math.floor(10000+Math.random()*90000); }while(typeof gurus!=='undefined' && gurus.find(g=>g.gid===ng));
+    return ng;
+  }
+  function last4Digits(s){
+    const d=(s||'').replace(/\D/g,'');
+    return d.slice(-4);
+  }
+  // GID: kalau user kosongin input → selalu random acak (termasuk honorer)
+  if(!gid){ gid=genRandomGID(); }
+  // Password: kalau user kosongin
+  if(!passInput){
+    if(nip!=='-' && last4Digits(nip).length===4){
+      passInput='snebron'+last4Digits(nip);
+    } else {
+      passInput='snebron'+Math.floor(1000+Math.random()*9000);
+    }
+  }
+  const pass=passInput;
+  if(typeof gurus!=='undefined' && gurus.find(g=>g.gid===gid)){ alert('GID sudah ada'); return; }
+  (async()=>{
+    try{
+      const LS='CUSTOM_GURUS_V5';
+      let customs=[]; try{ customs=JSON.parse(localStorage.getItem(LS)||'[]'); }catch(e){ customs=[]; }
+      customs.push({gid:gid, nama:nama, nip:nip, password:pass, isNew:true});
+      localStorage.setItem(LS, JSON.stringify(customs));
+      if(typeof gurus!=='undefined'){ gurus.push({no:gurus.length+1, nama:nama, nip:nip, gid:gid, password:pass}); }
+      // sync to Firestore collection gurus agar muncul di halaman-absen.html
+      try{
+        const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+        const d=window.db|| (typeof db!=='undefined'?db:null);
+        if(d){ await setDoc(doc(d,"gurus",gid), {gid:gid, nama:nama, Nama:nama, nip:nip, NIP:nip, password:pass, GID:gid, created_at:new Date().toISOString()}, {merge:true}); }
+      }catch(e){ console.log('firestore gurus sync', e); }
+      closeTambahGTK();
+      document.getElementById('newNamaLengkap').value='';
+      document.getElementById('newNIPBaru').value='';
+      document.getElementById('newGIDBaru').value='';
+      document.getElementById('newPassBaru').value='snebron'+Math.floor(1000+Math.random()*9000);
+      alert('✅ Simpan & Sinkron berhasil - GID '+gid);
+      if(typeof renderGurus==='function') renderGurus(document.getElementById('searchGuru')?.value||'');
+    }catch(e){ alert(e.message); }
+  })();
+}
+function openTambahGTK(){
+  document.getElementById('modalTambahGTK').classList.remove('hidden');
+  document.getElementById('modalTambahGTK').style.display='flex';
+}
+function closeTambahGTK(){
+  document.getElementById('modalTambahGTK').classList.add('hidden');
+  document.getElementById('modalTambahGTK').style.display='none';
+}
+window.simpanGTKBaru=simpanGTKBaru;
+window.openTambahGTK=openTambahGTK;
+window.closeTambahGTK=closeTambahGTK;
+
+function renderGurus(filter=''){const grid=document.getElementById('guruGrid');if(!grid)return;grid.innerHTML='';let list=gurus;if(filter){const f=filter.toLowerCase();list=gurus.filter(g=>g.nama.toLowerCase().includes(f)||g.gid.toLowerCase().includes(f));}document.getElementById('totalGuruInfo').textContent=list.length+' guru';list.forEach((g,i)=>{const isHonorer=g.nip==='-'||!g.nip;const custom=customPassMap[g.gid];const div=document.createElement('div');div.className='card';div.style.display='flex';div.style.flexDirection='column';div.style.gap='12px';const qrId='qr-'+i+'-'+g.gid;div.innerHTML=`<div style="display:flex;gap:12px"><div id="${qrId}" style="width:84px;height:84px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer" title="Klik untuk preview QR"></div><div style="flex:1"><div style="font-weight:800;color:#0f355c;font-size:14px">${g.nama} ${isHonorer?'<span style="background:#fef3c7;color:#92400e;font-size:9px;padding:2px 6px;border-radius:999px">HONORER</span>':''}</div><div style="font-size:11px;color:#64748b;margin-top:2px">NIP: ${g.nip||'-'} • ${g.gid}</div><div style="margin-top:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="font-size:9px;color:#94a3b8;font-weight:700">DEFAULT</div><div style="font-family:monospace;font-weight:800;font-size:13px">${g.password}</div>${custom && custom.password_custom && custom.password_custom!==g.password ? `<div style="margin-top:6px;border-top:1px solid #e2e8f0;padding-top:6px"><div style="font-size:9px;color:#dc2626;font-weight:700">CUSTOM</div><div style="font-family:monospace;font-weight:800;color:#dc2626;font-size:13px">${custom.password_custom}</div></div>` : ''}</div></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+  <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="directDownloadQR('${g.gid}','${g.nama}')">⬇️ Download QR</button>
+  <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="copyDataQR('${g.gid}','${g.nama}','${g.nip}')">📋 Copy Data QR</button>
+  <button style="height:40px;border-radius:12px;border:1px solid #fde68a;background:#fef9c3;font-weight:700;color:#92400e;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="ubahPassword('${g.gid}')">🔑 Ubah Password</button>
+  <button style="height:40px;border-radius:12px;border:1px solid #fecaca;background:#fee2e2;font-weight:700;color:#991b1b;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="resetPassword('${g.gid}')">🔄 Reset</button>
+  <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="copyPass('${g.gid}')">📋 Copy Pass</button>
+  <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="openEditGuru('${g.gid}')">✏️ Edit</button>
+  <button style="height:40px;border-radius:12px;border:1px solid #fecaca;background:#fee2e2;font-weight:700;color:#991b1b;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;grid-column:span 2" onclick="hapusGuru('${g.gid}')">🗑️ Hapus Guru</button>
+</div>`;;grid.appendChild(div);setTimeout(()=>{const el=document.getElementById(qrId);if(!el)return;el.innerHTML='';new QRCode(el,{text:`${g.gid}`,width:84,height:84,colorDark:"#0f355c",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M}); el.style.cursor='pointer'; el.title='Klik untuk download QR'; el.onclick=()=>downloadQR(g.gid,g.nama); },100);});grid.querySelectorAll('button[data-act="reset"]').forEach(b=>{b.onclick=async()=>{const gid=b.dataset.gid;if(!confirm('Reset '+gid+'?'))return;try{await deleteDoc(doc(db,"users",gid));alert('✅ Reset!');delete customPassMap[gid];renderGurus(document.getElementById('searchGuru').value);}catch(e){alert(e.message);}};});grid.querySelectorAll('button[data-act="copy"]').forEach(b=>{b.onclick=()=>{const g=gurus.find(x=>x.gid===b.dataset.gid);const c=customPassMap[b.dataset.gid];const t=c?c.password_custom:g.password;navigator.clipboard.writeText(t).then(()=>alert('Copied: '+t));};});}
 document.getElementById('searchGuru').oninput=()=>{renderGurus(document.getElementById('searchGuru').value);};
 async function loadRekap(){const grid=document.getElementById('laporanBody');grid.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px">Memuat...</td></tr>';try{const q=query(collection(db,"absensi"),orderBy("waktu","desc"),limit(1000));const snap=await getDocs(q);allAbsen=[];snap.forEach(d=>{const data=d.data();data._id=d.id;allAbsen.push(data);});applyFilter();document.getElementById('rekapInfo').textContent=`${allAbsen.length} data dimuat`;}catch(e){grid.innerHTML=`<tr><td colspan="9" style="color:red">${e.message}</td></tr>`;}}
 window.loadRekap=loadRekap;
-function applyFilter(){const tgl=document.getElementById('filterTanggal').value;const gid=document.getElementById('filterGuruSelect').value;const kategori=document.getElementById('filterKategori').value;const jenis=document.getElementById('filterJenis').value;const status=document.getElementById('filterStatus').value;const search=document.getElementById('searchLaporan').value.toLowerCase();let filtered=allAbsen;if(tgl){filtered=filtered.filter(d=>{const dt=new Date(d.waktu);return dt.toISOString().split('T')[0]===tgl;});}if(gid){filtered=filtered.filter(d=>d.gid===gid);}if(kategori){filtered=filtered.filter(d=>(d.kategori_absen||'')===kategori);}if(jenis){filtered=filtered.filter(d=>(d.jenis_absen||'')===jenis);}if(status){filtered=filtered.filter(d=>d.status===status);}if(search){filtered=filtered.filter(d=> (d.nama||'').toLowerCase().includes(search) || (d.gid||'').toLowerCase().includes(search) );}const body=document.getElementById('laporanBody');if(filtered.length===0){body.innerHTML='<tr><td colspan="9" style="text-align:center;color:#94a3b8">Tidak ada data sesuai filter</td></tr>';}else{body.innerHTML='';filtered.forEach(data=>{const dt=new Date(data.waktu);const jam=dt.toLocaleTimeString('id-ID');const tglStr=dt.toLocaleDateString('id-ID');const kat=data.kategori_absen||'TEPAT_WAKTU';const badgeKat=kat==='TEPAT_WAKTU'?'badge-tepat':kat==='TELAT'?'badge-telat':'badge-diluar';const tr=document.createElement('tr');tr.innerHTML=`<td><div style="font-weight:700">${tglStr}</div><div style="font-size:10px;color:#64748b">${jam}</div></td><td style="font-weight:700;color:#0f355c">${data.nama||'-'}</td><td><span style="font-size:10px;background:#f1f5f9;border:1px solid #e2e8f0;padding:2px 6px;border-radius:999px">${data.gid}</span></td><td><span class="badge" style="background:#f8fafc">${data.jenis_absen||'-'}</span></td><td><span class="badge ${badgeKat}">${data.label_absen||kat}</span></td><td><span class="badge ${data.status==='VALID'?'badge-tepat':'badge-diluar'}">${data.status||'-'}</span></td><td>${data.jarak_meter||0}m</td><td>${data.telat_menit?data.telat_menit+' menit':'-'}</td><td style="font-size:10px">${data.plus_code||''}</td>`;body.appendChild(tr);});}document.getElementById('totalAbsen').textContent=filtered.length;document.getElementById('totalTepat').textContent=filtered.filter(d=> (d.kategori_absen||'TEPAT_WAKTU')==='TEPAT_WAKTU').length;document.getElementById('totalTelat').textContent=filtered.filter(d=>d.kategori_absen==='TELAT').length;document.getElementById('totalDiluar').textContent=filtered.filter(d=>d.kategori_absen==='DILUAR_JAM_KERJA').length;}
+
+window.updateBulkBar=()=>{
+  const checked=document.querySelectorAll('.chk-laporan:checked');
+  const bar=document.getElementById('bulkBar');
+  if(!bar) return;
+  const count=checked.length;
+  if(count>0){ bar.style.display='flex'; document.getElementById('bulkCount').textContent=count+' dipilih'; } else { bar.style.display='none'; }
+};
+window.batalPilih=()=>{ document.querySelectorAll('.chk-laporan').forEach(c=>c.checked=false); const all=document.getElementById('checkAllLaporan'); if(all) all.checked=false; updateBulkBar(); };
+window.toggleAllLaporan=(el)=>{ document.querySelectorAll('.chk-laporan').forEach(c=>c.checked=el.checked); updateBulkBar(); };
+window.exportTerpilih=()=>{
+  const ids=Array.from(document.querySelectorAll('.chk-laporan:checked')).map(c=>c.value);
+  if(ids.length===0) return alert('Pilih dulu centang laporan');
+  const selected=allAbsen.filter(a=>ids.includes(a._id));
+  const rows=selected.map(d=>{ const dt=new Date(d.waktu); return {GID:d.gid,Nama:d.nama,Tanggal:dt.toLocaleDateString('id-ID'),Jam:dt.toLocaleTimeString('id-ID'),Jenis:d.jenis_absen||'',Kategori:d.kategori_absen||'',Label:d.label_absen||'',Status:d.status||'',Jarak:d.jarak_meter||0,Telat:d.telat_menit||0,PlusCode:d.plus_code||'36R6+X89'}; });
+  const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Terpilih"); XLSX.writeFile(wb,"Laporan_Terpilih_"+ids.length+".xlsx");
+};
+window.hapusTerpilih=async()=>{
+  const ids=Array.from(document.querySelectorAll('.chk-laporan:checked')).map(c=>c.value);
+  if(ids.length===0) return;
+  if(!confirm('Hapus '+ids.length+' data terpilih?')) return;
+  try{ for(const id of ids){ await deleteDoc(doc(db,"absensi",id)); } alert('✅ '+ids.length+' dihapus'); allAbsen=allAbsen.filter(a=>!ids.includes(a._id)); applyFilter(); }catch(e){ alert(e.message); }
+};
+
+function applyFilter(){const tgl=document.getElementById('filterTanggal').value;const gid=document.getElementById('filterGuruSelect').value;const kategori=document.getElementById('filterKategori').value;const jenis=document.getElementById('filterJenis').value;const status=document.getElementById('filterStatus').value;const search=document.getElementById('searchLaporan').value.toLowerCase();let filtered=allAbsen;if(tgl){filtered=filtered.filter(d=>{const dt=new Date(d.waktu);return dt.toISOString().split('T')[0]===tgl;});}if(gid){filtered=filtered.filter(d=>d.gid===gid);}if(kategori){filtered=filtered.filter(d=>(d.kategori_absen||'')===kategori);}if(jenis){filtered=filtered.filter(d=>(d.jenis_absen||'')===jenis);}if(status){filtered=filtered.filter(d=>d.status===status);}if(search){filtered=filtered.filter(d=> (d.nama||'').toLowerCase().includes(search) || (d.gid||'').toLowerCase().includes(search) );}const body=document.getElementById('laporanBody');if(filtered.length===0){body.innerHTML='<tr><td colspan="9" style="text-align:center;color:#94a3b8">Tidak ada data sesuai filter</td></tr>';}else{body.innerHTML='';filtered.forEach(data=>{const dt=new Date(data.waktu);const jam=dt.toLocaleTimeString('id-ID');const tglStr=dt.toLocaleDateString('id-ID');const kat=data.kategori_absen||'TEPAT_WAKTU';const badgeKat=kat==='TEPAT_WAKTU'?'badge-tepat':kat==='TELAT'?'badge-telat':'badge-diluar';const tr=document.createElement('tr');tr.innerHTML=`<td><div style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" class="chk-laporan" value="${data._id}" onchange="updateBulkBar()" style="margin-top:4px;width:16px;height:16px"><div><div style="font-weight:700">${tglStr}</div><div style="font-size:10px;color:#64748b">${jam}</div></div></div></td><td style="font-weight:700;color:#0f355c">${data.nama||'-'}</td><td><span style="font-size:10px;background:#f1f5f9;border:1px solid #e2e8f0;padding:2px 6px;border-radius:999px">${data.gid}</span></td><td><span class="badge" style="background:#f8fafc">${data.jenis_absen||'-'}</span></td><td><span class="badge ${badgeKat}">${data.label_absen||kat}</span></td><td><span class="badge ${data.status==='VALID'?'badge-tepat':'badge-diluar'}">${data.status||'-'}</span></td><td>${data.jarak_meter||0}m</td><td>${data.telat_menit?data.telat_menit+' menit':'-'}</td><td style="font-size:10px">${data.plus_code||''}</td>`;body.appendChild(tr);});}document.getElementById('totalAbsen').textContent=filtered.length;document.getElementById('totalTepat').textContent=filtered.filter(d=> (d.kategori_absen||'TEPAT_WAKTU')==='TEPAT_WAKTU').length;document.getElementById('totalTelat').textContent=filtered.filter(d=>d.kategori_absen==='TELAT').length;
+document.getElementById('totalDiluar').textContent=filtered.filter(d=>d.kategori_absen==='DILUAR_JAM_KERJA').length;
+  // === CARD VIEW GENERATION for HP like image_07ed30.png ===
+  try{
+    const cardsEl=document.getElementById('laporanCards');
+    if(cardsEl){
+      let cardsHtml='';
+      filtered.forEach(d=>{
+        const dt=new Date(d.waktu);
+        const tglStr=dt.toLocaleDateString('id-ID');
+        const jamStr=dt.toLocaleTimeString('id-ID');
+        const jamShort=dt.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+        const plus=d.plus_code||'36R6+X89';
+        const kategori=d.kategori_absen||'';
+        const labelKategori=d.label_absen||kategori.replace(/_/g,' ');
+        const jenis=d.jenis_absen||'DILUAR';
+        const radiusStatus=d.status||'LUAR_RADIUS';
+        const jarak=(d.jarak_meter||0)+'m';
+        const telat=d.telat_menit ? d.telat_menit+'m' : '-';
+        const badgeJenisClass = jenis==='DILUAR' || jenis==='DILUAR_JAM_KERJA' ? 'badge-diluar' : 'badge-valid';
+        const badgeRadiusClass = radiusStatus==='LUAR_RADIUS' ? 'badge-luar' : 'badge-valid';
+        const badgeKatClass = kategori.includes('DILUAR') || kategori==='DILUAR_JAM_KERJA' ? 'badge-diluar' : 'badge-valid';
+        cardsHtml+=`
+        <div class="lap-card">
+          <div style="font-size:10px;color:#94a3b8;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px"><input type="checkbox" class="chk-laporan" value="${d._id}" onchange="updateBulkBar()" style="width:16px;height:16px"> ${plus}</div>
+          <div class="lap-row"><span class="lap-label">TANGGAL</span><span class="lap-value" style="text-align:right"><div style="font-weight:800;font-size:15px">${tglStr}</div><div style="font-size:11px;color:#64748b">${jamStr} • ${jamShort}</div></span></div>
+          <div class="lap-row"><span class="lap-label">GURU</span><span class="lap-value" style="font-weight:800;color:#0f355c">${d.nama||'-'}</span></div>
+          <div class="lap-row"><span class="lap-label">GID</span><span class="lap-value"><span class="badge-pill badge-gid">${d.gid||'-'}</span></span></div>
+          <div class="lap-row"><span class="lap-label">JENIS</span><span class="lap-value"><span class="badge-pill ${badgeJenisClass}">${jenis}</span></span></div>
+          <div class="lap-row"><span class="lap-label">KATEGORI</span><span class="lap-value"><span class="badge-pill ${badgeKatClass}">${labelKategori}</span></span></div>
+          <div class="lap-row"><span class="lap-label">RADIUS</span><span class="lap-value"><span class="badge-pill ${badgeRadiusClass}">${radiusStatus}</span></span></div>
+          <div class="lap-row"><span class="lap-label">JARAK</span><span class="lap-value">${jarak}</span></div>
+          <div class="lap-row"><span class="lap-label">TELAT</span><span class="lap-value">${telat}</span></div>
+          <div class="lap-row"><span class="lap-label">PLUS CODE</span><span class="lap-value" style="font-weight:700">${plus}</span></div>
+        </div>`;
+      });
+      cardsEl.innerHTML=cardsHtml||'<div style="text-align:center;color:#94a3b8;padding:20px">Tidak ada data</div>';
+    }
+  }catch(e){ console.log('cards err', e); }
+  setTimeout(()=>{ document.querySelectorAll('.chk-laporan').forEach(ch=>{ ch.addEventListener('change', updateBulkBar); }); updateBulkBar(); },100); }
+
 document.getElementById('filterTanggal').onchange=applyFilter;document.getElementById('filterGuruSelect').onchange=applyFilter;document.getElementById('filterKategori').onchange=applyFilter;document.getElementById('filterJenis').onchange=applyFilter;document.getElementById('filterStatus').onchange=applyFilter;document.getElementById('searchLaporan').oninput=applyFilter;
 window.resetFilter=()=>{document.getElementById('filterTanggal').value='';document.getElementById('filterGuruSelect').value='';document.getElementById('filterKategori').value='';document.getElementById('filterJenis').value='';document.getElementById('filterStatus').value='';document.getElementById('searchLaporan').value='';applyFilter();};
 window.exportExcel=()=>{if(allAbsen.length===0){alert('Load dulu');return;}const tgl=document.getElementById('filterTanggal').value;const gid=document.getElementById('filterGuruSelect').value;const kat=document.getElementById('filterKategori').value;let filtered=allAbsen;if(tgl){filtered=filtered.filter(d=>new Date(d.waktu).toISOString().split('T')[0]===tgl);} if(gid){filtered=filtered.filter(d=>d.gid===gid);} if(kat){filtered=filtered.filter(d=>d.kategori_absen===kat);}const rows=filtered.map(d=>{const dt=new Date(d.waktu);return{GID:d.gid,Nama:d.nama,Tanggal:dt.toLocaleDateString('id-ID'),Jam:dt.toLocaleTimeString('id-ID'),Jenis:d.jenis_absen||'',Kategori:d.kategori_absen||'',Label:d.label_absen||'',Status_Radius:d.status||'',Jarak_meter:d.jarak_meter||0,Telat_menit:d.telat_menit||0,PlusCode:d.plus_code||'',Latitude:d.lat||'',Longitude:d.lng||'',Waktu_ISO:d.waktu};});const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Laporan Absen");XLSX.writeFile(wb,`laporan-absen-V4-${new Date().toISOString().split('T')[0]}.xlsx`);};
 window.exportCSV=async()=>{if(allAbsen.length===0){alert('Load dulu');return;}let csv="GID,Nama,Tanggal,Jam,Jenis,Kategori,Status,Jarak,Telat,PlusCode\n";const tgl=document.getElementById('filterTanggal').value;let filtered=allAbsen;if(tgl){filtered=filtered.filter(d=>new Date(d.waktu).toISOString().split('T')[0]===tgl);}filtered.forEach(d=>{const dt=new Date(d.waktu);csv+=`"${d.gid}","${d.nama}","${dt.toLocaleDateString('id-ID')}","${dt.toLocaleTimeString('id-ID')}","${d.jenis_absen||''}","${d.kategori_absen||''}","${d.status}",${d.jarak_meter||0},${d.telat_menit||0},"${d.plus_code||''}"\n`;});const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`laporan-V4-${new Date().toISOString().split('T')[0]}.csv`;a.click();};
 window.clearTest=async()=>{if(!confirm('Hapus semua data LUAR_RADIUS?'))return;try{const q=query(collection(db,"absensi"));const snap=await getDocs(q);let del=0;for(const d of snap.docs){const data=d.data();if(data.status==='LUAR_RADIUS'||(data.jarak_meter&&data.jarak_meter>100)){await deleteDoc(doc(db,"absensi",d.id));del++;}}alert(`${del} data dihapus`);loadRekap();}catch(e){alert(e.message);}};
-document.getElementById('radiusInput').oninput=e=>{RADIUS=parseInt(e.target.value)||40;localStorage.setItem('RADIUS_METER',RADIUS);};
+
+// === PATCH V5 20-70 SILENT + LIBUR + LIVE ===
+const MIN_R=20, MAX_R=70, DEF_R=40;
+function clampR(v){ let n=parseInt(v); if(isNaN(n)) return DEF_R; if(n<MIN_R) return MIN_R; if(n>MAX_R) return MAX_R; return n; }
+function toast(msg){ const t=document.createElement('div'); t.textContent=msg; t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0f355c;color:white;padding:10px 16px;border-radius:12px;font-weight:800;z-index:9999;font-size:12px'; document.body.appendChild(t); setTimeout(()=>t.remove(),2500); }
+
+// Override radius handling
+const radiusInputEl = document.getElementById('radiusInput');
+const radiusLabelEl = document.getElementById('radiusLabel');
+const saveRadiusBtn = document.getElementById('saveRadiusBtn');
+if(radiusInputEl){
+  radiusInputEl.min = MIN_R;
+  radiusInputEl.max = MAX_R;
+  radiusInputEl.step = 5;
+  radiusInputEl.addEventListener('input', (e)=>{ let v=clampR(e.target.value); RADIUS=v; if(radiusLabelEl) radiusLabelEl.textContent=v+'m'; localStorage.setItem('RADIUS_METER', String(v)); localStorage.setItem('RADIUS_CUSTOM', String(v)); });
+  radiusInputEl.addEventListener('change', (e)=>{ let v=clampR(e.target.value); e.target.value=v; RADIUS=v; if(radiusLabelEl) radiusLabelEl.textContent=v+'m'; localStorage.setItem('RADIUS_METER', String(v)); localStorage.setItem('RADIUS_CUSTOM', String(v)); if(typeof mapAdminCircle!=='undefined' && mapAdminCircle) mapAdminCircle.setRadius(v); if(window.adminCircle) window.adminCircle.setRadius(v); });
+}
+async function saveRadiusSilent(){
+  let v = clampR(document.getElementById('radiusInput')?.value || DEF_R);
+  document.getElementById('radiusInput').value = v;
+  RADIUS = v;
+  if(radiusLabelEl) radiusLabelEl.textContent = v+'m';
+  localStorage.setItem('RADIUS_METER', String(v));
+  localStorage.setItem('RADIUS_CUSTOM', String(v));
+  try{
+    const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    // db should exist from original file
+    if(window.db || typeof db!=='undefined'){
+      const d = window.db || db;
+      const ref = doc(d, "settings", "config");
+      await setDoc(ref, {radius:v, updated_at:new Date().toISOString(), updated_by:"admin"}, {merge:true});
+      toast(`✅ Radius ${v}m disimpan - silent untuk GTK`);
+    } else {
+      toast(`Radius ${v}m lokal disimpan`);
+    }
+  }catch(e){ console.log(e); toast(`Radius ${v}m lokal disimpan`); }
+  // update map circle if exists
+  try{ if(window.adminCircle) window.adminCircle.setRadius(v); if(window.circle) window.circle.setRadius(v); if(typeof adminCircle!=='undefined' && adminCircle) adminCircle.setRadius(v); if(typeof mapAdminCircle!=='undefined' && mapAdminCircle) mapAdminCircle.setRadius(v); }catch(e){}
+}
+if(saveRadiusBtn){ saveRadiusBtn.onclick = saveRadiusSilent; }
+
+// Load radius from Firestore + local
+async function loadRadiusV5(){
+  try{
+    const {doc, getDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d = window.db || (typeof db!=='undefined'?db:null);
+    if(d){
+      const snap = await getDoc(doc(d, "settings", "config"));
+      if(snap.exists() && snap.data().radius!==undefined){
+        let r = clampR(snap.data().radius);
+        RADIUS = r;
+        if(radiusInputEl) radiusInputEl.value = r;
+        if(radiusLabelEl) radiusLabelEl.textContent = r+'m';
+        localStorage.setItem('RADIUS_CUSTOM', String(r));
+        localStorage.setItem('RADIUS_METER', String(r));
+      }
+    }
+  }catch(e){}
+  // fallback local
+  const local = localStorage.getItem('RADIUS_CUSTOM') || localStorage.getItem('RADIUS_METER');
+  if(local){
+    let r=clampR(local);
+    RADIUS=r;
+    if(radiusInputEl) radiusInputEl.value=r;
+    if(radiusLabelEl) radiusLabelEl.textContent=r+'m';
+  }
+}
+loadRadiusV5();
+
+// === LIBUR LOGIC ===
+function getKategoriAbsenV5(date){
+  const day=date.getDay();
+  const menit=date.getHours()*60+date.getMinutes();
+  if(day===6) return {kategori:'LIBUR_SABTU', label:'Libur Sabtu', jenis:'LIBUR', valid:true};
+  if(day===0) return {kategori:'LIBUR_MINGGU', label:'Libur Minggu', jenis:'LIBUR', valid:true};
+  if(day===5){
+    if(menit>=360 && menit<=450) return {kategori:'TEPAT_WAKTU', label:'Tepat Waktu', jenis:'MASUK', valid:true};
+    if(menit>=451 && menit<=540) return {kategori:'TELAT', label:'Telat '+(menit-450)+'m', jenis:'MASUK', valid:true};
+    if(menit>=541 && menit<=599) return {kategori:'BELUM_WAKTUNYA_PULANG', label:'Belum Waktunya Pulang', jenis:'PULANG', valid:true};
+    if(menit>=600) return {kategori:'TEPAT_WAKTU', label:'Tepat Waktu', jenis:'PULANG', valid:true};
+  } else {
+    if(menit>=360 && menit<=450) return {kategori:'TEPAT_WAKTU', label:'Tepat Waktu', jenis:'MASUK', valid:true};
+    if(menit>=451 && menit<=690) return {kategori:'TELAT', label:'Telat '+(menit-450)+'m', jenis:'MASUK', valid:true};
+    if(menit>=691 && menit<=829) return {kategori:'PULANG_SEBELUM_WAKTUNYA', label:'Pulang Sebelum Waktunya', jenis:'PULANG', valid:true};
+    if(menit>=830) return {kategori:'TEPAT_WAKTU', label:'Tepat Waktu', jenis:'PULANG', valid:true};
+  }
+  return {kategori:'DILUAR_JAM_KERJA', label:'Diluar Jam Kerja', jenis:'DILUAR_JAM_KERJA', valid:true};
+}
+// Expose globally and override if existing
+window.getKategori = getKategoriAbsenV5;
+window.getKategoriAbsen = getKategoriAbsenV5;
+
+// === LIVE ONSNAPSHOT ===
+async function startLiveV5(){
+  try{
+    const {collection, query, orderBy, limit, onSnapshot} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d = window.db || (typeof db!=='undefined'?db:null);
+    if(!d) return;
+    const q = query(collection(d, "absensi"), orderBy("waktu","desc"), limit(100));
+    onSnapshot(q, (snap)=>{
+      const hasNew = snap.docChanges().some(c=>c.type==='added');
+      if(typeof loadRekap==='function' && hasNew){
+        // only auto reload if filter empty
+        const tgl = document.getElementById('filterTanggal')?.value;
+        if(!tgl){
+          loadRekap();
+          const t=document.createElement('div'); t.textContent='📥 Laporan baru masuk'; t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0f355c;color:white;padding:8px 14px;border-radius:10px;font-weight:700;z-index:9999;font-size:11px'; document.body.appendChild(t); setTimeout(()=>t.remove(),2000);
+        }
+      }
+    });
+  }catch(e){ console.log("live fail", e); }
+}
+setTimeout(startLiveV5, 2000);
+// === END PATCH V5 ===
+
+
+
+// === FIX GTK AUTO GID & PASSWORD + SYNC ABSEN ===
+// Sesuai request: GID selalu random acak, password ambil dari NIP kalau ada
+window.generateGIDAuto=(nip)=>{
+  const existing = (typeof gurus!=='undefined'? gurus.map(g=>g.gid) : []);
+  let gid;
+  let tries=0;
+  do{
+    const rnd = Math.floor(10000 + Math.random()*90000);
+    gid = 'G-'+rnd;
+    tries++;
+  }while(existing.includes(gid) && tries<100);
+  return gid;
+};
+window.generatePasswordAuto=(nip, gid)=>{
+  if(nip && nip!=='-' && /\d/.test(nip)){
+    const d = nip.replace(/[^0-9]/g,'');
+    return 'snebron'+d.slice(-4);
+  } else {
+    // honorer: password random 4 digit independen, TIDAK ambil dari GID
+    return 'snebron'+Math.floor(1000+Math.random()*9000);
+  }
+};
+
+window.autoFillGIDPass=()=>{
+  const nipEl=document.getElementById('newNIP');
+  const gidEl=document.getElementById('newGID');
+  const passEl=document.getElementById('newPassPreview');
+  if(!nipEl || !gidEl) return;
+  const nip=nipEl.value.trim()||'-';
+  let gid=gidEl.value.trim();
+  // auto generate if empty
+  if(!gid){
+    gid=generateGIDAuto(nip);
+    gidEl.value=gid;
+  }
+  const pass=generatePasswordAuto(nip, gid);
+  if(passEl) passEl.value=pass;
+  const info=document.getElementById('autoInfo');
+  if(info){
+    if(nip && nip!=='-'){
+      info.textContent=`NIP terdeteksi → GID random ${gid} , Password snebron${nip.replace(/[^0-9]/g,'').slice(-4)} (GID acak, tidak sama dengan NIP)`;
+    } else {
+      info.textContent=`Tanpa NIP (honorer) → GID random ${gid} , Password ${pass} (GID & Password acak beda)`;
+    }
+  }
+};
+// === END AUTO ===
+
+window.simpanGTKBaru=async()=>{
+  let gid=document.getElementById('newGID').value.trim().toUpperCase();
+  const nama=document.getElementById('newNama').value.trim();
+  let nip=document.getElementById('newNIP').value.trim()||'-';
+  const passInput=document.getElementById('newPassPreview');
+  let password=passInput?passInput.value.trim():'';
+  if(!nama) return alert('Nama wajib diisi');
+  if(!gid){
+    gid=generateGIDAuto(nip);
+    document.getElementById('newGID').value=gid;
+  }
+  if(!password){
+    password=generatePasswordAuto(nip, gid);
+  }
+  if(!gid) return alert('GID gagal dibuat');
+  try{
+    const mod=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d = (typeof db!=='undefined'?db:window.db)||null;
+    if(d){
+      await mod.setDoc(mod.doc(d, "gurus", gid), {
+        gid:gid, nama:nama, nip:nip, GID:gid, Nama:nama, NIP:nip, password:password,
+        created_at:new Date().toISOString(), created_by:'admin', isNew:true
+      }, {merge:true});
+      try{ /* jangan buat users/custom pas tambah baru, biar DEFAULT doang yang muncul */ }catch(e){}
+    }
+    try{
+      let customs=JSON.parse(localStorage.getItem('CUSTOM_GURUS_V5')||'[]');
+      customs=customs.filter(x=>x.gid!==gid);
+      customs.push({gid:gid, originalGID:gid, nama:nama, nip:nip, password:password, isNew:true, created_at:new Date().toISOString()});
+      localStorage.setItem('CUSTOM_GURUS_V5', JSON.stringify(customs));
+      localStorage.setItem('SI-ABSEN_PASS_'+gid, password);
+    }catch(e){ console.log('custom save fail', e); }
+    if(typeof gurus!=='undefined'){
+      const idx=gurus.findIndex(x=>x.gid===gid);
+      if(idx>-1) gurus[idx]={gid:gid, nama:nama, nip:nip, password:password};
+      else gurus.push({gid:gid, nama:nama, nip:nip, password:password});
+    }
+    alert('✅ GTK '+nama+' disimpan\nGID: '+gid+'\nPassword: '+password);
+    closeTambahGTK(); renderGurus(document.getElementById('searchGuru')?.value||''); if(typeof loadPasswords==='function') loadPasswords();
+  }catch(e){ console.error(e); alert('Gagal simpan: '+(e.message||e)); }
+};
+const origRender = window.renderGurus || renderGurus;
+window.renderGurus = function(filter){
+  origRender(filter);
+  setTimeout(()=>{
+    document.querySelectorAll('button[data-act="edit"]').forEach(b=>{
+      b.onclick=async()=>{
+        const gid=b.dataset.gid;
+        const g = (typeof gurus!=='undefined'?gurus.find(x=>x.gid===gid):null);
+        const namaBaru = prompt('Edit nama GTK', g?.nama||'');
+        if(!namaBaru) return;
+        try{
+          const mod=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+          const d = window.db || (typeof db!=='undefined'?db:null);
+          if(d) await mod.setDoc(mod.doc(d, "gurus", gid), {nama:namaBaru, Nama:namaBaru}, {merge:true});
+          if(g) g.nama=namaBaru;
+          window.renderGurus(document.getElementById('searchGuru').value);
+        }catch(e){ alert(e.message); }
+      };
+    });
+    document.querySelectorAll('button[data-act="hapus"]').forEach(b=>{
+      b.onclick=async()=>{
+        const gid=b.dataset.gid;
+        if(!confirm('Hapus '+gid+'?')) return;
+        try{
+          const mod=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+          const d = window.db || (typeof db!=='undefined'?db:null);
+          if(d) await mod.deleteDoc(mod.doc(d, "gurus", gid));
+          if(typeof gurus!=='undefined'){ const idx=gurus.findIndex(x=>x.gid===gid); if(idx>-1) gurus.splice(idx,1); }
+          window.renderGurus(document.getElementById('searchGuru').value);
+        }catch(e){ alert(e.message); }
+      };
+    });
+  },200);
+};
+try{ renderGurus = window.renderGurus; }catch(e){}
+
 </script>
+
+<div id="qrModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="background:white;border-radius:20px;padding:20px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,.3)">
+    <div style="font-weight:800;color:#0f355c;margin-bottom:8px" id="qrModalNama">QR GTK</div>
+    <div style="font-size:11px;color:#64748b;margin-bottom:12px" id="qrModalGID">G-XXXXX</div>
+    <div id="qrModalBox" style="width:240px;height:240px;margin:0 auto;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;display:flex;align-items:center;justify-content:center"></div>
+    <div style="font-size:10px;color:#94a3b8;margin-top:10px">Klik Download untuk simpan PNG</div>
+    <div style="display:flex;gap:8px;margin-top:16px"><button class="btn" style="flex:1;background:white;border:1px solid #e2e8f0;height:42px" onclick="closeQRModal()">Tutup</button><button class="btn" style="flex:1;background:#0f355c;color:white;height:42px;border:none" id="qrModalDownloadBtn">📥 Download</button></div>
+  </div>
+</div>
+
+
+<div id="modalEditGuru" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px">
+  <div class="card" style="width:100%;max-width:460px;background:white;border-radius:20px;padding:20px">
+    <div style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;color:#0f172a">✏️ Edit Guru</div>
+    <div style="margin-top:16px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">Nama Lengkap</div><input id="editNamaLengkap" class="input" style="height:48px;border-radius:12px" placeholder="Nama Lengkap"/></div>
+    <div style="margin-top:12px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">NIP (isi - jika honorer)</div><input id="editNIP" class="input" style="height:48px;border-radius:12px" placeholder="NIP"/></div>
+    <div style="margin-top:12px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">GID (kosongkan auto G-XXXXX)</div><input id="editGID" class="input" style="height:48px;border-radius:12px" placeholder="G-XXXXX"/></div>
+    <div style="margin-top:12px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">Password Default</div><input id="editPassDefault" class="input" style="height:48px;border-radius:12px" placeholder="Password"/></div>
+    <div style="display:flex;gap:10px;margin-top:20px"><button style="flex:1;height:48px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700" onclick="closeEditGuru()">Batal</button><button style="flex:1;height:48px;border-radius:12px;border:none;background:#0f172a;color:white;font-weight:800" onclick="updateGuru()">Update & Sinkron</button></div>
+  </div>
+</div>
+
 </body></html>
