@@ -1,7 +1,5 @@
 <!doctype html>
-<html lang="id"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>SI-ABSEN/Admin</title>
-<link rel="icon" href="logo-smp2.png">
+<html lang="id"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Admin V5 - 20-70m Silent + Libur Sabtu Minggu + Live</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -161,15 +159,8 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 </head>
 <body>
 <header class="header">
-<div class="logo-box">
-  <div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SI-ABSEN" style="width:100%;height:100%;object-fit:contain"/></div>
-<div>
-  <div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SI-ABSEN</div>
-  <div style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.5px">Panel Admin •</div>
-</div>
-</div>
-</div>
-<div style="display:flex;gap:8px;align-items:center"><span id="authBadge" class="hidden badge badge-valid"></span><button id="logoutBtn" class="hidden btn-outline" style="height:50px;width:auto;padding: 14px;font-weight:900;font-size:12px" onclick="doLogout()">Logout</button></div>
+<div class="logo-box"><div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SI-ABSEN" style="width:100%;height:100%;object-fit:contain"/></div><div><div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SI-ABSEN</div><div style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.5px">Panel Admin • 36R6+X89</div></div></div></div>
+<div style="display:flex;gap:8px;align-items:center"><span id="authBadge" class="hidden badge badge-valid"></span><button id="logoutBtn" class="hidden btn-outline" style="height:36px;width:auto;padding:0 14px;font-size:12px" onclick="doLogout()">Logout</button></div>
 </header>
 
 <!-- LOGIN SCREEN - DESAIN SAMA KAYAK HALAMAN ABSEN -->
@@ -177,7 +168,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div class="card" style="text-align:center;padding:24px">
 <div style="width:64px;height:64px;border-radius:20px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:28px">🔐</div>
 <h2 style="color:#0f355c;margin:16px 0 4px">Login Admin</h2>
-<p style="font-size:12px;color:#64748b;margin:0">Masuk dengan email admin</p>
+<p style="font-size:12px;color:#64748b;margin:0">Masuk dengan email admin terdaftar di Firebase Auth</p>
 
 <div style="text-align:left;margin-top:20px">
 <label style="font-size:11px;font-weight:800;letter-spacing:.5px;color:#475569">EMAIL ADMIN</label>
@@ -198,7 +189,6 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <button id="forgotBtn" class="btn btn-outline" style="margin-top:10px;height:40px;font-size:12px">Lupa Password? Reset via Email</button>
 
 <div style="margin-top:16px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:10px 12px;text-align:left">
-<div style="font-size:10px;font-weight:800;color:#0369a1;letter-spacing:.5px">✅ STATUS AUTH</div>
 <div id="authConfigInfo" style="font-size:10px;color:#0c4a6e;margin-top:4px;line-height:1.5">Menghubungkan ke Firebase...</div>
 </div>
 
@@ -210,7 +200,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div id="adminContent" class="hidden">
 <div style="max-width:1350px;margin:0 auto;padding:16px 20px">
 <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
-<button id="tabLaporan" class="btn-tab active" onclick="switchTab('laporan')">📊 Laporan GTK</button>
+<button id="tabLaporan" class="btn-tab active" onclick="switchTab('laporan')">📊 Laporan Absen</button>
 <button id="tabGuru" class="btn-tab" onclick="switchTab('guru')">👥 Data GTK + QR</button>
 <span id="authInfo" class="badge-auth" style="margin-left:auto"></span>
 </div>
@@ -221,7 +211,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div id="lastLoginInfo" style="font-size:9px;color:#94a3b8;margin-top:2px"></div>
 <label style="font-size:11px;font-weight:700;margin-top:14px;display:block">Radius Absen</label>
 <div style="display:flex;gap:8px;margin-top:6px"><input id="radiusInput" type="number" min="20" max="70" step="5" value="40" class="input" style="height:40px"/><button id="saveRadiusBtn" type="button" style="height:40px;padding:0 12px;background:#0f355c;color:white;border-radius:12px;display:flex;align-items:center;font-weight:700;border:none;cursor:pointer">m</button></div>
-<div style="font-size:10px;color:#64748b;margin-top:4px">Batas 20m-70m • Default 40m • <span id="radiusLabel">40m</span></div>
+<div style="font-size:10px;color:#64748b;margin-top:4px">Batas 20m-70m • Default 40m •<span id="radiusLabel">40m</span></div>
 <div style="margin-top:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="font-size:10px;font-weight:800;color:#94a3b8">TITIK SEKOLAH</div><div style="font-weight:700;font-size:12px;color:#0f355c">-6.889583,112.286111</div><div style="font-size:10px;color:#64748b">36R6+X89 • 40m</div><div id="rekapInfo" style="margin-top:8px;background:white;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font-size:11px">Memuat...</div></div>
 <div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden"><div id="mapAdmin"></div></div>
 <div style="margin-top:12px;display:grid;gap:8px"><button class="btn btn-primary" style="height:40px" onclick="loadRekap()">🔄 Refresh Laporan</button><button class="btn btn-outline" style="height:40px" onclick="loadPasswords()">🔑 Load Password Custom</button></div>
@@ -232,7 +222,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <input id="filterTanggal" type="date" class="input" style="height:36px"/><select id="filterGuruSelect" class="input" style="height:36px"><option value="">Semua GTK</option></select>
 <select id="filterKategori" class="input" style="height:36px"><option value="">Semua Kategori</option><option value="TEPAT_WAKTU">TEPAT_WAKTU</option><option value="TELAT">TELAT</option><option value="PULANG_SEBELUM_WAKTUNYA">PULANG_SEBELUM_WAKTUNYA</option><option value="BELUM_WAKTUNYA_PULANG">BELUM_WAKTUNYA_PULANG</option><option value="LIBUR_SABTU">LIBUR_SABTU</option><option value="LIBUR_MINGGU">LIBUR_MINGGU</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
 <select id="filterJenis" class="input" style="height:36px"><option value="">Semua Jenis</option><option value="MASUK">MASUK</option><option value="PULANG">PULANG</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
-<select id="filterStatus" class="input" style="height:36px"><option value="">Validasi</option><option value="VALID">VALID</option><option value="LUAR_RADIUS">LUAR_RADIUS</option></select>
+<select id="filterStatus" class="input" style="height:36px"><option value="">VALIDITAS</option><option value="VALID">VALID</option><option value="LUAR_RADIUS">LUAR_RADIUS</option></select>
 <input id="searchLaporan" class="input" placeholder="Cari nama..." style="height:36px"/>
 </div>
 <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="height:36px;flex:1" onclick="loadRekap()">🔄 Tampilkan</button><button class="btn btn-outline" style="height:36px;width:120px" onclick="resetFilter()">Reset</button></div>
@@ -278,7 +268,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
       <div>
         <div style="font-size:13px;font-weight:700;margin-bottom:6px">Password Auto</div>
         <input id="newPassPreview" class="input" placeholder="Auto snebronXXXX" readonly style="background:#f8fafc" />
-        <div style="font-size:10px;color:#64748b;margin-top:4px">snebron + 4 digit NIP / random honorer</div>
+        <div style="font-size:10px;color:#64748b;margin-top:4px">snebron + 4 digit NIP / GID</div>
       </div>
     </div>
     <div style="margin-top:8px;display:flex;gap:8px">
@@ -288,6 +278,12 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
     <div style="display:flex;gap:10px;margin-top:20px">
       <button style="flex:1;height:48px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700" onclick="closeTambahGTK()">Batal</button>
       <button style="flex:1;height:48px;border-radius:12px;border:none;background:#0f172a;color:white;font-weight:800" onclick="simpanGTKBaru()">💾 Simpan & Sinkron</button>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:#64748b;background:#f8fafc;padding:10px;border-radius:10px;border:1px solid #e2e8f0">
+      <b>Logika Auto:</b><br/>
+      • Punya NIP → GID = G- + random 5 digit unik (beda dari NIP), Password = snebron + 4 digit akhir NIP<br/>
+      • Tanpa NIP (-) → GID = G- + random 5 digit unik, Password = snebron + random 4 digit (beda dari GID)<br/>
+      • Sudah sinkron ke halaman absen via Firestore gurus + CUSTOM_GURUS_V5
     </div>
   </div>
 </div>
@@ -304,7 +300,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getFirestore, collection, query, getDocs, orderBy, limit, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 const LAT=-6.9075625, LNG=112.2108125; let RADIUS=40;
-const gurus=[];
+const gurus = []; window.gurus=gurus; // DIHAPUS hardcode password - load dari Firestore, urut 1-44
+function getDefaultPassword(nip){
+  if(!nip || nip==="-") return "snebron0000";
+  const digits = nip.replace(/\D/g,"").slice(-4);
+  return "snebron"+digits;
+}
 const firebaseConfig={apiKey:"AIzaSyCSi5QKL-MapUUdGLV4OuiXupXa3XmRKvg",authDomain:"smpn1-brondong-absen.firebaseapp.com",projectId:"smpn1-brondong-absen",storageBucket:"smpn1-brondong-absen.firebasestorage.app",messagingSenderId:"174884842248",appId:"1:174884842248:web:8625540d5f3ff8b7f45abd"};
 let app,db,auth,allAbsen=[];
 try{app=initializeApp(firebaseConfig);db=getFirestore(app);auth=getAuth(app);document.getElementById('authConfigInfo').innerHTML=`✅ Terhubung ke <b>${firebaseConfig.projectId}</b><br>Auth OK • Silakan login`;onAuthStateChanged(auth,(user)=>{if(user){document.getElementById('adminLoginScreen').classList.add('hidden');document.getElementById('adminContent').classList.remove('hidden');document.getElementById('authBadge').textContent=`✅ ${user.email}`;document.getElementById('authBadge').classList.remove('hidden');document.getElementById('logoutBtn').classList.remove('hidden');document.getElementById('authInfo').textContent=`✅ ${user.email}`;document.getElementById('authUid').textContent=`UID: ${user.uid.slice(0,16)}...`;document.getElementById('lastLoginInfo').textContent=`Login: ${user.metadata.lastSignInTime||''}`;initMap();initGuruSelect();loadGurusFromFirestore().then(()=>{ renderGurus(); });loadPasswords();loadRekap();}else{document.getElementById('adminLoginScreen').classList.remove('hidden');document.getElementById('adminContent').classList.add('hidden');document.getElementById('authBadge').classList.add('hidden');document.getElementById('logoutBtn').classList.add('hidden');}});}catch(e){document.getElementById('authConfigInfo').innerHTML=`❌ ${e.message}`;}
@@ -359,14 +360,15 @@ async function loadGurusFromFirestore(){
       const gid=data.gid||data.GID||d.id;
       if(!gid) return;
       if(map[gid]){
-        // update existing
+        // update existing - pakai no asli dari Firestore biar urut 1-44
         map[gid].nama = data.nama||data.Nama||map[gid].nama;
         map[gid].nip = data.nip||data.NIP||map[gid].nip;
         if(data.password) map[gid].password = data.password;
+        if(data.no) map[gid].no = data.no;
         map[gid].gid = gid;
       } else {
-        // new guru from Firestore
-        map[gid] = {no:Object.keys(map).length+1, nama:data.nama||data.Nama||'-', nip:data.nip||data.NIP||'-', gid:gid, password:data.password||'snebron0000'};
+        // new guru from Firestore - pakai data.no asli
+        map[gid] = {no:data.no||9999, nama:data.nama||data.Nama||'-', nip:data.nip||data.NIP||'-', gid:gid, password:data.password||'snebron0000'};
       }
     });
     // merge CUSTOM_GURUS_V5 juga biar edit lokal yang belum ke Firestore tetap kebaca
@@ -383,10 +385,11 @@ async function loadGurusFromFirestore(){
         }
       });
     }catch(e){}
-    // replace gurus array
-    const newList = Object.values(map);
+    // replace gurus array - SORT 1-44 biar gak acak
+    const newList = Object.values(map).sort((a,b)=>(a.no||9999)-(b.no||9999));
     gurus.length=0;
-    newList.forEach(g=>gurus.push(g));
+    newList.forEach((g,i)=>{ if(!g.no || g.no===9999) g.no=i+1; gurus.push(g); });
+    window.gurus=gurus;
     console.log('✅ gurus loaded dari Firestore:', gurus.length);
     if(typeof renderGurus==='function') renderGurus(document.getElementById('searchGuru')?.value||'');
   }catch(e){ console.log('loadGurus fail', e.message); }
@@ -494,7 +497,7 @@ function ubahPassword(gid){
   })();
 }
 function hapusGuru(gid){
-  if(!confirm('Hapus GTK '+gid+'?')) return;
+  if(!confirm('Hapus Guru '+gid+'?')) return;
   (async()=>{
     try{
       // hapus dari custom localStorage
@@ -652,7 +655,7 @@ window.simpanGTKBaru=simpanGTKBaru;
 window.openTambahGTK=openTambahGTK;
 window.closeTambahGTK=closeTambahGTK;
 
-function renderGurus(filter=''){const grid=document.getElementById('guruGrid');if(!grid)return;grid.innerHTML='';let list=gurus;if(filter){const f=filter.toLowerCase();list=gurus.filter(g=>g.nama.toLowerCase().includes(f)||g.gid.toLowerCase().includes(f));}document.getElementById('totalGuruInfo').textContent=list.length+' GTK';list.forEach((g,i)=>{const isHonorer=g.nip==='-'||!g.nip;const custom=customPassMap[g.gid];const div=document.createElement('div');div.className='card';div.style.display='flex';div.style.flexDirection='column';div.style.gap='12px';const qrId='qr-'+i+'-'+g.gid;div.innerHTML=`<div style="display:flex;gap:12px"><div id="${qrId}" style="width:84px;height:84px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer" title="Klik untuk preview QR"></div><div style="flex:1"><div style="font-weight:800;color:#0f355c;font-size:14px">${g.nama} ${isHonorer?'<span style="background:#fef3c7;color:#92400e;font-size:9px;padding:2px 6px;border-radius:999px">HONORER</span>':''}</div><div style="font-size:11px;color:#64748b;margin-top:2px">NIP: ${g.nip||'-'} • ${g.gid}</div><div style="margin-top:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="font-size:9px;color:#94a3b8;font-weight:700">DEFAULT</div><div style="font-family:monospace;font-weight:800;font-size:13px">${g.password}</div>${custom && custom.password_custom && custom.password_custom!==g.password ? `<div style="margin-top:6px;border-top:1px solid #e2e8f0;padding-top:6px"><div style="font-size:9px;color:#dc2626;font-weight:700">CUSTOM</div><div style="font-family:monospace;font-weight:800;color:#dc2626;font-size:13px">${custom.password_custom}</div></div>` : ''}</div></div></div>
+function renderGurus(filter=''){const grid=document.getElementById('guruGrid');if(!grid)return;grid.innerHTML='';let list=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));if(filter){const f=filter.toLowerCase();list=gurus.filter(g=>g.nama.toLowerCase().includes(f)||g.gid.toLowerCase().includes(f));}document.getElementById('totalGuruInfo').textContent=list.length+' GTK';list.forEach((g,i)=>{const isHonorer=g.nip==='-'||!g.nip;const custom=customPassMap[g.gid];const div=document.createElement('div');div.className='card';div.style.display='flex';div.style.flexDirection='column';div.style.gap='12px';const qrId='qr-'+i+'-'+g.gid;div.innerHTML=`<div style="display:flex;gap:12px"><div id="${qrId}" style="width:84px;height:84px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer" title="Klik untuk preview QR"></div><div style="flex:1"><div style="font-weight:800;color:#0f355c;font-size:14px">${g.nama} ${isHonorer?'<span style="background:#fef3c7;color:#92400e;font-size:9px;padding:2px 6px;border-radius:999px">HONORER</span>':''}</div><div style="font-size:11px;color:#64748b;margin-top:2px">NIP: ${g.nip||'-'} • ${g.gid}</div><div style="margin-top:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="font-size:9px;color:#94a3b8;font-weight:700">DEFAULT</div><div style="font-family:monospace;font-weight:800;font-size:13px">${g.password}</div>${custom && custom.password_custom && custom.password_custom!==g.password ? `<div style="margin-top:6px;border-top:1px solid #e2e8f0;padding-top:6px"><div style="font-size:9px;color:#dc2626;font-weight:700">CUSTOM</div><div style="font-family:monospace;font-weight:800;color:#dc2626;font-size:13px">${custom.password_custom}</div></div>` : ''}</div></div></div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
   <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="directDownloadQR('${g.gid}','${g.nama}')">⬇️ Download QR</button>
   <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="copyDataQR('${g.gid}','${g.nama}','${g.nip}')">📋 Copy Data QR</button>
