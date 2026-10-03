@@ -10,19 +10,23 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,system-ui;background:#f8fafc;color:#0f172a}
-.header{height:64px;background:white;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:50}
+/* FIX: header z-index dinaikin biar gak ketutup map */
+.header{height:64px;background:white;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:9999}
 .logo-box{display:flex;align-items:center;gap:10px}
 .logo-img{width:40px;height:40px;border-radius:12px;background:transparent;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;overflow:hidden}
 .logo-img img{width:100%;height:100%;object-fit:contain}
 .btn{height:40px;padding:0 18px;border-radius:12px;font-weight:700;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-family:Inter}
 .btn-primary{background:#0f355c;color:white}
 .btn-outline{background:white;border:1px solid #e2e8f0;color:#0f355c}
-.map-card{border-radius:20px;overflow:hidden;border:1px solid #e2e8f0;background:white;box-shadow:0 8px 24px rgba(15,53,92,0.08)}
-#map{height:360px;background:#e8eef5}
+.map-card{border-radius:20px;overflow:hidden;border:1px solid #e2e8f0;background:white;box-shadow:0 8px 24px rgba(15,53,92,0.08);position:relative;z-index:1}
+#map{height:360px;background:#e8eef5;position:relative;z-index:1}
 .badge{display:inline-flex;align-items:center;gap:6px;background:white;border:1px solid #e2e8f0;border-radius:999px;padding:6px 12px;font-size:11px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
 .toggle-group{display:flex;background:white;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
 .toggle-btn{padding:6px 12px;font-size:11px;font-weight:700;border:none;cursor:pointer;background:white;color:#64748b}
 .toggle-btn.active{background:#0f355c;color:white}
+
+/* Leaflet controls biar di bawah header */
+.leaflet-top, .leaflet-bottom{z-index:2 !important}
 
 /* RESPONSIVE HP FIX */
 @media (max-width: 768px){
@@ -66,19 +70,19 @@ body{margin:0;font-family:Inter,system-ui;background:#f8fafc;color:#0f172a}
 
 <main style="max-width:1120px;margin:0 auto;padding:24px 20px">
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-    <span style="display:inline-flex;align-items:center;gap:6px;background:white;border:1px solid #e2e8f0;border-radius:999px;padding:5px 12px;font-size:10px;font-weight:700;color:#0f355c"><span style="width:16px;height:16px;background:#0f355c;color:white;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:10px">🛡️</span> SISTEM RESMI - 2025/2026 Privasi Terjaga</span>
+    <span style="display:inline-flex;align-items:center;gap:6px;background:white;border:1px solid #e2e8f0;border-radius:999px;padding:5px 12px;font-size:10px;font-weight:700;color:#0f355c"><span style="width:16px;height:16px;background:#0f355c;color:white;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:10px">🛡️</span> SISTEM ABSENSI GTK | Privasi Terjaga</span>
   </div>
   
   <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:28px;align-items:start">
     <div>
       <h1 style="font-size:46px;line-height:0.9;font-weight:800;color:#0f355c;margin:0">SI-ABSEN<br/>SMPN 1<br/>Brondong</h1>
-      <p style="color:#475569;font-size:13px;line-height:1.6;max-width:420px;margin-top:14px">Absensi QR Berbasis Lokasi | ID Privat & Terenkripsi<br/>Sekali cetak untuk ID Card, validasi otomatis hanya dalam radius 40m sekolah.</p>
+      <p style="color:#475569;font-size:13px;line-height:1.6;max-width:420px;margin-top:14px">Absensi QR Berbasis Lokasi | ID Privat & Terenkripsi<br/>Sekali cetak untuk ID Card, validasi otomatis hanya dalam radius yang telah ditentukan.</p>
       <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
-        <a class="btn btn-primary" style="height:44px;padding:0 20px" href="halaman-absen.html">Masuk Sebagai Guru →</a>
+        <a class="btn btn-primary" style="height:44px;padding:0 20px" href="halaman-absen.html">Masuk Sebagai GTK →</a>
         <a class="btn btn-outline" style="height:44px" href="admin-absen.html">Panel Admin</a>
       </div>
       <div style="display:flex;gap:14px;margin-top:14px;font-size:11px;color:#64748b;font-weight:600">
-        <span style="display:flex;align-items:center;gap:4px">🟢 Guru Terverifikasi</span>
+        <span style="display:flex;align-items:center;gap:4px">🟢 GTK Terverifikasi</span>
         <span style="display:flex;align-items:center;gap:4px">🔒 Ter-enkripsi & Aman</span>
       </div>
     </div>
@@ -86,68 +90,65 @@ body{margin:0;font-family:Inter,system-ui;background:#f8fafc;color:#0f172a}
     <div class="map-card">
       <div style="position:relative">
         <div id="map"></div>
-        <!-- Top badges -->
-        <div style="position:absolute;top:12px;left:12px;right:12px;z-index:500;display:flex;justify-content:space-between;align-items:start;gap:8px;flex-wrap:wrap">
-          <div class="badge">● radius 40m Aktif • 36R6+X89</div>
+        <!-- FIX: z-index 500 -> 10 biar gak nutupin header -->
+        <div style="position:absolute;top:12px;left:12px;right:12px;z-index:10;display:flex;justify-content:space-between;align-items:start;gap:8px;flex-wrap:wrap">
+          <div class="badge">● Radius Aktif •</div>
+        <div style="position:absolute;top:40px;right:5px;z-index:10;display:flex;gap:8px;flex-wrap:wrap">
+          <div style="background:#0f355c;color:white;border-radius:14px;padding:10px 12px;min-width:110px;box-shadow:0 2px 12px rgba(0,0,0,0.15)">
+            <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;opacity:0.7">STATUS</div>
+            <div style="font-weight:800;font-size:12px;margin-top:2px">● Valid</div>
+            <div style="font-size:10px;opacity:0.8;margin-top:1px">Dalam Jangkauan</div>
+          </div>
+        </div>
           <div class="toggle-group">
             <button id="btnPeta" class="toggle-btn active" onclick="setMode('peta')">🗺️ Peta</button>
             <button id="btnSatelit" class="toggle-btn" onclick="setMode('satelit')">🛰️ Satelit</button>
           </div>
         </div>
-        <!-- Bottom cards -->
-        <div style="position:absolute;bottom:12px;left:12px;right:12px;z-index:500;display:flex;gap:8px;flex-wrap:wrap">
-          <div style="flex:1;background:white;border-radius:14px;padding:10px 12px;border:1px solid #e2e8f0;box-shadow:0 2px 12px rgba(0,0,0,0.08)">
-            <div style="font-size:9px;font-weight:800;color:#94a3b8;letter-spacing:0.8px">SMPN 1 Brondong</div>
-            <div style="font-weight:800;font-size:12px;color:#0f355c;margin-top:2px">-6.9075, 112.2108 • Lamongan</div>
-            <div style="font-size:10px;color:#64748b;margin-top:1px">36R6+X89 • Boho, Tlogoretno</div>
-          </div>
-          <div style="background:#0f355c;color:white;border-radius:14px;padding:10px 12px;min-width:110px;box-shadow:0 2px 12px rgba(0,0,0,0.15)">
-            <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;opacity:0.7">STATUS</div>
-            <div style="font-weight:800;font-size:12px;margin-top:2px">● Valid</div>
-            <div style="font-size:10px;opacity:0.8;margin-top:1px">Di Dalam 40m</div>
-          </div>
+        <div style="position:absolute;bottom:12px;left:12px;right:12px;z-index:10;background:white;border-radius:14px;padding:10px 12px;box-shadow:0 4px 16px rgba(0,0,0,0.12);border:1px solid #e2e8f0">
+          <div style="font-size:10px;font-weight:700;color:#94a3b8;letter-spacing:0.5px">SMPN 1 Brondong</div>
+          <div style="font-size:12px;font-weight:800;color:#0f355c;margin-top:1px">-6.9075, 112.2108 • Lamongan</div>
+          <div style="font-size:10px;color:#64748b;margin-top:1px">36R6+X89 • Boho, Tlogoretno</div>
         </div>
       </div>
     </div>
   </div>
 </main>
 
-<section style="background:white;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;margin-top:32px;padding:28px 20px">
-  <div style="max-width:1120px;margin:0 auto">
-    <div style="display:flex;justify-content:space-between;align-items:end;flex-wrap:wrap;gap:12px;margin-bottom:18px">
-      <div>
-        <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:#94a3b8">CARA KERJA SISTEM</div>
-        <h2 style="font-size:24px;font-weight:800;color:#0f355c;margin:6px 0 0;line-height:1.1">Absen 3 detik,<br/>tanpa ribet.</h2>
-      </div>
-      <div style="font-size:11px;color:#64748b;max-width:300px;line-height:1.5">Dirancang untuk guru - bukan untuk admin. Cukup bawa HP sendiri, tidak perlu tukar perangkat, hanya absen di area SMPN 1 Brondong.</div>
+<section style="max-width:1120px;margin:28px auto 0;padding:28px 20px;background:white;border:1px solid #e2e8f0;border-radius:20px">
+  <div style="display:flex;justify-content:space-between;align-items:end;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+    <div>
+      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:#94a3b8">CARA KERJA SISTEM</div>
+      <div style="font-size:22px;font-weight:800;color:#0f355c;margin-top:4px">Absen 3 detik,<br/>tanpa ribet.</div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
-      <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:18px;position:relative">
-        <div style="position:absolute;top:14px;right:14px;font-size:10px;color:#cbd5e1;font-weight:700">01</div>
-        <div style="width:36px;height:36px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:16px">👤</div>
-        <div style="font-weight:800;color:#0f355c;margin-top:14px;font-size:13px">Login dengan ID Privat</div>
-        <div style="font-size:11px;color:#64748b;margin-top:6px;line-height:1.5">Setiap guru dapat ID unik permanen hanya diketahui guru & admin. Tidak bisa ditebak, tidak bisa duplikat.</div>
-        <div style="margin-top:12px"><span style="font-size:9px;background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 8px;border-radius:999px;font-weight:700;color:#475569">🆔 ID Unik • Privat</span></div>
-      </div>
-      <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:18px;position:relative">
-        <div style="position:absolute;top:14px;right:14px;font-size:10px;color:#cbd5e1;font-weight:700">02</div>
-        <div style="width:36px;height:36px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:16px">📱</div>
-        <div style="font-weight:800;color:#0f355c;margin-top:14px;font-size:13px">Scan QR di ID Card dengan HP sendiri</div>
-        <div style="font-size:11px;color:#64748b;margin-top:6px;line-height:1.5">Tempelkan kamera ke QR di kartu identitas. Tidak perlu HP sekolah - pakai HP pribadi guru.</div>
-        <div style="margin-top:12px"><span style="font-size:9px;background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 8px;border-radius:999px;font-weight:700;color:#475569">📱 BYOD • No Device Sharing</span></div>
-      </div>
-      <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:18px;position:relative">
-        <div style="position:absolute;top:14px;right:14px;font-size:10px;color:#cbd5e1;font-weight:700">03</div>
-        <div style="width:36px;height:36px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:16px">📍</div>
-        <div style="font-weight:800;color:#0f355c;margin-top:14px;font-size:13px">Validasi otomatis dalam radius 40m</div>
-        <div style="font-size:11px;color:#64748b;margin-top:6px;line-height:1.5">Sistem cek lokasi real-time. Hanya bisa absen jika berada di area 40m SMPN 1 Brondong.</div>
-        <div style="margin-top:12px"><span style="font-size:9px;background:#dcfce7;border:1px solid #bbf7d0;padding:4px 8px;border-radius:999px;font-weight:700;color:#166534">📍 Geofencing 40m</span></div>
-      </div>
+    <div style="font-size:11px;color:#64748b;max-width:300px;line-height:1.5">Dirancang untuk GTK - Cukup bawa HP sendiri, tidak perlu tukar perangkat, hanya absen di area SMPN 1 Brondong.</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+    <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:18px;position:relative">
+      <div style="position:absolute;top:14px;right:14px;font-size:10px;color:#cbd5e1;font-weight:700">01</div>
+      <div style="width:36px;height:36px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:16px">👤</div>
+      <div style="font-weight:800;color:#0f355c;margin-top:14px;font-size:13px">Login dengan ID Privat</div>
+      <div style="font-size:11px;color:#64748b;margin-top:6px;line-height:1.5">Setiap GTK dapat ID unik permanen hanya diketahui GTK & admin. Tidak bisa ditebak, tidak bisa duplikat.</div>
+      <div style="margin-top:12px"><span style="font-size:9px;background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 8px;border-radius:999px;font-weight:700;color:#475569">🆔 ID Unik • Privat</span></div>
+    </div>
+    <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:18px;position:relative">
+      <div style="position:absolute;top:14px;right:14px;font-size:10px;color:#cbd5e1;font-weight:700">02</div>
+      <div style="width:36px;height:36px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:16px">📱</div>
+      <div style="font-weight:800;color:#0f355c;margin-top:14px;font-size:13px">Scan QR di ID Card dengan HP sendiri</div>
+      <div style="font-size:11px;color:#64748b;margin-top:6px;line-height:1.5">Tempelkan kamera ke QR di kartu identitas. Tidak perlu HP sekolah - pakai HP pribadi GTK.</div>
+      <div style="margin-top:12px"><span style="font-size:9px;background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 8px;border-radius:999px;font-weight:700;color:#475569">📱 BYOD • No Device Sharing</span></div>
+    </div>
+    <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:18px;position:relative">
+      <div style="position:absolute;top:14px;right:14px;font-size:10px;color:#cbd5e1;font-weight:700">03</div>
+      <div style="width:36px;height:36px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:16px">📍</div>
+      <div style="font-weight:800;color:#0f355c;margin-top:14px;font-size:13px">Validasi otomatis dalam radius yang telah ditentukan</div>
+      <div style="font-size:11px;color:#64748b;margin-top:6px;line-height:1.5">Sistem cek lokasi real-time. Hanya bisa absen jika berada di area SMPN 1 Brondong.</div>
+      <div style="margin-top:12px"><span style="font-size:9px;background:#dcfce7;border:1px solid #bbf7d0;padding:4px 8px;border-radius:999px;font-weight:700;color:#166534">📍 Geofencing 40m</span></div>
     </div>
   </div>
 </section>
 
-<footer style="background:white;border-top:1px solid #e2e8f0"><div style="max-width:1120px;margin:0 auto;padding:0 20px;height:64px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:10px"><div style="width:32px;height:32px;border-radius:8px;background:transparent;display:flex;align-items:center;justify-content:center;overflow:hidden"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.textContent='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="logo" style="width:100%;height:100%;object-fit:contain"/></div><div><div style="font-weight:800;font-size:11px;color:#0f355c">SI-ABSEN — SMPN 1 Brondong</div><div style="font-size:9px;color:#94a3b8">QR Geofencing Absensi • ID Privat Terjaga • Anti Titip Absen • 36R6+X89</div></div></div><div style="font-size:9px;color:#94a3b8;display:flex;align-items:center;gap:8px"><span>© 2025 SMPN 1 Brondong, Lamongan</span><span>• -6.9075, 112.2108</span><span style="background:#0f172a;color:white;padding:3px 8px;border-radius:999px;font-weight:700">v1.0 • Desain Aman</span></div></div></footer>
+<footer style="background:white;border-top:1px solid #e2e8f0;margin-top:24px"><div style="max-width:1120px;margin:0 auto;padding:0 20px;height:64px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:10px"><div style="width:32px;height:32px;border-radius:8px;background:transparent;display:flex;align-items:center;justify-content:center;overflow:hidden"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.textContent='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="logo" style="width:100%;height:100%;object-fit:contain"/></div><div><div style="font-weight:800;font-size:11px;color:#0f355c">SI-ABSEN — SMPN 1 Brondong</div><div style="font-size:9px;color:#94a3b8">QR Geofencing Absensi • ID Privat Terjaga • Anti Titip Absen • 36R6+X89</div></div></div><div style="font-size:9px;color:#94a3b8;display:flex;align-items:center;gap:8px"><span>© 2025 SMPN 1 Brondong, Lamongan</span><span>• -6.9075, 112.2108</span></div></div></footer>
 
 <script>
 const LAT=-6.9075625, LNG=112.2108125, PLUS="36R6+X89";
