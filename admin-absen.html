@@ -36,6 +36,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 .badge-belum{background:#ffedd5;border-color:#fed7aa;color:#9a3412}
 .badge-awal{background:#fef9c3;border-color:#fde68a;color:#854d0e}
 #liveBadge{background:#dcfce7;color:#166534;padding:3px 8px;border-radius:999px;font-size:10px;margin-left:6px}
+#authBadge{ display:none !important; }
 </style>
 <style>
 /* === RESPONSIVE HP FIX - hanya tampilan, tidak sentuh tombol/fungsi === */
@@ -161,8 +162,17 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 </head>
 <body>
 <header class="header">
-<div class="logo-box"><div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SI-ABSEN" style="width:100%;height:100%;object-fit:contain"/></div><div><div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SI-ABSEN</div><div style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.5px">Panel Admin • 36R6+X89</div></div></div></div>
-<div style="display:flex;gap:8px;align-items:center"><span id="authBadge" class="hidden badge badge-valid"></span><button id="logoutBtn" class="hidden btn-outline" style="height:36px;width:auto;padding:0 14px;font-size:12px" onclick="doLogout()">Logout</button></div>
+<div class="logo-box">
+  <div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SI-ABSEN" style="width:100%;height:100%;object-fit:contain"/></div>
+<div>
+  <div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SI-ABSEN</div>
+<div style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.5px">Panel Admin</div>
+</div>
+</div>
+</div>
+<div style="display:flex;gap:8px;align-items:center">
+  <span id="authBadge" class="hidden badge badge-valid"></span><button id="logoutBtn" class="hidden btn-outline" style="height:36px;width:auto;padding:0 14px;font-size:12px" onclick="doLogout()">Logout</button>
+</div>
 </header>
 
 <!-- LOGIN SCREEN - DESAIN SAMA KAYAK HALAMAN ABSEN -->
@@ -170,7 +180,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div class="card" style="text-align:center;padding:24px">
 <div style="width:64px;height:64px;border-radius:20px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:28px">🔐</div>
 <h2 style="color:#0f355c;margin:16px 0 4px">Login Admin</h2>
-<p style="font-size:12px;color:#64748b;margin:0">Masuk dengan email admin terdaftar di Firebase Auth</p>
+<p style="font-size:12px;color:#64748b;margin:0">Masuk dengan email admin terdaftar</p>
 
 <div style="text-align:left;margin-top:20px">
 <label style="font-size:11px;font-weight:800;letter-spacing:.5px;color:#475569">EMAIL ADMIN</label>
@@ -191,6 +201,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <button id="forgotBtn" class="btn btn-outline" style="margin-top:10px;height:40px;font-size:12px">Lupa Password? Reset via Email</button>
 
 <div style="margin-top:16px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:10px 12px;text-align:left">
+<div style="font-size:10px;font-weight:800;color:#0369a1;letter-spacing:.5px">✅ STATUS AUTH</div>
 <div id="authConfigInfo" style="font-size:10px;color:#0c4a6e;margin-top:4px;line-height:1.5">Menghubungkan ke Firebase...</div>
 </div>
 
@@ -202,7 +213,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div id="adminContent" class="hidden">
 <div style="max-width:1350px;margin:0 auto;padding:16px 20px">
 <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
-<button id="tabLaporan" class="btn-tab active" onclick="switchTab('laporan')">📊 Laporan Absen</button>
+<button id="tabLaporan" class="btn-tab active" onclick="switchTab('laporan')">📊 Laporan GTK</button>
 <button id="tabGuru" class="btn-tab" onclick="switchTab('guru')">👥 Data GTK + QR</button>
 <span id="authInfo" class="badge-auth" style="margin-left:auto"></span>
 </div>
@@ -213,7 +224,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div id="lastLoginInfo" style="font-size:9px;color:#94a3b8;margin-top:2px"></div>
 <label style="font-size:11px;font-weight:700;margin-top:14px;display:block">Radius Absen</label>
 <div style="display:flex;gap:8px;margin-top:6px"><input id="radiusInput" type="number" min="20" max="70" step="5" value="40" class="input" style="height:40px"/><button id="saveRadiusBtn" type="button" style="height:40px;padding:0 12px;background:#0f355c;color:white;border-radius:12px;display:flex;align-items:center;font-weight:700;border:none;cursor:pointer">m</button></div>
-<div style="font-size:10px;color:#64748b;margin-top:4px">Batas 20m-70m • Default 40m •<span id="radiusLabel">40m</span></div>
+<div style="font-size:10px;color:#64748b;margin-top:4px">Batas 20m-70m • Default 40m • Silent realtime ke halaman GTK • <span id="radiusLabel">40m</span></div>
 <div style="margin-top:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="font-size:10px;font-weight:800;color:#94a3b8">TITIK SEKOLAH</div><div style="font-weight:700;font-size:12px;color:#0f355c">-6.889583,112.286111</div><div style="font-size:10px;color:#64748b">36R6+X89 • 40m</div><div id="rekapInfo" style="margin-top:8px;background:white;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font-size:11px">Memuat...</div></div>
 <div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden"><div id="mapAdmin"></div></div>
 <div style="margin-top:12px;display:grid;gap:8px"><button class="btn btn-primary" style="height:40px" onclick="loadRekap()">🔄 Refresh Laporan</button><button class="btn btn-outline" style="height:40px" onclick="loadPasswords()">🔑 Load Password Custom</button></div>
@@ -224,7 +235,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <input id="filterTanggal" type="date" class="input" style="height:36px"/><select id="filterGuruSelect" class="input" style="height:36px"><option value="">Semua GTK</option></select>
 <select id="filterKategori" class="input" style="height:36px"><option value="">Semua Kategori</option><option value="TEPAT_WAKTU">TEPAT_WAKTU</option><option value="TELAT">TELAT</option><option value="PULANG_SEBELUM_WAKTUNYA">PULANG_SEBELUM_WAKTUNYA</option><option value="BELUM_WAKTUNYA_PULANG">BELUM_WAKTUNYA_PULANG</option><option value="LIBUR_SABTU">LIBUR_SABTU</option><option value="LIBUR_MINGGU">LIBUR_MINGGU</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
 <select id="filterJenis" class="input" style="height:36px"><option value="">Semua Jenis</option><option value="MASUK">MASUK</option><option value="PULANG">PULANG</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
-<select id="filterStatus" class="input" style="height:36px"><option value="">VALIDITAS</option><option value="VALID">VALID</option><option value="LUAR_RADIUS">LUAR_RADIUS</option></select>
+<select id="filterStatus" class="input" style="height:36px"><option value="">VALID+LUAR_RADIUS</option><option value="VALID">VALID</option><option value="LUAR_RADIUS">LUAR_RADIUS</option></select>
 <input id="searchLaporan" class="input" placeholder="Cari nama..." style="height:36px"/>
 </div>
 <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="height:36px;flex:1" onclick="loadRekap()">🔄 Tampilkan</button><button class="btn btn-outline" style="height:36px;width:120px" onclick="resetFilter()">Reset</button></div>
@@ -281,12 +292,6 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
       <button style="flex:1;height:48px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700" onclick="closeTambahGTK()">Batal</button>
       <button style="flex:1;height:48px;border-radius:12px;border:none;background:#0f172a;color:white;font-weight:800" onclick="simpanGTKBaru()">💾 Simpan & Sinkron</button>
     </div>
-    <div style="margin-top:10px;font-size:11px;color:#64748b;background:#f8fafc;padding:10px;border-radius:10px;border:1px solid #e2e8f0">
-      <b>Logika Auto:</b><br/>
-      • Punya NIP → GID = G- + random 5 digit unik (beda dari NIP), Password = snebron + 4 digit akhir NIP<br/>
-      • Tanpa NIP (-) → GID = G- + random 5 digit unik, Password = snebron + random 4 digit (beda dari GID)<br/>
-      • Sudah sinkron ke halaman absen via Firestore gurus + CUSTOM_GURUS_V5
-    </div>
   </div>
 </div>
 
@@ -302,7 +307,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getFirestore, collection, query, getDocs, orderBy, limit, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 const LAT=-6.9075625, LNG=112.2108125; let RADIUS=40;
-const gurus = []; window.gurus=gurus; // DIHAPUS hardcode password - load dari Firestore, urut 1-44
+const gurus = []; window.gurus=gurus; window.gurus=gurus; // DIHAPUS hardcode password - load dari Firestore, urut 1-44
 function getDefaultPassword(nip){
   if(!nip || nip==="-") return "snebron0000";
   const digits = nip.replace(/\D/g,"").slice(-4);
@@ -310,7 +315,7 @@ function getDefaultPassword(nip){
 }
 const firebaseConfig={apiKey:"AIzaSyCSi5QKL-MapUUdGLV4OuiXupXa3XmRKvg",authDomain:"smpn1-brondong-absen.firebaseapp.com",projectId:"smpn1-brondong-absen",storageBucket:"smpn1-brondong-absen.firebasestorage.app",messagingSenderId:"174884842248",appId:"1:174884842248:web:8625540d5f3ff8b7f45abd"};
 let app,db,auth,allAbsen=[];
-try{app=initializeApp(firebaseConfig);db=getFirestore(app);auth=getAuth(app);document.getElementById('authConfigInfo').innerHTML=`✅ Terhubung ke <b>${firebaseConfig.projectId}</b><br>Auth OK • Silakan login`;onAuthStateChanged(auth,(user)=>{if(user){document.getElementById('adminLoginScreen').classList.add('hidden');document.getElementById('adminContent').classList.remove('hidden');document.getElementById('authBadge').textContent=`✅ ${user.email}`;document.getElementById('authBadge').classList.remove('hidden');document.getElementById('logoutBtn').classList.remove('hidden');document.getElementById('authInfo').textContent=`✅ ${user.email}`;document.getElementById('authUid').textContent=`UID: ${user.uid.slice(0,16)}...`;document.getElementById('lastLoginInfo').textContent=`Login: ${user.metadata.lastSignInTime||''}`;initMap();initGuruSelect();loadGurusFromFirestore().then(()=>{ renderGurus(); });loadPasswords();loadRekap();}else{document.getElementById('adminLoginScreen').classList.remove('hidden');document.getElementById('adminContent').classList.add('hidden');document.getElementById('authBadge').classList.add('hidden');document.getElementById('logoutBtn').classList.add('hidden');}});}catch(e){document.getElementById('authConfigInfo').innerHTML=`❌ ${e.message}`;}
+try{app=initializeApp(firebaseConfig);db=getFirestore(app);window.db=db;auth=getAuth(app);document.getElementById('authConfigInfo').innerHTML=`✅ Terhubung ke <b>${firebaseConfig.projectId}</b><br>Auth OK • Silakan login`;onAuthStateChanged(auth,(user)=>{if(user){document.getElementById('adminLoginScreen').classList.add('hidden');document.getElementById('adminContent').classList.remove('hidden');document.getElementById('authBadge').textContent=`✅ ${user.email}`;document.getElementById('authBadge').classList.remove('hidden');document.getElementById('logoutBtn').classList.remove('hidden');document.getElementById('authInfo').textContent=`✅ ${user.email}`;document.getElementById('authUid').textContent=`UID: ${user.uid.slice(0,16)}...`;document.getElementById('lastLoginInfo').textContent=`Login: ${user.metadata.lastSignInTime||''}`;initMap();initGuruSelect();loadGurusFromFirestore().then(()=>{ renderGurus(); });loadPasswords();loadRekap();}else{document.getElementById('adminLoginScreen').classList.remove('hidden');document.getElementById('adminContent').classList.add('hidden');document.getElementById('authBadge').classList.add('hidden');document.getElementById('logoutBtn').classList.add('hidden');}});}catch(e){document.getElementById('authConfigInfo').innerHTML=`❌ ${e.message}`;}
 setTimeout(()=>{ if(typeof loadGurusFromFirestore==='function') loadGurusFromFirestore(); }, 1000);
 const eyeOpen=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7Z" stroke="#0f355c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="#0f355c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="1.5" fill="#0f355c"/></svg>`;
 const eyeClosed=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3l18 18M10.58 10.58a3 3 0 0 0 4.24 4.24M9.53 9.53A10.07 10.07 0 0 0 2.39 12c1.73 3.89 6 7 11 7a9.96 9.96 0 0 0 4.22-1M14.12 14.12A3 3 0 0 1 9.88 9.88" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -324,7 +329,7 @@ document.getElementById('adminEmail')?.addEventListener('keydown', (e)=>{ if(e.k
 document.getElementById('loginBtn').onclick=async()=>{const email=document.getElementById('adminEmail').value.trim().replace('@@','@');const pass=document.getElementById('adminPass').value.trim();const btn=document.getElementById('loginBtn');if(!email||!pass){showErr('Isi email dan password','error');return;}btn.textContent='⏳ Mengecek...';btn.disabled=true;try{await signInWithEmailAndPassword(auth,email,pass);}catch(e){let m=e.message;if(e.code==='auth/invalid-credential')m='❌ Email atau password salah! Cek lagi.';if(e.code==='auth/invalid-email')m='❌ Format email salah!';if(e.code==='auth/too-many-requests')m='❌ Terlalu banyak percobaan, tunggu sebentar.';showErr(m,'error');}btn.textContent='Masuk Secure →';btn.disabled=false;};
 document.getElementById('forgotBtn').onclick=async()=>{
   const email=document.getElementById('adminEmail').value.trim().replace('@@','@');
-  if(!email){showErr('Isi email dulu untuk reset! Contoh: smpnegeri1brondong@gmail.com','error');return;}
+  if(!email){showErr('Isi email dulu untuk reset!','error');return;}
   const btn=document.getElementById('forgotBtn');
   btn.textContent='⏳ Mengirim...'; btn.disabled=true;
   try{
@@ -343,7 +348,21 @@ window.doLogout=async()=>{await signOut(auth);};
 window.switchTab=(tab)=>{document.getElementById('tabLaporan').classList.toggle('active',tab==='laporan');document.getElementById('tabGuru').classList.toggle('active',tab==='guru');document.getElementById('panelLaporan').classList.toggle('hidden',tab!=='laporan');document.getElementById('panelGuru').classList.toggle('hidden',tab!=='guru');if(tab==='guru') setTimeout(()=>renderGurus(),100);};
 let mapAdmin, adminCircle, adminMarker;
 function initMap(){mapAdmin=L.map('mapAdmin',{zoomControl:false}).setView([LAT,LNG],16);L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20}).addTo(mapAdmin);adminCircle=L.circle([LAT,LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f4c81',fillOpacity:0.12}).addTo(mapAdmin);adminMarker=L.marker([LAT,LNG]).addTo(mapAdmin); window.mapAdmin=mapAdmin; window.adminCircle=adminCircle; window.circle=adminCircle; }
-function initGuruSelect(){const sel=document.getElementById('filterGuruSelect');gurus.forEach(g=>{const o=document.createElement('option');o.value=g.gid;o.textContent=`${g.gid} - ${g.nama}`;sel.appendChild(o);});}
+function initGuruSelect(){
+  const sel=document.getElementById('filterGuruSelect');
+  if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML='<option value="">Semua GTK</option>';
+  const sorted=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));
+  sorted.forEach(g=>{
+    const o=document.createElement('option');
+    o.value=g.gid;
+    o.textContent=`${String(g.no||'-').padStart(2,'0')} - ${g.nama} (${g.gid})`;
+    sel.appendChild(o);
+  });
+  if(cur) sel.value=cur;
+}
+window.initGuruSelect=initGuruSelect;
 let customPassMap={};
 async function loadPasswords(){document.getElementById('rekapInfo').textContent='Memuat...';try{const snap=await getDocs(collection(db,"users"));customPassMap={};snap.forEach(d=>{customPassMap[d.id]=d.data();});document.getElementById('rekapInfo').innerHTML=`✅ ${snap.size} custom password`;renderGurus();}catch(e){document.getElementById('rekapInfo').innerHTML=`❌ ${e.message}`;}}
 window.loadPasswords=loadPasswords;
@@ -393,6 +412,7 @@ async function loadGurusFromFirestore(){
     newList.forEach((g,i)=>{ if(!g.no || g.no===9999) g.no=i+1; gurus.push(g); });
     window.gurus=gurus;
     console.log('✅ gurus loaded dari Firestore:', gurus.length);
+    if(typeof initGuruSelect==='function') initGuruSelect();
     if(typeof renderGurus==='function') renderGurus(document.getElementById('searchGuru')?.value||'');
   }catch(e){ console.log('loadGurus fail', e.message); }
 }
@@ -499,7 +519,7 @@ function ubahPassword(gid){
   })();
 }
 function hapusGuru(gid){
-  if(!confirm('Hapus Guru '+gid+'?')) return;
+  if(!confirm('Hapus GTK '+gid+'?')) return;
   (async()=>{
     try{
       // hapus dari custom localStorage
@@ -549,6 +569,7 @@ function updateGuru(){
       if(!d) throw new Error('db belum siap');
       const oldG = (typeof gurus!=='undefined'? gurus.find(x=>x.gid===editingGID) : null);
       const oldPass = oldG ? oldG.password : '';
+      const oldNo = oldG ? oldG.no : null;
       const isPassChanged = pass && pass !== oldPass;
       // ambil old_gids dari doc lama biar alias chain gak putus
       let prevOldGids = oldG ? (oldG.old_gids||[]) : [];
@@ -561,8 +582,8 @@ function updateGuru(){
       }catch(e){}
       let newOldGids = [...prevOldGids];
       if(gid!==editingGID && !newOldGids.includes(editingGID)) newOldGids.push(editingGID);
-      // FIX alias: simpan old_gids di doc baru
-      await setDoc(doc(d, "gurus", gid), {gid:gid, GID:gid, nama:nama, Nama:nama, nip:nip, NIP:nip, password:pass||oldPass, old_gids:newOldGids, updated_at:new Date().toISOString(), updated_by:'admin'}, {merge:true});
+      // FIX: simpan old_gids + PERTAHANKAN NO biar gak ke bawah pas edit GID
+      await setDoc(doc(d, "gurus", gid), {gid:gid, GID:gid, nama:nama, Nama:nama, nip:nip, NIP:nip, password:pass||oldPass, no:oldNo, old_gids:newOldGids, updated_at:new Date().toISOString(), updated_by:'admin'}, {merge:true});
       if(gid!==editingGID){ try{ await deleteDoc(doc(d, "gurus", editingGID)); }catch(e){} }
       if(isPassChanged){
         try{ await setDoc(doc(d, "users", gid), {gid:gid, password:pass, password_custom:pass, nama:nama, nip:nip, updated_at:new Date().toISOString()}, {merge:true}); if(gid!==editingGID){ try{ await deleteDoc(doc(d, "users", editingGID)); }catch(e){} } }catch(e){}
