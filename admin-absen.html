@@ -1,5 +1,14 @@
 <!doctype html>
-<html lang="id"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#0f355c"/>
+<link rel="apple-touch-icon" href="si-absen.png"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="SI-ABSEN"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>Admin SI-ABSEN</title>
 <link rel="icon" href="logo-smp2.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -1027,4 +1036,26 @@ try{ renderGurus = window.renderGurus; }catch(e){}
   </div>
 </div>
 
-</body></html>
+<script>
+// PWA Install + iOS support
+let deferredPrompt;
+const btn = document.createElement('button');
+btn.id='pwaInstallBtn';
+btn.innerHTML='📲 Install Aplikasi SI-ABSEN';
+btn.style.cssText='position:fixed;bottom:20px;left:16px;right:16px;z-index:9999;background:#0f355c;color:white;border:none;height:52px;border-radius:16px;font-weight:800;display:none;';
+document.body.appendChild(btn);
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; btn.style.display='block'; });
+btn.onclick=async()=>{
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt=null; btn.style.display='none';
+  }else{
+    alert('iPhone: Tap tombol Share (kotak panah) → Tambahkan ke Layar Utama\nAndroid: Tap titik 3 → Install App');
+  }
+};
+window.addEventListener('appinstalled', ()=>btn.style.display='none');
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
+</script>
+</body>
+</html>

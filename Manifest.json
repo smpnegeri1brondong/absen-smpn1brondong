@@ -1,0 +1,43 @@
+{
+  "name": "SI-ABSEN SMPN 1 Brondong",
+  "short_name": "SI-ABSEN",
+  "description": "Sistem Absen GTK SMPN 1 Brondong - Info, Absen & Admin",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f355c",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "si-absen.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "si-absen.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "si-absen.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "si-absen.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "si-absen.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

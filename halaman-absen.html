@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#0f355c"/>
+<link rel="apple-touch-icon" href="si-absen.png"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="SI-ABSEN"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>SI-ABSEN</title>
 <link rel="icon" href="logo-smp2.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -85,7 +91,9 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 
 <div id="absenScreen"
  class="hidden">
-<div class="card"><div style="display:flex;justify-content:space-between"><div><div style="font-size:11px;font-weight:800;color:#64748b">PROFIL GTK</div><div id="namaGuru" style="font-weight:800;color:#0f355c;margin-top:4px;font-size:16px"></div><div id="nipGuru" style="font-size:12px;color:#64748b"></div></div><div id="inisialGuru" style="width:44px;height:44px;border-radius:999px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800"></div></div><div id="jamInfo" style="margin-top:10px;display:none"></div><div id="firebaseInfo" style="margin-top:10px;font-size:10px;padding:6px 10px;border-radius:8px;background:#f1f5f9;border:1px solid #e2e8f0">Firebase: mengecek...</div></div>
+<div class="card">
+  <div style="display:flex;justify-content:space-between">
+    <div><div style="font-size:11px;font-weight:800;color:#64748b">PROFIL GTK</div><div id="namaGuru" style="font-weight:800;color:#0f355c;margin-top:4px;font-size:16px"></div><div id="nipGuru" style="font-size:12px;color:#64748b"></div></div><div id="inisialGuru" style="width:44px;height:44px;border-radius:999px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800"></div></div><div id="jamInfo" style="margin-top:10px;display:none"></div><div id="firebaseInfo" style="margin-top:10px;font-size:10px;padding:6px 10px;border-radius:8px;background:#f1f5f9;border:1px solid #e2e8f0">Firebase: mengecek...</div></div>
 
 <div class="card" style="padding:12px 14px;border:2px solid #e0f2fe;background:#f0f9ff">
   <div style="display:flex;justify-content:space-between;align-items:start;gap:12px">
@@ -609,7 +617,28 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 });
 // === END PATCH KONEK ADMIN ===
+</script>
 
+<script>
+// PWA Install + iOS support
+let deferredPrompt;
+const btn = document.createElement('button');
+btn.id='pwaInstallBtn';
+btn.innerHTML='📲 Install Aplikasi SI-ABSEN';
+btn.style.cssText='position:fixed;bottom:20px;left:16px;right:16px;z-index:9999;background:#0f355c;color:white;border:none;height:52px;border-radius:16px;font-weight:800;display:none;';
+document.body.appendChild(btn);
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; btn.style.display='block'; });
+btn.onclick=async()=>{
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt=null; btn.style.display='none';
+  }else{
+    alert('iPhone: Tap tombol Share (kotak panah) → Tambahkan ke Layar Utama\nAndroid: Tap titik 3 → Install App');
+  }
+};
+window.addEventListener('appinstalled', ()=>btn.style.display='none');
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
 </script>
 </body>
 </html>
