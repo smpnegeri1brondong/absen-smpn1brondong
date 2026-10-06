@@ -355,8 +355,43 @@ document.getElementById('forgotBtn').onclick=async()=>{
 };
 window.doLogout=async()=>{await signOut(auth);};
 window.switchTab=(tab)=>{document.getElementById('tabLaporan').classList.toggle('active',tab==='laporan');document.getElementById('tabGuru').classList.toggle('active',tab==='guru');document.getElementById('panelLaporan').classList.toggle('hidden',tab!=='laporan');document.getElementById('panelGuru').classList.toggle('hidden',tab!=='guru');if(tab==='guru') setTimeout(()=>renderGurus(),100);};
-let mapAdmin, adminCircle, adminMarker;
-function initMap(){mapAdmin=L.map('mapAdmin',{zoomControl:false}).setView([LAT,LNG],16);L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20}).addTo(mapAdmin);adminCircle=L.circle([LAT,LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f4c81',fillOpacity:0.12}).addTo(mapAdmin);adminMarker=L.marker([LAT,LNG]).addTo(mapAdmin); window.mapAdmin=mapAdmin; window.adminCircle=adminCircle; window.circle=adminCircle; }
+let mapAdmin, adminCircle, adminMarker, adminMarkerUser, adminLine;
+function initMap(){
+  mapAdmin=L.map('mapAdmin',{zoomControl:false}).setView([LAT,LNG],16);
+  L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20}).addTo(mapAdmin);
+  
+  adminCircle=L.circle([LAT,LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f4c81',fillOpacity:0.12}).addTo(mapAdmin);
+  
+  // Titik 1: Sekolah
+  const schoolIcon = L.divIcon({html:'<div style="width:28px;height:28px;background:#0f355c;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white">🏫</div>',iconSize:[28,28],className:''});
+  adminMarker=L.marker([LAT,LNG],{icon:schoolIcon}).addTo(mapAdmin).bindPopup('SMPN 1 Brondong - Pusat Radius');
+
+  window.mapAdmin=mapAdmin; window.adminCircle=adminCircle; window.circle=adminCircle;
+  
+  // Langsung cek lokasi admin (titik ke-2)
+  cekLokasiAdmin();
+}
+
+function cekLokasiAdmin(){
+  if(!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(p=>{
+    const lat=p.coords.latitude, lng=p.coords.longitude;
+    if(adminMarkerUser) mapAdmin.removeLayer(adminMarkerUser);
+    if(adminLine) mapAdmin.removeLayer(adminLine);
+
+    // Titik 2: HP Admin
+    const userIcon = L.divIcon({html:'<div style="width:18px;height:18px;background:#2563eb;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>',iconSize:[18,18],className:''});
+    adminMarkerUser = L.marker([lat,lng],{icon:userIcon}).addTo(mapAdmin).bindPopup('📍 Lokasi Anda (Admin)');
+
+    // Garis penghubung
+    const d = mapAdmin.distance([LAT,LNG],[lat,lng]);
+    const warna = d<=RADIUS ? '#16a34a' : '#ef4444';
+    adminLine = L.polyline([[LAT,LNG],[lat,lng]],{color:warna,weight:2,dashArray:'6 6'}).addTo(mapAdmin);
+
+    const group = L.featureGroup([adminCircle, adminMarker, adminMarkerUser]);
+    mapAdmin.fitBounds(group.getBounds().pad(0.4));
+  }, null, {enableHighAccuracy:true, timeout:10000});
+}
 function initGuruSelect(){
   const sel=document.getElementById('filterGuruSelect');
   if(!sel) return;
