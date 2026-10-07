@@ -41,7 +41,7 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 #customAlert .modal-body{padding:20px;color:#334155;font-size:14px;line-height:1.5}
 #customAlert .modal-footer{padding:12px 20px;display:flex;justify-content:flex-end;border-top:1px solid #e2e8f0}
 </style>
-</head>
+<style>#firebaseInfo{display:none !important;}</style></head>
 <body>
 <header class="header">
 <div style="display:flex;align-items:center;gap:8px"><div style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'" alt="SI-ABSEN" style="width:100%;height:100%;object-fit:contain"/></div><div><div style="font-weight:800;color:#0f355c;font-size:12px">SI-ABSEN</div><div style="font-size:10px;color:#64748b">ABSEN GTK</div></div></div>
@@ -96,7 +96,7 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
  class="hidden">
 <div class="card">
   <div style="display:flex;justify-content:space-between">
-    <div><div style="font-size:11px;font-weight:800;color:#64748b">PROFIL GTK</div><div id="namaGuru" style="font-weight:800;color:#0f355c;margin-top:4px;font-size:16px"></div><div id="nipGuru" style="font-size:12px;color:#64748b"></div></div><div id="inisialGuru" style="width:44px;height:44px;border-radius:999px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800"></div></div><div id="jamInfo" style="margin-top:10px;display:none"></div><div id="firebaseInfo" style="margin-top:10px;font-size:10px;padding:6px 10px;border-radius:8px;background:#f1f5f9;border:1px solid #e2e8f0">Firebase: mengecek...</div></div>
+    <div><div style="font-size:11px;font-weight:800;color:#64748b">PROFIL GTK</div><div id="namaGuru" style="font-weight:800;color:#0f355c;margin-top:4px;font-size:16px"></div><div id="nipGuru" style="font-size:12px;color:#64748b"></div></div><div id="inisialGuru" style="width:44px;height:44px;border-radius:999px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800"></div></div><div id="jamInfo" style="margin-top:10px;display:none"></div><div id="firebaseInfo" style="display:none !important" style="margin-top:10px;font-size:10px;padding:6px 10px;border-radius:8px;background:#f1f5f9;border:1px solid #e2e8f0">Firebase: mengecek...</div></div>
 
 <div class="card" style="padding:12px 14px;border:2px solid #e0f2fe;background:#f0f9ff">
   <div style="display:flex;justify-content:space-between;align-items:start;gap:12px">
@@ -163,7 +163,7 @@ let db=null;
 try{
   const app=initializeApp(firebaseConfig);
   db=getFirestore(app); window.db=db;
-  document.getElementById('firebaseInfo').textContent='✅ Firebase: '+firebaseConfig.projectId+'';
+  /*HIDDEN*/ document.getElementById('firebaseInfo').textContent='✅ Firebase: '+firebaseConfig.projectId+'';
   window.db=db;
 
   // === SYNC GURU DINAMIS DARI ADMIN ===
@@ -187,15 +187,15 @@ try{
         GURUS.length=0;
         map.forEach(v=>GURUS.push(v));
         console.log('✅ GURUS synced dari Firestore:', GURUS.length);
-        document.getElementById('firebaseInfo').textContent = '✅ Firebase: '+firebaseConfig.projectId+' • '+GURUS.length+' guru synced';
+        /*HIDDEN*/ document.getElementById('firebaseInfo').textContent = '✅ Firebase: '+firebaseConfig.projectId+' • '+GURUS.length+' guru synced';
       }
     }catch(e){ console.log('Gagal load gurus:', e); }
   };
   // Panggil setelah init
   setTimeout(()=>{ window.loadGurusFromFirestore(); }, 800);
 
-  document.getElementById('firebaseInfo').style.background='#dcfce7';
-}catch(e){ document.getElementById('firebaseInfo').textContent='❌ Firebase gagal: '+e.message; }
+  /*HIDDEN*/ document.getElementById('firebaseInfo').style.background='#dcfce7';
+}catch(e){ /*HIDDEN*/ document.getElementById('firebaseInfo').textContent='❌ Firebase gagal: '+e.message; }
 
 const LAT=-6.9075625, LNG=112.2108125, PLUS="36R5+VX Tlogoretno"; // SMPN 1 Brondong sync dengan admin Adminnn-LOGIN-MATA-ENTER-FORGOT.html
 let CURRENT_LAT=-6.9075625, CURRENT_LNG=112.2108125, RADIUS=40;
@@ -285,17 +285,12 @@ window.getJenisAbsen=(d)=>{
   // Tepat Pulang 13:50-15:30 (830-930) Sen-Kam, 10:00-15:00 (600-900) Jumat, atau pakai jam pulang cepat
   // Lock Pulang >15:30 / >15:00 -> valid:false anti balik jam 20:00
   
-  if(day===5){ // JUMAT
+  if(day===5){ // JUMAT - LOGIC FIX PULANG CEPAT
     if(batasTepatPulangCustom!==null){
       if(menit>=360 && menit<=435){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Jumat Masuk Tepat Waktu (batas 07:15)'}; }
       if(menit>=436 && menit<=540){ const telat=menit-435; return {jenis:'MASUK', kategori:'TELAT', label:`Telat ${telat} menit`, color:'telat', valid:true, telatMenit:telat, pesan:`Jumat Telat ${telat} menit dari 07:15`}; }
-      // Lewat 09:00 lock masuk kecuali ada buka kunci
-      if(menit>=541 && menit<(batasTepatPulangCustom)){
-        // Jika belum lewat jam pulang cepat, masih belum waktunya pulang
-        if(!bukaMasuk && menit>540 && menit<600){
-          // masih dalam range belum waktunya pulang tapi sudah lewat batas masuk
-          // cek apakah sudah absen masuk hari ini? Nanti di prosesAbsenOtomatis akan cek history, tapi di sini kasih info lock masuk
-        }
+      // FIX: jika pulang cepat, semua menit 09:01 sampai sebelum jam pulang cepat = BELUM_WAKTUNYA_PULANG
+      if(menit>=541 && menit < batasTepatPulangCustom){
         return {jenis:'PULANG', kategori:'BELUM_WAKTUNYA_PULANG', label:'Belum Waktunya Pulang (Pulang Cepat '+pc.jam_pulang+')', color:'awal', valid:true, telatMenit:0, pesan:'Jumat belum waktunya pulang, pulang cepat jam '+pc.jam_pulang}; 
       }
       if(menit>=batasTepatPulangCustom && menit<=900){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Tepat Waktu (Pulang Cepat '+pc.jam_pulang+')', color:'tepat', valid:true, telatMenit:0, pesan:'Jumat Pulang Tepat Waktu (Pulang Cepat '+pc.jam_pulang+')'}; }
@@ -303,7 +298,6 @@ window.getJenisAbsen=(d)=>{
         if(bukaPulang) return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Tepat Waktu (Dibuka Kunci)', color:'tepat', valid:true, telatMenit:0, pesan:'Pulang lewat 15:00 tapi sudah dibuka kunci admin'};
         return {jenis:'LOCK_PULANG', kategori:'LOCK_PULANG', label:'Lock Pulang Lewat 15:00', color:'lock', valid:false, telatMenit:0, pesan:'⛔ Pulang sudah ditutup jam 15:00. Kalau mau absen hubungi admin untuk buka kunci. Anti ngakalin balik jam 20:00'}; 
       }
-      if(menit>540 && menit<360){ /* malam */ }
     } else {
       if(menit>=360 && menit<=435){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Jumat Masuk Tepat Waktu'}; }
       if(menit>=436 && menit<=540){ const telat=menit-435; return {jenis:'MASUK', kategori:'TELAT', label:`Telat ${telat} menit`, color:'telat', valid:true, telatMenit:telat, pesan:`Jumat Telat ${telat} menit dari 07:15`}; }
@@ -321,13 +315,13 @@ window.getJenisAbsen=(d)=>{
       // Untuk sekarang biarkan sebagai BELUM_WAKTUNYA_PULANG, lock masuk akan di-handle di cekJamAbsen dengan cek history absen
     }
   } else {
-    // SENIN-KAMIS
+    // SENIN-KAMIS - LOGIC FIX PULANG CEPAT
     if(batasTepatPulangCustom!==null){
       if(menit>=360 && menit<=435){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Masuk Tepat Waktu (batas 07:15)'}; }
       if(menit>=436 && menit<=690){ const telat=menit-435; return {jenis:'MASUK', kategori:'TELAT', label:`Telat ${telat} menit`, color:'telat', valid:true, telatMenit:telat, pesan:`Telat ${telat} menit dari 07:15`}; }
-      if(menit>=691 && menit<=829){ return {jenis:'PULANG', kategori:'PULANG_SEBELUM_WAKTUNYA', label:'Pulang Sebelum Waktunya', color:'awal', valid:true, telatMenit:0, pesan:'Pulang sebelum jam 13:50'}; }
-      if(menit>=830 && menit<batasTepatPulangCustom){
-        return {jenis:'PULANG', kategori:'PULANG_SEBELUM_WAKTUNYA', label:'Pulang Sebelum Waktunya (Pulang Cepat '+pc.jam_pulang+')', color:'awal', valid:true, telatMenit:0, pesan:'Belum jam pulang cepat '+pc.jam_pulang}; 
+      // FIX: jika pulang cepat misal 12:00, maka 11:31 sampai sebelum 12:00 = BELUM_WAKTUNYA_PULANG
+      if(menit>=691 && menit < batasTepatPulangCustom){
+        return {jenis:'PULANG', kategori:'BELUM_WAKTUNYA_PULANG', label:'Belum Waktunya Pulang (Pulang Cepat '+pc.jam_pulang+')', color:'awal', valid:true, telatMenit:0, pesan:'Belum waktunya pulang, pulang cepat jam '+pc.jam_pulang}; 
       }
       if(menit>=batasTepatPulangCustom && menit<=930){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Tepat Waktu (Pulang Cepat '+pc.jam_pulang+')', color:'tepat', valid:true, telatMenit:0, pesan:'Pulang Tepat Waktu (Pulang Cepat '+pc.jam_pulang+')'}; }
       if(menit>930 && menit<=1260){ 
@@ -406,38 +400,9 @@ setTimeout(loadSettingsAbsenV7, 1500);
 
 // Override cekJamAbsen to handle LOCK display
 const _origCekJamAbsen = window.cekJamAbsen;
-window.cekJamAbsen=()=>{ 
-  const el=document.getElementById('jamInfo'); 
-  if(!el) return; 
-  const now=new Date(); 
-  const info=getJenisAbsen(now); 
-  const jamStr=now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' WIB'; 
-  el.style.display='block'; 
-  el.style.whiteSpace='normal'; 
-  el.style.lineHeight='1.5';
-  el.style.maxWidth='100%';
-  if(info.valid){ 
-    el.innerHTML='<span style="background:#dcfce7;border:1px solid #bbf7d0;color:#166534;padding:6px 12px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block;white-space:normal;line-height:1.4;max-width:100%;word-break:break-word">● '+info.jenis+' DIBUKA • '+jamStr+' • '+info.label+'</span>'; 
-    const btnScan = document.getElementById('btnStartCam');
-    if(btnScan){ btnScan.disabled=false; btnScan.style.opacity='1'; btnScan.title=''; }
-  } else { 
-    const isLock = info.jenis.includes('LOCK');
-    const isIzin = info.jenis==='IZIN';
-    const isLibur = info.jenis==='LIBUR';
-    let bg='#fee2e2', border='#fecaca', color='#991b1b';
-    if(isIzin){ bg='#dbeafe'; border='#bfdbfe'; color='#1e40af'; }
-    else if(isLibur){ bg='#e0f2fe'; border='#bae6fd'; color='#075985'; }
-    else if(isLock){ bg='#fee2e2'; border='#fecaca'; color='#991b1b'; }
-    el.innerHTML='<span style="background:'+bg+';border:1px solid '+border+';color:'+color+';padding:8px 12px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block;white-space:normal;line-height:1.5;max-width:100%;word-break:break-word;overflow-wrap:break-word">● '+info.jenis+' • '+jamStr+' • '+info.pesan+'</span>'; 
-    // Disable scan button if locked / libur / izin
-    const btnScan = document.getElementById('btnStartCam');
-    if(btnScan){
-      btnScan.disabled = true;
-      btnScan.style.opacity = '0.5';
-      btnScan.title = info.pesan;
-    }
-  } 
-};
+// === FIX 1: ICON MATA PAKAI SVG, BUKAN EMOJI ===
+const eyeOpenSVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+const eyeClosedSVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.53 9.53a3 3 0 1 0 4.24 4.24"/><path d="M3 3l18 18"/></svg>';
 
 window.getKategori = window.getJenisAbsen;
 window.getKategoriAbsen = window.getJenisAbsen;
@@ -452,16 +417,36 @@ window.cekJamAbsen=()=>{
   el.style.whiteSpace='normal'; 
   el.style.lineHeight='1.5';
   el.style.maxWidth='100%';
-  if(info.valid){ 
-    el.innerHTML='<span style="background:#dcfce7;border:1px solid #bbf7d0;color:#166534;padding:6px 12px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block;white-space:normal;line-height:1.4;max-width:100%;word-break:break-word">● '+info.jenis+' DIBUKA • '+jamStr+'</span>'; 
-  } else { 
-    el.innerHTML='<span style="background:#fee2e2;border:1px solid #fecaca;color:#991b1b;padding:8px 12px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block;white-space:normal;line-height:1.5;max-width:100%;word-break:break-word;overflow-wrap:break-word">● TUTUP • '+jamStr+' • '+info.pesan+'</span>'; 
-  } 
+  const btnScan = document.getElementById('btnStartCam');
+  // Tentukan warna dan teks
+  let bg='#dcfce7', border='#bbf7d0', color='#166534', icon='●', text='';
+  if(info.jenis==='MASUK' && info.kategori==='TEPAT_WAKTU'){ text='MASUK DIBUKA • '+jamStr+' • Tepat Waktu'; }
+  else if(info.jenis==='MASUK' && info.kategori==='TELAT'){ bg='#fef3c7'; border='#fde68a'; color='#92400e'; text='MASUK DIBUKA • '+jamStr+' • Telat '+ (info.telatMenit||0) +' menit'; }
+  else if(info.jenis==='PULANG' && info.kategori==='TEPAT_WAKTU'){ text='PULANG DIBUKA • '+jamStr+' • Tepat Waktu'; }
+  else if(info.kategori==='PULANG_SEBELUM_WAKTUNYA' || info.kategori==='BELUM_WAKTUNYA_PULANG'){ 
+    bg='#fef3c7'; border='#fde68a'; color='#92400e'; 
+    text='BELUM WAKTUNYA PULANG • '+jamStr+' • Nanti jam 13:50 (sekarang masih '+jamStr+') - Tetap bisa absen tapi tercatat pulang awal'; 
+    // tombol tetap aktif
+    if(btnScan){ btnScan.disabled=false; btnScan.style.opacity='1'; btnScan.title=''; }
+  }
+  else if(info.valid){ text=info.label+' • '+jamStr; if(btnScan){ btnScan.disabled=false; btnScan.style.opacity='1'; } }
+  else {
+    const isLock = info.jenis.includes('LOCK');
+    const isIzin = info.jenis==='IZIN';
+    const isLibur = info.jenis==='LIBUR';
+    bg='#fee2e2'; border='#fecaca'; color='#991b1b';
+    if(isIzin){ bg='#dbeafe'; border='#bfdbfe'; color='#1e40af'; }
+    else if(isLibur){ bg='#e0f2fe'; border='#bae6fd'; color='#075985'; }
+    text=info.jenis+' • '+jamStr+' • '+info.pesan;
+    if(btnScan){ btnScan.disabled=true; btnScan.style.opacity='0.5'; btnScan.title=info.pesan; }
+    el.innerHTML='<span style="background:'+bg+';border:1px solid '+border+';color:'+color+';padding:8px 12px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block;white-space:normal;line-height:1.5;max-width:100%;word-break:break-word;overflow-wrap:break-word">'+text+'</span>';
+    return;
+  }
+  el.innerHTML='<span style="background:'+bg+';border:1px solid '+border+';color:'+color+';padding:6px 12px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block;white-space:normal;line-height:1.4;max-width:100%;word-break:break-word">● '+text+'</span>';
+  if(btnScan && info.valid){ btnScan.disabled=false; btnScan.style.opacity='1'; btnScan.title=''; }
 };
 
-// === FIX 1: ICON MATA PAKAI SVG, BUKAN EMOJI ===
-const eyeOpenSVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
-const eyeClosedSVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.53 9.53a3 3 0 1 0 4.24 4.24"/><path d="M3 3l18 18"/></svg>';
+
 window.togglePass=()=>{
   const inp=document.getElementById('passInput');
   const btn=document.getElementById('eyeBtn');
@@ -586,6 +571,49 @@ window.logout=()=>{ localStorage.removeItem('SI-ABSEN_GID'); location.reload(); 
 async function prosesAbsenOtomatis(){
   const now=new Date();
   const jamInfo=getJenisAbsen(now);
+  // === FIX LOCK: kalau belum absen MASUK hari ini, gak boleh PULANG ===
+  if(jamInfo.jenis==='PULANG'){
+    try{
+      const d = window.db || db;
+      if(d){
+        const {collection, getDocs, query, where} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+        const todayStr = now.toISOString().split('T')[0];
+        // cek apakah sudah ada absen MASUK hari ini untuk gid ini
+        const q = query(collection(d,'absensi'), where('gid','==', currentGuru.gid), where('jenis_absen','==','MASUK'));
+        const snap = await getDocs(q);
+        let sudahMasuk = false;
+        snap.forEach(docSnap=>{
+          const w = docSnap.data().waktu;
+          let tgl = '';
+          try{ tgl = w ? new Date(w).toISOString().split('T')[0] : (docSnap.data().waktu_server ? '' : ''); }catch(e){ tgl = docSnap.data().tanggal || ''; }
+          // fallback: cek field waktu string contains today
+          if(docSnap.data().waktu && typeof docSnap.data().waktu==='string' && docSnap.data().waktu.includes(todayStr)) sudahMasuk=true;
+          else if(docSnap.data().tanggal===todayStr) sudahMasuk=true;
+          else {
+            // cek via toDate
+            try{
+              const dt = docSnap.data().waktu?.toDate ? docSnap.data().waktu.toDate() : new Date(docSnap.data().waktu);
+              if(dt.toISOString().split('T')[0]===todayStr) sudahMasuk=true;
+            }catch(e){}
+          }
+        });
+        // jika belum ada sama sekali yang tanggal hari ini, cek rekap_harian
+        if(!sudahMasuk){
+          try{
+            const {doc, getDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+            const refMasuk = doc(d,'rekap_harian', todayStr+'_'+currentGuru.gid+'_MASUK');
+            const snapMasuk = await getDoc(refMasuk);
+            if(snapMasuk.exists()) sudahMasuk=true;
+          }catch(e){}
+        }
+        if(!sudahMasuk){
+          showCustomAlert('BELUM ABSEN MASUK', `⛔ <b>Kamu belum absen MASUK hari ini</b><br><br>Gak bisa langsung absen PULANG jam <b>${now.toLocaleTimeString('id-ID')} WIB</b>.<br><br>Silakan absen MASUK dulu pagi, baru nanti bisa absen PULANG jam <b>13:50</b> ke atas.<br><br>Kalau memang sudah masuk tapi lupa absen, hubungi admin untuk <b>Buka Kunci Masuk</b>.`);
+          document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 COBA LAGI';
+          return;
+        }
+      }
+    }catch(e){ console.log('cek masuk fail', e); }
+  }
   if(jamInfo.jenis==='LIBUR'){
     setTimeout(()=>{ showCustomAlert('HARI LIBUR HEYY', `🏖️ <b>Terlalu Rajin Mas</b><br><br>${jamInfo.pesan}<br><br>Absen kamu <b>TETAP TERCATAT</b> di laporan sebagai <b>${jamInfo.label}</b> agar admin tau kamu absen di hari libur.<br><br>Jam sekarang: <b>${now.toLocaleTimeString('id-ID')} WIB</b>`); }, 300);
   } else if(jamInfo.kategori==='PULANG_SEBELUM_WAKTUNYA' || jamInfo.kategori==='BELUM_WAKTUNYA_PULANG'){
@@ -767,10 +795,9 @@ async function startAdminSync(){
 }
 setTimeout(startAdminSync, 1000);
 
-// ANTI-DOBEL MINIMAL - dari file kamu, cuma benerin merge biar gak jadi 45
+// ANTI-DOBEL + LOCK MASUK FIX
 function mergeCustomGurus(){
   try{
-    // Jika GURUS sudah ada dari Firestore/onSnapshot (44), jangan merge CUSTOM_GURUS_V5 lagi, langsung hapus sampahnya
     if(typeof GURUS!=='undefined' && GURUS.length>0){
       try{ localStorage.removeItem('CUSTOM_GURUS_V5'); }catch(e){}
       console.log("✅ GURUS dari Firestore (anti-dobel):", GURUS.length);
@@ -781,10 +808,7 @@ function mergeCustomGurus(){
     let customs=[];
     try{ customs=JSON.parse(localStorage.getItem('CUSTOM_GURUS_V5')||'[]'); }catch(e){ customs=[]; }
     if(customs.length===0) return;
-    customs.forEach(cc=>{
-      if(!cc || !cc.gid || cc.deleted) return;
-      if(!map[cc.gid]) map[cc.gid]={no:Object.keys(map).length+1, nama:cc.nama||'-', nip:cc.nip||'-', gid:cc.gid, password:cc.password||'snebron0000'};
-    });
+    customs.forEach(cc=>{ if(cc && cc.gid && !cc.deleted && !map[cc.gid]) map[cc.gid]={no:Object.keys(map).length+1, nama:cc.nama||'-', nip:cc.nip||'-', gid:cc.gid, password:cc.password||'snebron0000'}; });
     GURUS=Object.values(map);
     console.log("✅ GURUS fallback:", GURUS.length);
   }catch(e){ console.log("mergeCustom err", e); }
