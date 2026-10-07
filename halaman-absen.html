@@ -574,42 +574,47 @@ async function prosesAbsenOtomatis(){
   // === FIX LOCK: kalau belum absen MASUK hari ini, gak boleh PULANG ===
   if(jamInfo.jenis==='PULANG'){
     try{
-      const d = window.db || db;
-      if(d){
-        const {collection, getDocs, query, where} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-        const todayStr = now.toISOString().split('T')[0];
-        // cek apakah sudah ada absen MASUK hari ini untuk gid ini
-        const q = query(collection(d,'absensi'), where('gid','==', currentGuru.gid), where('jenis_absen','==','MASUK'));
-        const snap = await getDocs(q);
-        let sudahMasuk = false;
-        snap.forEach(docSnap=>{
-          const w = docSnap.data().waktu;
-          let tgl = '';
-          try{ tgl = w ? new Date(w).toISOString().split('T')[0] : (docSnap.data().waktu_server ? '' : ''); }catch(e){ tgl = docSnap.data().tanggal || ''; }
-          // fallback: cek field waktu string contains today
-          if(docSnap.data().waktu && typeof docSnap.data().waktu==='string' && docSnap.data().waktu.includes(todayStr)) sudahMasuk=true;
-          else if(docSnap.data().tanggal===todayStr) sudahMasuk=true;
-          else {
-            // cek via toDate
+      // FIX BUG: kalau admin sudah buka kunci MASUK, jangan block PULANG dengan alert BELUM ABSEN MASUK
+      // Karena getJenisAbsen sudah override jadi MASUK kalau ada bukaMasuk, tapi kalau tetap ke sini, cek dulu
+      const tglStrBuka = now.toISOString().split('T')[0];
+      const gidBuka = (currentGuru && currentGuru.gid) ? currentGuru.gid : (localStorage.getItem('SI-ABSEN_GID')||'');
+      const bukaMasukAktif = (typeof isBukaKunciHariIni==='function') ? isBukaKunciHariIni(gidBuka, tglStrBuka, 'MASUK') : null;
+      if(bukaMasukAktif){
+        console.log('Buka MASUK aktif, skip validasi belum absen masuk, biarkan absen');
+      } else {
+        const d = window.db || db;
+        if(d){
+          const {collection, getDocs, query, where} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+          const todayStr = now.toISOString().split('T')[0];
+          const q = query(collection(d,'absensi'), where('gid','==', currentGuru.gid), where('jenis_absen','==','MASUK'));
+          const snap = await getDocs(q);
+          let sudahMasuk = false;
+          snap.forEach(docSnap=>{
+            const w = docSnap.data().waktu;
+            let tgl = '';
+            try{ tgl = w ? new Date(w).toISOString().split('T')[0] : (docSnap.data().waktu_server ? '' : ''); }catch(e){ tgl = docSnap.data().tanggal || ''; }
+            if(docSnap.data().waktu && typeof docSnap.data().waktu==='string' && docSnap.data().waktu.includes(todayStr)) sudahMasuk=true;
+            else if(docSnap.data().tanggal===todayStr) sudahMasuk=true;
+            else {
+              try{
+                const dt = docSnap.data().waktu?.toDate ? docSnap.data().waktu.toDate() : new Date(docSnap.data().waktu);
+                if(dt.toISOString().split('T')[0]===todayStr) sudahMasuk=true;
+              }catch(e){}
+            }
+          });
+          if(!sudahMasuk){
             try{
-              const dt = docSnap.data().waktu?.toDate ? docSnap.data().waktu.toDate() : new Date(docSnap.data().waktu);
-              if(dt.toISOString().split('T')[0]===todayStr) sudahMasuk=true;
+              const {doc, getDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+              const refMasuk = doc(d,'rekap_harian', todayStr+'_'+currentGuru.gid+'_MASUK');
+              const snapMasuk = await getDoc(refMasuk);
+              if(snapMasuk.exists()) sudahMasuk=true;
             }catch(e){}
           }
-        });
-        // jika belum ada sama sekali yang tanggal hari ini, cek rekap_harian
-        if(!sudahMasuk){
-          try{
-            const {doc, getDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-            const refMasuk = doc(d,'rekap_harian', todayStr+'_'+currentGuru.gid+'_MASUK');
-            const snapMasuk = await getDoc(refMasuk);
-            if(snapMasuk.exists()) sudahMasuk=true;
-          }catch(e){}
-        }
-        if(!sudahMasuk){
-          showCustomAlert('BELUM ABSEN MASUK', `⛔ <b>Kamu belum absen MASUK hari ini</b><br><br>Gak bisa langsung absen PULANG jam <b>${now.toLocaleTimeString('id-ID')} WIB</b>.<br><br>Silakan absen MASUK dulu pagi, baru nanti bisa absen PULANG jam <b>13:50</b> ke atas.<br><br>Kalau memang sudah masuk tapi lupa absen, hubungi admin untuk <b>Buka Kunci Masuk</b>.`);
-          document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 COBA LAGI';
-          return;
+          if(!sudahMasuk){
+            showCustomAlert('BELUM ABSEN MASUK', `⛔ <b>Kamu belum absen MASUK hari ini</b><br><br>Gak bisa langsung absen PULANG jam <b>${now.toLocaleTimeString('id-ID')} WIB</b>.<br><br>Silakan absen MASUK dulu pagi, baru nanti bisa absen PULANG jam <b>13:50</b> ke atas.<br><br>Kalau memang sudah masuk tapi lupa absen, hubungi admin untuk <b>Buka Kunci Masuk</b>.`);
+            document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 COBA LAGI';
+            return;
+          }
         }
       }
     }catch(e){ console.log('cek masuk fail', e); }
