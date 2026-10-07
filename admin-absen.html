@@ -1353,6 +1353,9 @@ function getPulangCepatInfoV7(t){
 
 function getIzinV6(gid,tgl){ return allIzinV6.find(i=> i.gid===gid && tgl>=i.tanggal_mulai && tgl<= (i.tanggal_selesai||i.tanggal_mulai)); }
 function getBukaV6(gid,tgl){ return allBukaV6.find(b=> b.gid===gid && b.tanggal===tgl); }
+function getBukaMasukV6(gid,tgl){ return allBukaV6.find(b=> b.gid===gid && b.tanggal===tgl && (b.jenis||'MASUK')==='MASUK'); }
+function getBukaPulangV6(gid,tgl){ return allBukaV6.find(b=> b.gid===gid && b.tanggal===tgl && (b.jenis||'')==='PULANG'); }
+function getBukaAllV6(gid,tgl){ return allBukaV6.filter(b=> b.gid===gid && b.tanggal===tgl); }
 
 function formatTelat(menit){
   if(!menit || menit<=0) return '-';
@@ -1467,6 +1470,9 @@ window.applyFilter44 = function(){
     const list=map[g.gid]||[];
     const izin=getIzinV6(g.gid,tgl);
     const buka=getBukaV6(g.gid,tgl);
+    const bukaMasuk=getBukaMasukV6(g.gid,tgl);
+    const bukaPulang=getBukaPulangV6(g.gid,tgl);
+    const bukaAll=getBukaAllV6(g.gid,tgl);
     let status='', kategori='', jam='-', ket='', badge='', cls='badge-tepat';
     let koreksi=list.find(x=>x.koreksi_kategori);
     
@@ -1513,7 +1519,7 @@ window.applyFilter44 = function(){
     }
     rows.push({no:g.no||i+1, gid:g.gid, nama:g.nama, status:finalStatus, kategori:finalKategori, jam:finalJam, ket:finalKet, badge:finalBadge, cls:finalCls, 
                jamMasuk, jamPulang, statusMasuk, statusPulang, badgeMasuk, badgePulang, clsMasuk, clsPulang, ketMasuk, ketPulang, kategoriMasuk, kategoriPulang, telatMasuk, telatPulang,
-               list, izin, buka, koreksi, namaLower:(g.nama||'').toLowerCase()});
+               list, izin, buka, bukaMasuk, bukaPulang, bukaAll, koreksi, namaLower:(g.nama||'').toLowerCase()});
   });
   
   let filtered=rows;
@@ -1535,8 +1541,20 @@ window.applyFilter44 = function(){
       const tr=document.createElement('tr');
       const telatMasuk = r.telatMasuk||0;
       let aksi='';
-      if((r.kategori==='BOLOS' || r.kategori==='BELUM_ABSEN' || r.kategori==='TIDAK_ABSEN_MASUK') && !r.buka && !r.izin){
-        aksi+=`<button style="background:#f59e0b;color:white;border:none;padding:6px 10px;border-radius:8px;font-size:10px;font-weight:800;margin-right:4px;cursor:pointer" onclick="openBukaV6('${r.gid}','${r.nama}','${tgl}')">🔓 Buka</button>`;
+      // FIX BUG TOMBOL BUKA ILANG SETELAH BUKA MASUK: cek terpisah MASUK & PULANG
+      const needBukaMasuk = (r.kategori==='BOLOS' || r.kategori==='BELUM_ABSEN' || r.kategori==='TIDAK_ABSEN_MASUK' || r.statusMasuk==='BELUM_ABSEN' || !r.jamMasuk || r.jamMasuk==='-');
+      const needBukaPulang = (r.statusPulang==='BELUM_ABSEN' || r.kategori==='PULANG_SEBELUM_WAKTUNYA' || r.kategori==='BELUM_WAKTUNYA_PULANG' || (r.jamPulang==='-' && r.jamMasuk!=='-') );
+      if(!r.izin){
+        if(needBukaMasuk && !r.bukaMasuk){
+          aksi+=`<button style="background:#f59e0b;color:white;border:none;padding:6px 10px;border-radius:8px;font-size:10px;font-weight:800;margin-right:4px;cursor:pointer" onclick="openBukaV6('${r.gid}','${r.nama}','${tgl}','MASUK')">🔓 Buka Masuk</button>`;
+        }
+        if( (needBukaPulang || r.kategori==='BOLOS' || r.kategori==='BELUM_ABSEN') && !r.bukaPulang){
+          aksi+=`<button style="background:#fb923c;color:white;border:none;padding:6px 10px;border-radius:8px;font-size:10px;font-weight:800;margin-right:4px;cursor:pointer" onclick="openBukaV6('${r.gid}','${r.nama}','${tgl}','PULANG')">🔓 Buka Pulang</button>`;
+        }
+        // Fallback kalau masih belum absen sama sekali dan belum ada buka apapun
+        if(aksi==='' && (r.kategori==='BOLOS' || r.kategori==='BELUM_ABSEN') && !r.bukaMasuk && !r.bukaPulang && !r.buka){
+          aksi+=`<button style="background:#f59e0b;color:white;border:none;padding:6px 10px;border-radius:8px;font-size:10px;font-weight:800;margin-right:4px;cursor:pointer" onclick="openBukaV6('${r.gid}','${r.nama}','${tgl}','MASUK')">🔓 Buka</button>`;
+        }
       }
       aksi+=`<button style="background:#0f355c;color:white;border:none;padding:6px 10px;border-radius:8px;font-size:10px;font-weight:800;margin-right:4px;cursor:pointer" onclick="openKoreksiV6('${r.gid}','${r.nama}','${r.kategori}','${tgl}')">✏️ Koreksi</button>`;
       // Tombol reset jika ada TIDAK_ABSEN_MASUK atau koreksi
