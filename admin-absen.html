@@ -962,13 +962,13 @@ function getKategoriAbsenV5(date){
     if(menit>=360 && menit<=435) return {kategori:'TEPAT_WAKTU', label:'Tepat Waktu', jenis:'MASUK', valid:true};
     if(menit>=436 && menit<=599) return {kategori:'TELAT', label:'Telat', jenis:'MASUK', valid:true, telat:menit-435};
     if(menit>=600 && menit<=930) return {kategori:'TEPAT_WAKTU', label:'Tepat Waktu', jenis:'PULANG', valid:true};
-    if(menit>930) return {kategori:'DILUAR_JAM_KERJA', label:'Diluar Jam Kerja', jenis:'DILUAR_JAM_KERJA', valid:false};
+    if(menit>930) return {kategori:'DILUAR_JAM_KERJA', label:'Di Luar Jam Kerja', jenis:'DILUAR_JAM_KERJA', valid:false};
     return {kategori:'BELUM_WAKTUNYA_PULANG', label:'Belum Waktunya Pulang', jenis:'PULANG', valid:true};
   } else {
     if(menit>=360 && menit<=435) return {kategori:'TEPAT_WAKTU', label:'Tepat Waktu', jenis:'MASUK', valid:true};
     if(menit>=436 && menit<=829) return {kategori:'TELAT', label:'Telat', jenis:'MASUK', valid:true, telat:menit-435};
     if(menit>=830 && menit<=930) return {kategori:'TEPAT_WAKTU', label:'Tepat Waktu', jenis:'PULANG', valid:true};
-    if(menit>930) return {kategori:'DILUAR_JAM_KERJA', label:'Diluar Jam Kerja', jenis:'DILUAR_JAM_KERJA', valid:false};
+    if(menit>930) return {kategori:'DILUAR_JAM_KERJA', label:'Di Luar Jam Kerja', jenis:'DILUAR_JAM_KERJA', valid:false};
     return {kategori:'PULANG_SEBELUM_WAKTUNYA', label:'Pulang Sebelum Waktunya', jenis:'PULANG', valid:true};
   }
 }
@@ -1138,6 +1138,27 @@ function formatTelat(menit){
   if(sisa===0) return jam+' jam';
   return jam+' jam '+sisa+' menit';
 }
+// === LOGIKA JAM BARU SINKRON DENGAN HALAMAN ABSEN ===
+window.getJenisAbsen=(d)=>{
+  const n=d||new Date(); const day=n.getDay(); const h=n.getHours(); const m=n.getMinutes(); const menit=h*60+m;
+  if(day===6){ return {jenis:'LIBUR', kategori:'LIBUR_SABTU', label:'Libur Sabtu', color:'libur', valid:true, telatMenit:0, pesan:'Hari Sabtu libur'}; }
+  if(day===0){ return {jenis:'LIBUR', kategori:'LIBUR_MINGGU', label:'Libur Minggu', color:'libur', valid:true, telatMenit:0, pesan:'Hari Minggu libur'}; }
+  if(day===5){
+    if(menit>=360 && menit<=435){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Masuk Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Jumat Masuk Tepat Waktu 06:00-07:15'}; }
+    if(menit>=436 && menit<=540){ const telat=menit-435; return {jenis:'MASUK', kategori:'TELAT', label:'Terlambat Masuk', color:'telat', valid:true, telatMenit:telat, pesan:`Jumat Terlambat ${telat} menit dari 07:15`}; }
+    if(menit>=541 && menit<=570){ return {jenis:'PULANG', kategori:'BELUM_WAKTUNYA_PULANG', label:'Belum Waktunya Pulang', color:'awal', valid:false, telatMenit:0, pesan:'Jumat Belum waktunya pulang 09:01-09:30, pulang resmi 10:00'}; }
+    if(menit>=571 && menit<=599){ return {jenis:'PULANG', kategori:'PULANG_SEBELUM_WAKTUNYA', label:'Pulang Sebelum Waktunya', color:'awal', valid:true, telatMenit:0, pesan:'Jumat Pulang Sebelum Waktunya 09:31-09:59'}; }
+    if(menit>=600 && menit<=930){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Pulang', color:'tepat', valid:true, telatMenit:0, pesan:'Jumat Pulang 10:00-15:30'}; }
+    return {jenis:'DILUAR_JAM_KERJA', kategori:'DILUAR_JAM_KERJA', label:'Di Luar Jam Kerja', color:'diluar', valid:false, telatMenit:0, pesan:'Di luar jam kerja >15:30 - <06:00'};
+  } else {
+    if(menit>=360 && menit<=435){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Masuk Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Masuk Tepat Waktu 06:00-07:15'}; }
+    if(menit>=436 && menit<=690){ const telat=menit-435; return {jenis:'MASUK', kategori:'TELAT', label:'Terlambat Masuk', color:'telat', valid:true, telatMenit:telat, pesan:`Terlambat ${telat} menit dari 07:15`}; }
+    if(menit>=691 && menit<=780){ return {jenis:'PULANG', kategori:'BELUM_WAKTUNYA_PULANG', label:'Belum Waktunya Pulang', color:'awal', valid:false, telatMenit:0, pesan:'Belum waktunya pulang 11:31-13:00, pulang resmi 13:50'}; }
+    if(menit>=781 && menit<=829){ return {jenis:'PULANG', kategori:'PULANG_SEBELUM_WAKTUNYA', label:'Pulang Sebelum Waktunya', color:'awal', valid:true, telatMenit:0, pesan:'Pulang Sebelum Waktunya 13:01-13:49'}; }
+    if(menit>=830 && menit<=930){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Pulang', color:'tepat', valid:true, telatMenit:0, pesan:'Pulang 13:50-15:30'}; }
+    return {jenis:'DILUAR_JAM_KERJA', kategori:'DILUAR_JAM_KERJA', label:'Di Luar Jam Kerja', color:'diluar', valid:false, telatMenit:0, pesan:'Di luar jam kerja >15:30 - <06:00'};
+  }
+};
 window.allAbsen = window.allAbsen || [];
 function getTanggalLaporan(){ const el=document.getElementById('filterTanggal'); if(el&&el.value) return el.value; return new Date().toISOString().split('T')[0]; }
 function parseAbsenGTK(gid, tanggalStr){
@@ -1171,13 +1192,17 @@ function parseAbsenGTK(gid, tanggalStr){
 function badgeStatus(rec){
   if(!rec) return '<span class="badge badge-belum">⏳ Belum Absen</span>';
   const kat=(rec.kategori_absen||'').toUpperCase();
-  if(kat.includes('TEPAT')) return '<span class="badge badge-tepat">✅ Tepat Waktu</span>';
-  if(kat.includes('TELAT')) return '<span class="badge badge-telat">⚠️ Telat</span>';
+  const jenis=(rec.jenis_absen||'').toUpperCase();
+  if(rec.is_koreksi) return '<span class="badge" style="background:#dbeafe;color:#1e40af;border-color:#bfdbfe">✏️ '+(rec.label_absen||rec.kategori_absen||'Koreksi')+'</span>';
   if(kat.includes('LIBUR')) return '<span class="badge badge-libur">🏖️ '+(rec.label_absen||'Libur')+'</span>';
   if(kat.includes('BELUM')) return '<span class="badge badge-belum">⏳ Belum Waktunya Pulang</span>';
   if(kat.includes('SEBELUM')) return '<span class="badge badge-awal">⏳ Pulang Sebelum Waktunya</span>';
-  if(rec.is_koreksi) return '<span class="badge" style="background:#dbeafe;color:#1e40af;border-color:#bfdbfe">✏️ '+(rec.kategori_absen||'Koreksi')+'</span>';
-  return '<span class="badge" style="background:#f1f5f9;color:#334155">'+(rec.kategori_absen||'-')+'</span>';
+  if(kat.includes('DILUAR')) return '<span class="badge badge-diluar">⛔ Di Luar Jam Kerja</span>';
+  if(kat.includes('TEPAT') && jenis.includes('MASUK')) return '<span class="badge badge-tepat">✅ Masuk Tepat Waktu</span>';
+  if(kat.includes('TELAT')) return '<span class="badge badge-telat">⚠️ Terlambat Masuk</span>';
+  if(kat.includes('TEPAT') && jenis.includes('PULANG')) return '<span class="badge badge-tepat">✅ Pulang</span>';
+  if(kat.includes('TEPAT')) return '<span class="badge badge-tepat">✅ '+(rec.label_absen||'Tepat Waktu')+'</span>';
+  return '<span class="badge" style="background:#f1f5f9;color:#334155">'+(rec.label_absen||rec.kategori_absen||'-')+'</span>';
 }
 window.renderLaporanBaru = function(){
   const body=document.getElementById('rekapBody'); if(!body) return;
@@ -1276,8 +1301,51 @@ window.openKoreksi=(gid,nama,tanggal)=>{
   document.getElementById('koreksiTanggal').value=tanggal;
   document.getElementById('modalKoreksi').classList.remove('hidden');
   document.getElementById('modalKoreksi').style.display='flex';
+  // Tampilkan info koreksi yang ada (Opsi A)
+  try{
+    const infoEl=document.getElementById('koreksiInfo');
+    if(infoEl){
+      const list=(window.allAbsen||[]).filter(d=> d.gid===gid && (d.tanggal===tanggal || (d.waktu && d.waktu.startsWith(tanggal))) && d.is_koreksi);
+      if(list.length>0){
+        let htmlInfo='📋 <b>Koreksi yang ada:</b><br>';
+        list.forEach(d=>{
+          const jam=d.waktu?new Date(d.waktu).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):'-';
+          htmlInfo+=`• ${d.jenis_absen} → ${d.kategori_absen} (${jam}) ${d.keterangan?'- '+d.keterangan:''}<br>`;
+        });
+        infoEl.innerHTML=htmlInfo;
+        infoEl.style.display='block';
+      }else{
+        infoEl.innerHTML='ℹ️ Belum ada koreksi untuk tanggal ini. Data yang tampil adalah data asli QR.';
+        infoEl.style.display='block';
+      }
+    }
+  }catch(e){ console.log('info koreksi fail', e); }
 };
 window.closeKoreksi=()=>{ document.getElementById('modalKoreksi').classList.add('hidden'); document.getElementById('modalKoreksi').style.display='none'; };
+window.resetKoreksi=async(jenis)=>{
+  const gid=document.getElementById('koreksiGID').value;
+  const tanggal=document.getElementById('koreksiTanggal').value;
+  const nama=document.getElementById('koreksiNama').textContent||gid;
+  if(!gid||!tanggal){ alert('GID/Tanggal kosong'); return; }
+  if(!confirm(`⚠️ YAKIN RESET KOREKSI ${jenis}?\n\nGTK: ${nama}\nTanggal: ${tanggal}\nJenis: ${jenis}\n\nKoreksi ${jenis} akan dihapus, laporan akan balik ke data asli QR (atau Belum Absen jika tidak ada data asli).\n\nLanjut?`)) return;
+  try{
+    const {doc, deleteDoc, getDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d = window.db || (typeof db!=='undefined'?db:null);
+    if(!d){ alert('Firestore belum siap'); return; }
+    const docId=`${tanggal}_${gid}_${jenis}_KOREKSI`;
+    const ref=doc(d,"absensi",docId);
+    const snap=await getDoc(ref);
+    if(!snap.exists()){
+      alert(`ℹ️ Tidak ada koreksi ${jenis} untuk di-reset\nID: ${docId}`);
+      return;
+    }
+    await deleteDoc(ref);
+    alert(`✅ Koreksi ${jenis} berhasil di-reset\n\nGTK: ${gid}\nTanggal: ${tanggal}\nID: ${docId}\n\nLaporan akan otomatis balik ke data asli.`);
+    closeKoreksi();
+  }catch(e){
+    alert('Gagal reset: '+(e.message||e));
+  }
+};
 window.simpanKoreksi=async()=>{
   const gid=document.getElementById('koreksiGID').value;
   const tanggal=document.getElementById('koreksiTanggal').value;
@@ -1422,7 +1490,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 </script>
 
-<div id="modalKoreksi" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px"><div class="card" style="width:100%;max-width:460px;background:white;border-radius:20px;padding:20px"><div style="font-weight:800;font-size:16px">✏️ Koreksi Absen - <span id="koreksiNama"></span></div><input type="hidden" id="koreksiGID"/><input type="hidden" id="koreksiTanggal"/><div style="margin-top:16px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">Jenis</div><select id="koreksiJenis" class="input"><option value="MASUK">MASUK</option><option value="PULANG">PULANG</option></select></div><div style="margin-top:12px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">Status Baru</div><select id="koreksiStatus" class="input"><option value="TEPAT_WAKTU">TEPAT_WAKTU</option><option value="TELAT">TELAT</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select></div><div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><div style="font-size:13px;font-weight:700;margin-bottom:6px">Telat (menit)</div><input id="koreksiTelat" type="number" class="input" value="0"/></div><div><div style="font-size:13px;font-weight:700;margin-bottom:6px">Keterangan</div><input id="koreksiKeterangan" class="input" placeholder="Alasan"/></div></div><div style="display:flex;gap:10px;margin-top:20px"><button style="flex:1;height:48px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700" onclick="closeKoreksi()">Batal</button><button style="flex:1;height:48px;border-radius:12px;border:none;background:#0f172a;color:white;font-weight:800" onclick="simpanKoreksi()">Simpan</button></div></div></div>
+<div id="modalKoreksi" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px"><div class="card" style="width:100%;max-width:460px;background:white;border-radius:20px;padding:20px"><div style="font-weight:800;font-size:16px">✏️ Koreksi Absen - <span id="koreksiNama"></span></div><input type="hidden" id="koreksiGID"/><input type="hidden" id="koreksiTanggal"/><div id="koreksiInfo" style="margin-top:12px;padding:10px 12px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:12px;font-size:11px;color:#475569;display:none;line-height:1.5"></div><div style="margin-top:16px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">Jenis</div><select id="koreksiJenis" class="input"><option value="MASUK">MASUK</option><option value="PULANG">PULANG</option></select></div><div style="margin-top:12px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">Status Baru</div><select id="koreksiStatus" class="input"><option value="TEPAT_WAKTU">TEPAT_WAKTU</option><option value="TELAT">TELAT</option><option value="PULANG_SEBELUM_WAKTUNYA">PULANG_SEBELUM_WAKTUNYA</option><option value="BELUM_WAKTUNYA_PULANG">BELUM_WAKTUNYA_PULANG</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option><option value="LIBUR_SABTU">LIBUR_SABTU</option><option value="LIBUR_MINGGU">LIBUR_MINGGU</option></select></div><div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><div style="font-size:13px;font-weight:700;margin-bottom:6px">Telat (menit)</div><input id="koreksiTelat" type="number" class="input" value="0"/></div><div><div style="font-size:13px;font-weight:700;margin-bottom:6px">Keterangan</div><input id="koreksiKeterangan" class="input" placeholder="Alasan"/></div></div><div style="margin-top:14px;padding:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:12px"><div style="font-size:10px;font-weight:800;color:#991b1b;letter-spacing:.5px;margin-bottom:6px">🔄 RESET KOREKSI (Opsi A - Per Jenis, Aman)</div><div style="display:flex;gap:8px"><button style="flex:1;height:40px;border-radius:10px;border:1px solid #fecaca;background:white;color:#991b1b;font-weight:800;font-size:11px;cursor:pointer" onclick="resetKoreksi('MASUK')">Reset MASUK</button><button style="flex:1;height:40px;border-radius:10px;border:1px solid #fecaca;background:white;color:#991b1b;font-weight:800;font-size:11px;cursor:pointer" onclick="resetKoreksi('PULANG')">Reset PULANG</button></div><div style="font-size:9px;color:#b45309;margin-top:6px;line-height:1.4">Hapus koreksi saja, data asli QR akan balik. Aman karena per jenis.</div></div><div style="display:flex;gap:10px;margin-top:16px"><button style="flex:1;height:48px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700" onclick="closeKoreksi()">Batal</button><button style="flex:1;height:48px;border-radius:12px;border:none;background:#0f172a;color:white;font-weight:800" onclick="simpanKoreksi()">Simpan</button></div></div></div>
 <script>
 // Fallback login admin - biar tombol bisa diklik walau module lambat
 document.addEventListener("DOMContentLoaded", ()=>{
