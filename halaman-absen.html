@@ -220,8 +220,8 @@ function initMap(){
     if(lr){ RADIUS=clampR(lr); }
   }catch(e){}
   map=L.map('miniMap',{zoomControl:false}).setView([CURRENT_LAT,CURRENT_LNG],17);
-  roadLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20});
-  satLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20});
+  roadLayer=L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20, subdomains:['0','1','2','3'], attribution:'&copy; Google'});
+  satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19, attribution:'&copy; Esri'});
   if(MODE_MINI==='satelit') satLayer.addTo(map); else roadLayer.addTo(map);
   circle=L.circle([CURRENT_LAT,CURRENT_LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f355c',fillOpacity:0.12}).addTo(map);
   const ic=L.divIcon({html:'<div style="width:28px;height:28px;background:#0f355c;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white">🏫</div>',iconSize:[28,28],className:''});
@@ -249,55 +249,20 @@ window.getJenisAbsen=(d)=>{
   if(day===0){ return {jenis:'LIBUR', kategori:'LIBUR_MINGGU', label:'Libur Minggu', color:'libur', valid:true, telatMenit:0, pesan:'Hari Minggu libur'}; }
   if(day===5){
     if(menit>=360 && menit<=435){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Jumat Masuk Tepat Waktu 06:00-07:15'}; }
-    if(menit>=436 && menit<=599){ const telat=menit-435; return {jenis:'MASUK', kategori:'TELAT', label:'Telat', color:'telat', valid:true, telatMenit:telat, pesan:`Jumat Telat ${telat} menit dari 07:15`}; }
-    if(menit>=600 && menit<=930){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Jumat Pulang Tepat Waktu 10:00-15:30'}; }
-    if(menit>930){ return {jenis:'DILUAR_JAM_KERJA', kategori:'DILUAR_JAM_KERJA', label:'Diluar Jam Kerja', color:'diluar', valid:false, telatMenit:0, pesan:'Diluar jam kerja >15:30'}; }
+    if(menit>=436 && menit<=540){ const telat=menit-435; return {jenis:'MASUK', kategori:'TELAT', label:'Terlambat', color:'telat', valid:true, telatMenit:telat, pesan:`Jumat Terlambat ${telat} menit dari 07:15`}; }
+    if(menit>=541 && menit<=570){ return {jenis:'PULANG', kategori:'BELUM_WAKTUNYA_PULANG', label:'Belum Waktunya Pulang', color:'awal', valid:false, telatMenit:0, pesan:'Jumat Belum waktunya pulang 09:01-09:30, pulang resmi 10:00'}; }
+    if(menit>=571 && menit<=599){ return {jenis:'PULANG', kategori:'PULANG_SEBELUM_WAKTUNYA', label:'Pulang Sebelum Waktunya', color:'awal', valid:true, telatMenit:0, pesan:'Jumat Pulang Sebelum Waktunya 09:31-09:59'}; }
+    if(menit>=600 && menit<=930){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Pulang', color:'tepat', valid:true, telatMenit:0, pesan:'Jumat Pulang 10:00-15:30'}; }
+    return {jenis:'DILUAR_JAM_KERJA', kategori:'DILUAR_JAM_KERJA', label:'Di Luar Jam Kerja', color:'diluar', valid:false, telatMenit:0, pesan:'Di luar jam kerja >15:30 - <06:00'};
   } else {
     if(menit>=360 && menit<=435){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Masuk Tepat Waktu 06:00-07:15'}; }
-    if(menit>=436 && menit<=829){ const telat=menit-435; return {jenis:'MASUK', kategori:'TELAT', label:'Telat', color:'telat', valid:true, telatMenit:telat, pesan:`Telat ${telat} menit dari 07:15`}; }
-    if(menit>=830 && menit<=930){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Pulang Tepat Waktu 13:50-15:30'}; }
-    if(menit>930){ return {jenis:'DILUAR_JAM_KERJA', kategori:'DILUAR_JAM_KERJA', label:'Diluar Jam Kerja', color:'diluar', valid:false, telatMenit:0, pesan:'Diluar jam kerja >15:30'}; }
-    if(menit>=691 && menit<=829){ return {jenis:'PULANG', kategori:'PULANG_SEBELUM_WAKTUNYA', label:'Pulang Sebelum Waktunya', color:'awal', valid:true, telatMenit:0, pesan:'Pulang sebelum jam 13:50'}; }
+    if(menit>=436 && menit<=690){ const telat=menit-435; return {jenis:'MASUK', kategori:'TELAT', label:'Terlambat', color:'telat', valid:true, telatMenit:telat, pesan:`Terlambat ${telat} menit dari 07:15`}; }
+    if(menit>=691 && menit<=780){ return {jenis:'PULANG', kategori:'BELUM_WAKTUNYA_PULANG', label:'Belum Waktunya Pulang', color:'awal', valid:false, telatMenit:0, pesan:'Belum waktunya pulang 11:31-13:00, pulang resmi 13:50'}; }
+    if(menit>=781 && menit<=829){ return {jenis:'PULANG', kategori:'PULANG_SEBELUM_WAKTUNYA', label:'Pulang Sebelum Waktunya', color:'awal', valid:true, telatMenit:0, pesan:'Pulang Sebelum Waktunya 13:01-13:49'}; }
+    if(menit>=830 && menit<=930){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Pulang', color:'tepat', valid:true, telatMenit:0, pesan:'Pulang 13:50-15:30'}; }
+    return {jenis:'DILUAR_JAM_KERJA', kategori:'DILUAR_JAM_KERJA', label:'Di Luar Jam Kerja', color:'diluar', valid:false, telatMenit:0, pesan:'Di luar jam kerja >15:30 - <06:00'};
   }
-  return {jenis:'DILUAR_JAM_KERJA', kategori:'DILUAR_JAM_KERJA', label:'Diluar Jam Kerja', color:'diluar', valid:false, telatMenit:0, pesan:'Diluar jam kerja'};
 };
-
-window.getKategoriAbsenV5 = 
-function formatTelat(menit){
-  menit = parseInt(menit)||0;
-  if(menit<=0) return '0 menit';
-  if(menit<60) return menit+' menit';
-  const jam = Math.floor(menit/60);
-  const sisa = menit%60;
-  if(sisa===0) return jam+' jam';
-  return jam+' jam '+sisa+' menit';
-}
-
-window.getJenisAbsen;
-window.getKategori = 
-function formatTelat(menit){
-  menit = parseInt(menit)||0;
-  if(menit<=0) return '0 menit';
-  if(menit<60) return menit+' menit';
-  const jam = Math.floor(menit/60);
-  const sisa = menit%60;
-  if(sisa===0) return jam+' jam';
-  return jam+' jam '+sisa+' menit';
-}
-
-window.getJenisAbsen;
-window.getKategoriAbsen = 
-function formatTelat(menit){
-  menit = parseInt(menit)||0;
-  if(menit<=0) return '0 menit';
-  if(menit<60) return menit+' menit';
-  const jam = Math.floor(menit/60);
-  const sisa = menit%60;
-  if(sisa===0) return jam+' jam';
-  return jam+' jam '+sisa+' menit';
-}
-
-window.getJenisAbsen;
 
 window.cekJamAbsen=()=>{ 
   const el=document.getElementById('jamInfo'); 
@@ -309,11 +274,18 @@ window.cekJamAbsen=()=>{
   el.style.whiteSpace='normal'; 
   el.style.lineHeight='1.5';
   el.style.maxWidth='100%';
-  if(info.valid){ 
-    el.innerHTML='<span style="background:#dcfce7;border:1px solid #bbf7d0;color:#166534;padding:6px 12px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block;white-space:normal;line-height:1.4;max-width:100%;word-break:break-word">● '+info.jenis+' DIBUKA • '+jamStr+'</span>'; 
-  } else { 
-    el.innerHTML='<span style="background:#fee2e2;border:1px solid #fecaca;color:#991b1b;padding:8px 12px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block;white-space:normal;line-height:1.5;max-width:100%;word-break:break-word;overflow-wrap:break-word">● TUTUP • '+jamStr+' • '+info.pesan+'</span>'; 
-  } 
+  let bg='#f1f5f9', border='#e2e8f0', color='#334155';
+  const kat=(info.kategori||'').toUpperCase();
+  if(kat.includes('TEPAT') && (info.jenis||'').includes('MASUK')){ bg='#dcfce7'; border='#bbf7d0'; color='#166534'; }
+  else if(kat.includes('TELAT')){ bg='#fef3c7'; border='#fde68a'; color='#92400e'; }
+  else if(kat.includes('BELUM')){ bg='#ffedd5'; border='#fed7aa'; color='#9a3412'; }
+  else if(kat.includes('SEBELUM')){ bg='#fef9c3'; border='#fde68a'; color='#854d0e'; }
+  else if(kat.includes('TEPAT') && (info.jenis||'').includes('PULANG')){ bg='#dcfce7'; border='#bbf7d0'; color='#166534'; }
+  else if(kat.includes('DILUAR')){ bg='#fee2e2'; border='#fecaca'; color='#991b1b'; }
+  else if(kat.includes('LIBUR')){ bg='#fee2e2'; border='#fecaca'; color='#991b1b'; }
+  else if(info.valid){ bg='#dcfce7'; border='#bbf7d0'; color='#166534'; }
+  else { bg='#fee2e2'; border='#fecaca'; color='#991b1b'; }
+  el.innerHTML=`<span style="background:${bg};border:1px solid ${border};color:${color};padding:6px 12px;border-radius:12px;font-size:10px;font-weight:800;display:inline-block;white-space:normal;line-height:1.4;max-width:100%;word-break:break-word">● ${info.label} • ${jamStr}</span>`;
 };
 
 // === FIX 1: ICON MATA PAKAI SVG, BUKAN EMOJI ===
@@ -492,12 +464,23 @@ async function prosesAbsenOtomatis(){
   };
   document.getElementById('lokasiStatus').textContent=`Jarak ${jarakText} • ${data.status} • ${jamInfo.jenis}`;
 
-  // === CEK DOUBLE ABSEN - CEGAH MASUK 2X ===
+  // === CEK BELUM WAKTUNYA PULANG - GAK TERCATAT ===
+  if(jamInfo.kategori==='BELUM_WAKTUNYA_PULANG'){
+    document.getElementById('c3').innerHTML=`Belum Waktunya <div>⏳</div>`; document.getElementById('c3').style.background='#ffedd5';
+    document.getElementById('firebaseStatus').textContent=`⏳ Belum waktunya pulang - tidak tercatat`;
+    setTimeout(()=>{
+      showCustomAlert('⏳ BELUM WAKTUNYA PULANG', `<b>${currentGuru.nama}</b><br><br>Jam <b>${jamStr}</b><br>${jamInfo.pesan}<br><br>Pulang resmi: <b>13:50-15:30</b> (Jumat 10:00-15:30)<br><br>Jarak: ${formatJarak(lastDistance)} • ${lastDistance<=RADIUS?'VALID':'LUAR_RADIUS'}<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Belum tercatat, coba lagi nanti</span>`);
+    },400);
+    setTimeout(()=>{ document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 SCAN LAGI'; },2000);
+    return;
+  }
+
+  // === CEK DOUBLE ABSEN - TANPA orderBy BIAR TIDAK BUTUH INDEX ===
   try{
     if(db){
-      const {query, where, orderBy, limit, getDocs} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      const {query, where, getDocs} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
       const todayStr = now.toISOString().split('T')[0];
-      const q = query(collection(db,"absensi"), where("gid","==",currentGuru.gid), orderBy("waktu","desc"), limit(50));
+      const q = query(collection(db,"absensi"), where("gid","==",currentGuru.gid));
       const snap = await getDocs(q);
       let hasMasukToday=false, hasPulangToday=false;
       snap.forEach(ds=>{
@@ -507,11 +490,33 @@ async function prosesAbsenOtomatis(){
           if(!tgl && d.waktu){ tgl=new Date(d.waktu).toISOString().split('T')[0]; }
           if(tgl===todayStr){
             const j=(d.jenis_absen||'').toUpperCase();
+            const kat=(d.kategori_absen||'').toUpperCase();
             if(j.includes('MASUK')) hasMasukToday=true;
-            if(j.includes('PULANG')) hasPulangToday=true;
+            // Pulang final = TEPAT_WAKTU (PULANG) atau PULANG_SEBELUM_WAKTUNYA
+            if(j.includes('PULANG') && (kat.includes('TEPAT') || kat.includes('SEBELUM')) ) hasPulangToday=true;
           }
         }catch(e){}
       });
+      if(hasMasukToday && hasPulangToday){
+        document.getElementById('c3').innerHTML=`Sudah Selesai <div>✅</div>`; document.getElementById('c3').style.background='#dcfce7';
+        document.getElementById('firebaseStatus').textContent=`✅ Sudah absen lengkap hari ini`;
+        setTimeout(()=>{
+          showCustomAlert('✅ SUDAH SELESAI', `<b>${currentGuru.nama}</b><br><br>Anda sudah absen <b>MASUK & PULANG</b> hari ini<br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#dcfce7;color:#166534;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">✅ Tidak perlu absen lagi</span>`);
+        },400);
+        setTimeout(()=>{ document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 SCAN LAGI'; },2000);
+        return;
+      }
+      // === OPSI B1: PULANG TANPA MASUK = TER-BLOK ===
+      if(jamInfo.jenis==='PULANG' && !hasMasukToday){
+        document.getElementById('c3').innerHTML=`TER-BLOK <div>🔒</div>`; document.getElementById('c3').style.background='#fee2e2';
+        document.getElementById('firebaseStatus').textContent=`🔒 Absen TER-BLOK - belum absen masuk`;
+        setTimeout(()=>{
+          showCustomAlert('🔒 ABSEN TER-BLOK', `<b>${currentGuru.nama}</b><br><br>Kamu belum melakukan absen <b>MASUK</b> loh hari ini<br><br>Hayoo... Halaman absen kamu <b>TER-BLOK</b> untuk hari ini<br><br>Silahkan hubungi admin untuk membuka <b>BLOK</b> supaya kamu bisa absen pulang<br><br>Jam: <b>${jamStr}</b><br>Jarak: ${formatJarak(lastDistance)} • ${lastDistance<=RADIUS?'VALID':'LUAR_RADIUS'}<br><br><span style="background:#fee2e2;color:#991b1b;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">🔒 Absen kamu TER-BLOK - Silahkan hubungi admin</span>`);
+        },400);
+        setTimeout(()=>{ document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 SCAN LAGI'; },2000);
+        return;
+      }
+
       if(jamInfo.jenis==='MASUK' && hasMasukToday){
         document.getElementById('c3').innerHTML=`Sudah Masuk <div>⏳</div>`; document.getElementById('c3').style.background='#fef3c7';
         document.getElementById('firebaseStatus').textContent=`⏳ Sudah absen masuk hari ini`;
@@ -532,7 +537,7 @@ async function prosesAbsenOtomatis(){
       }
     }
   }catch(e){
-    console.log('cek double absen error', e);
+    console.log('cek double absen error (lanjut simpan)', e);
   }
 
   let saveOk=false;
@@ -562,23 +567,23 @@ async function prosesAbsenOtomatis(){
     } else if(kat==='TELAT'){
       const telatTxt = jamInfo.telatMenit ? jamInfo.telatMenit+' menit' : (jamInfo.telat_menit? jamInfo.telat_menit+' menit':'');
       const telatDetail = jamInfo.telatMenit ? `<b>${jamInfo.telatMenit} menit</b> dari 07:15` : '';
-      title='⚠️ TELAT';
-      msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen <b>MASUK</b> jam <b>${jamStr}</b><br>Telat ${telatDetail} (${telatTxt})<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⚠️ Tetap Tercatat (Telat ${telatTxt})</span>`;
+      title='⚠️ TERLAMBAT';
+      msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen <b>MASUK</b> jam <b>${jamStr}</b><br>Terlambat ${telatDetail} (${telatTxt})<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⚠️ Tetap Tercatat (Terlambat ${telatTxt})</span>`;
     } else if(kat==='TEPAT_WAKTU' && jenis==='PULANG'){
-      title='✅ PULANG TEPAT WAKTU';
-      msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen <b>PULANG</b> jam <b>${jamStr}</b><br>Tepat Waktu 13:50-15:30<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#dcfce7;color:#166534;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">✅ Pulang Tercatat</span>`;
+      title='✅ PULANG';
+      msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen <b>PULANG</b> jam <b>${jamStr}</b><br>${jamInfo.pesan}<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#dcfce7;color:#166534;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">✅ Pulang Tercatat</span>`;
     } else if(kat==='PULANG_SEBELUM_WAKTUNYA'){
       title='⏳ PULANG SEBELUM WAKTUNYA';
-      msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen <b>PULANG</b> jam <b>${jamStr}</b><br>Sebelum jam pulang resmi 13:50<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Tercatat - Bisa absen pulang lagi nanti</span>`;
+      msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen <b>PULANG</b> jam <b>${jamStr}</b><br>${jamInfo.pesan}<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Tercatat sebagai Pulang Sebelum Waktunya (final, tidak bisa pulang lagi)</span><br><br><span style="font-size:10px;color:#64748b">Jika ada kasus khusus, hubungi admin untuk koreksi</span>`;
     } else if(kat==='BELUM_WAKTUNYA_PULANG'){
       title='⏳ BELUM WAKTUNYA PULANG';
-      msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen jam <b>${jamStr}</b><br>Belum waktunya pulang<br><br>${jamInfo.pesan}<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#e0f2fe;color:#075985;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">ℹ️ Tetap Tercatat</span>`;
+      msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen jam <b>${jamStr}</b><br>${jamInfo.pesan}<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Belum tercatat, coba lagi nanti jam pulang</span>`;
     } else if(jenis==='LIBUR'){
       title='🏖️ HARI LIBUR HEYY';
       msg=`<b>Terlalu Rajin Mas ${currentGuru.nama}</b><br><br>${jamInfo.pesan}<br><br>Absen kamu <b>TETAP TERCATAT</b> di laporan sebagai <b>${jamInfo.label}</b><br><br>Jam: <b>${jamStr}</b><br>Jarak: ${jarakInfo}`;
     } else if(kat==='DILUAR_JAM_KERJA' || kat==='DILUAR'){
-      title='⛔ DILUAR JAM KERJA';
-      msg=`<b>${currentGuru.nama}</b><br><br>Jam <b>${jamStr}</b> diluar jam kerja<br>${jamInfo.pesan}<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fee2e2;color:#991b1b;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⛔ Tercatat sebagai ${jamInfo.label}</span>`;
+      title='⛔ DI LUAR JAM KERJA';
+      msg=`<b>${currentGuru.nama}</b><br><br>Jam <b>${jamStr}</b> di luar jam kerja<br>${jamInfo.pesan}<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fee2e2;color:#991b1b;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⛔ Tercatat sebagai ${jamInfo.label}</span>`;
     } else {
       title=`${jamInfo.jenis} - ${jamInfo.label}`;
       msg=`<b>${currentGuru.nama}</b><br><br>Absen <b>${jamInfo.jenis}</b> jam <b>${jamStr}</b><br>Status: <b>${jamInfo.label}</b><br><br>${jamInfo.pesan}<br><br>Jarak: ${jarakInfo}<br><br>${saveOk?'<span style="background:#dcfce7;color:#166534;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">✅ Tersimpan</span>':'<span style="background:#fee2e2;color:#991b1b;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">❌ Gagal simpan</span>'}`;
