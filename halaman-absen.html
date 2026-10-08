@@ -469,7 +469,7 @@ async function prosesAbsenOtomatis(){
     document.getElementById('c3').innerHTML=`Belum Waktunya <div>⏳</div>`; document.getElementById('c3').style.background='#ffedd5';
     document.getElementById('firebaseStatus').textContent=`⏳ Belum waktunya pulang - tidak tercatat`;
     setTimeout(()=>{
-      showCustomAlert('⏳ BELUM WAKTUNYA PULANG', `<b>${currentGuru.nama}</b><br><br>Jam <b>${jamStr}</b><br>${jamInfo.pesan}<br><br>Pulang resmi: <b>13:50-15:30</b> (Jumat 10:00-15:30)<br><br>Jarak: ${formatJarak(lastDistance)} • ${lastDistance<=RADIUS?'VALID':'LUAR_RADIUS'}<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Belum tercatat, coba lagi nanti</span>`);
+      showCustomAlert('⏳ BELUM WAKTUNYA PULANG YAA MANIEZZ', `<b>${currentGuru.nama}</b><br><br>Jam <b>${jamStr}</b><br>Belum waktunya pulang<br><br>Pulang resmi: <b>13:50-15:30</b> (Jumat 10:00-15:30)<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Belum bisa absen, coba lagi nanti</span>`);
     },400);
     setTimeout(()=>{ document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 SCAN LAGI'; },2000);
     return;
@@ -501,7 +501,7 @@ async function prosesAbsenOtomatis(){
         document.getElementById('c3').innerHTML=`Sudah Selesai <div>✅</div>`; document.getElementById('c3').style.background='#dcfce7';
         document.getElementById('firebaseStatus').textContent=`✅ Sudah absen lengkap hari ini`;
         setTimeout(()=>{
-          showCustomAlert('✅ SUDAH SELESAI', `<b>${currentGuru.nama}</b><br><br>Anda sudah absen <b>MASUK & PULANG</b> hari ini<br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#dcfce7;color:#166534;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">✅ Tidak perlu absen lagi</span>`);
+          showCustomAlert('✅ ABSEN LENGKAP', `<b>${currentGuru.nama}</b><br><br>Jam <b>${jamStr}</b><br>Absen udah lengkap nih kak<br>Silahkan pulangg, hati-hati di jalan<br><br><span style="background:#dcfce7;color:#166534;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">✅ Tidak perlu absen lagi</span>`);
         },400);
         setTimeout(()=>{ document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 SCAN LAGI'; },2000);
         return;
@@ -521,7 +521,7 @@ async function prosesAbsenOtomatis(){
         document.getElementById('c3').innerHTML=`Sudah Masuk <div>⏳</div>`; document.getElementById('c3').style.background='#fef3c7';
         document.getElementById('firebaseStatus').textContent=`⏳ Sudah absen masuk hari ini`;
         setTimeout(()=>{
-          showCustomAlert('⏳ SUDAH ABSEN MASUK', `<b>${currentGuru.nama}</b><br><br>Anda <b>Sudah Absen Masuk</b> hari ini<br><br>Silahkan Absen Lagi Nanti Ketika <b>Pulang</b><br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Tidak tercatat ulang</span>`);
+          showCustomAlert('⏳ SUDAH ABSEN MASUK', `<b>${currentGuru.nama}</b><br><br>Anda <b>Sudah Absen Masuk</b> hari ini<br><br>Silahkan Absen Lagi Nanti Ketika <b>Pulang</b><br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Tunggu absen pulang</span>`);
         },400);
         setTimeout(()=>{ document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 SCAN LAGI'; },2000);
         return;
@@ -563,24 +563,24 @@ async function prosesAbsenOtomatis(){
 
     if(kat==='TEPAT_WAKTU' && jenis==='MASUK'){
       title='✅ MASUK TEPAT WAKTU';
-      msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen <b>MASUK</b> jam <b>${jamStr}</b><br>Tepat Waktu 06:00-07:15<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#dcfce7;color:#166534;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">✅ Tercatat di laporan</span>`;
+      msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen <b>MASUK</b> jam <b>${jamStr}</b><br>Rajinyooo<br><br><span style="background:#dcfce7;color:#166534;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">✅ Tepat Waktu</span>`;
     } else if(kat==='TELAT'){
       const telatTxt = jamInfo.telatMenit ? jamInfo.telatMenit+' menit' : (jamInfo.telat_menit? jamInfo.telat_menit+' menit':'');
       const telatDetail = jamInfo.telatMenit ? `<b>${jamInfo.telatMenit} menit</b> dari 07:15` : '';
-      title='⚠️ TERLAMBAT';
-      msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen <b>MASUK</b> jam <b>${jamStr}</b><br>Terlambat ${telatDetail} (${telatTxt})<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⚠️ Tetap Tercatat (Terlambat ${telatTxt})</span>`;
+      title='⚠ TERLAMBAT';
+      msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen <b>MASUK</b> jam <b>${jamStr}</b><br>Terlambat ${telatDetail} (${telatTxt})<br>Jangan diulangi yaa<br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⚠ Terlambat ${telatTxt}</span>`;
     } else if(kat==='TEPAT_WAKTU' && jenis==='PULANG'){
-      title='✅ PULANG';
-      msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen <b>PULANG</b> jam <b>${jamStr}</b><br>${jamInfo.pesan}<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#dcfce7;color:#166534;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">✅ Pulang Tercatat</span>`;
+      title='✅ PULANGGG YEYY 🎉';
+      msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen <b>PULANG</b> jam <b>${jamStr}</b><br>Selamat beristirahat<br>Hati-hati di jalan<br><br><span style="background:#dcfce7;color:#166534;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">✅ Pulang</span>`;
     } else if(kat==='PULANG_SEBELUM_WAKTUNYA'){
       title='⏳ PULANG SEBELUM WAKTUNYA';
       msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen <b>PULANG</b> jam <b>${jamStr}</b><br>${jamInfo.pesan}<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Tercatat sebagai Pulang Sebelum Waktunya (final, tidak bisa pulang lagi)</span><br><br><span style="font-size:10px;color:#64748b">Jika ada kasus khusus, hubungi admin untuk koreksi</span>`;
     } else if(kat==='BELUM_WAKTUNYA_PULANG'){
-      title='⏳ BELUM WAKTUNYA PULANG';
-      msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen jam <b>${jamStr}</b><br>${jamInfo.pesan}<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Belum tercatat, coba lagi nanti jam pulang</span>`;
+      title='⏳ BELUM WAKTUNYA PULANG YAA MANIEZZ';
+      msg=`<b>${currentGuru.nama}</b><br><br>Jam <b>${jamStr}</b><br>Belum waktunya pulang<br><br>Pulang resmi: <b>13:50-15:30</b> (Jumat 10:00-15:30)<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Belum bisa absen, coba lagi nanti</span>`;
     } else if(jenis==='LIBUR'){
-      title='🏖️ HARI LIBUR HEYY';
-      msg=`<b>Terlalu Rajin Mas ${currentGuru.nama}</b><br><br>${jamInfo.pesan}<br><br>Absen kamu <b>TETAP TERCATAT</b> di laporan sebagai <b>${jamInfo.label}</b><br><br>Jam: <b>${jamStr}</b><br>Jarak: ${jarakInfo}`;
+      title='INI HARI LIBUR HEYY';
+      msg=`<b>${currentGuru.nama}</b><br><br>Terlalu Rajin nih mas<br>${jamInfo.pesan}<br><br>Absen kamu <b>TETAP TERCATAT</b> di laporan sebagai <b>${jamInfo.label}</b><br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#e0f2fe;color:#0f355c;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">Libuuurrrrrrrrrr</span>`;
     } else if(kat==='DILUAR_JAM_KERJA' || kat==='DILUAR'){
       title='⛔ DI LUAR JAM KERJA';
       msg=`<b>${currentGuru.nama}</b><br><br>Jam <b>${jamStr}</b> di luar jam kerja<br>${jamInfo.pesan}<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fee2e2;color:#991b1b;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⛔ Tercatat sebagai ${jamInfo.label}</span>`;
