@@ -46,6 +46,31 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 .badge-awal{background:#fef9c3;border-color:#fde68a;color:#854d0e}
 #liveBadge{background:#dcfce7;color:#166534;padding:3px 8px;border-radius:999px;font-size:10px;margin-left:6px}
 #authBadge{ display:none !important; }
+
+
+@media (max-width: 768px){
+  .header-tabs{display:none!important}
+  .burger-btn{display:flex!important}
+  .burger-btn.hidden{display:none!important}
+  #logoutBtn{display:none!important} /* logout luar hidden di HP, cuma di dalam burger */
+  #oldTabRow{display:flex!important}
+  #oldTabRow #tabLaporan, #oldTabRow #tabGuru{display:none!important}
+  #mobileMenu.hidden{display:none!important}
+  #mobileMenu.show{display:flex!important}
+  .header{padding:0 14px!important}
+}
+@media (min-width: 769px){
+  #oldTabRow{margin-bottom:8px!important}
+  #mobileMenu{display:none!important}
+  #logoutBtn{display:flex!important}
+  #logoutBtn.hidden{display:none!important}
+}
+
+@media (min-width: 769px){
+  #oldTabRow{margin-bottom:8px!important}
+  #mobileMenu{display:none!important}
+}
+
 </style>
 <style>
 /* === RESPONSIVE HP FIX - hanya tampilan, tidak sentuh tombol/fungsi === */
@@ -175,7 +200,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 
 </head>
 <body>
-<header class="header">
+<header class="header" style="gap:12px">
 <div class="logo-box">
   <div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SI-ABSEN" style="width:100%;height:100%;object-fit:contain"/></div>
 <div>
@@ -183,11 +208,26 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.5px">Panel Admin</div>
 </div>
 </div>
-</div>
-<div style="display:flex;gap:8px;align-items:center">
+
+<nav id="headerTabs" class="header-tabs hidden" style="display:flex;gap:8px;align-items:center">
+  <button id="tabLaporanHeader" class="btn-tab active" onclick="switchTab('laporan')">📊 Laporan GTK</button>
+  <button id="tabGuruHeader" class="btn-tab" onclick="switchTab('guru')">👥 Data GTK + QR</button>
+</nav>
+
+<div style="display:flex;gap:8px;align-items:center;margin-left:auto">
   <span id="authBadge" class="hidden badge badge-valid"></span><button id="logoutBtn" class="hidden btn-outline" style="height:36px;width:auto;padding:0 14px;font-size:12px" onclick="doLogout()">Logout</button>
+  <button id="burgerBtn" class="burger-btn hidden" onclick="toggleMobileMenu()" aria-label="Menu" style="width:40px;height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:18px;font-weight:800">☰</button>
 </div>
 </header>
+
+<!-- MOBILE BURGER MENU -->
+<div id="mobileMenu" class="mobile-menu hidden" style="position:sticky;top:64px;z-index:9998;background:white;border-bottom:1px solid #e2e8f0;padding:12px 16px;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,.06)">
+  <button id="tabLaporanMobile" class="btn-tab active" style="width:100%;justify-content:flex-start" onclick="switchTab('laporan'); toggleMobileMenu(false)">📊 Laporan GTK</button>
+  <button id="tabGuruMobile" class="btn-tab" style="width:100%;justify-content:flex-start" onclick="switchTab('guru'); toggleMobileMenu(false)">👥 Data GTK + QR</button>
+  <div style="height:1px;background:#e2e8f0;margin:4px 0"></div>
+  <button class="btn btn-outline" style="height:40px" onclick="doLogout(); toggleMobileMenu(false)">Logout</button>
+</div>
+
 
 <!-- LOGIN SCREEN - DESAIN SAMA KAYAK HALAMAN ABSEN -->
 <div id="adminLoginScreen" class="container" style="margin-top:20px">
@@ -226,9 +266,9 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <!-- ADMIN CONTENT - 2 TAB -->
 <div id="adminContent" class="hidden">
 <div style="max-width:1350px;margin:0 auto;padding:16px 20px">
-<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
-<button id="tabLaporan" class="btn-tab active" onclick="switchTab('laporan')">📊 Laporan GTK</button>
-<button id="tabGuru" class="btn-tab" onclick="switchTab('guru')">👥 Data GTK + QR</button>
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px" id="oldTabRow">
+<button id="tabLaporan" class="btn-tab active hidden" onclick="switchTab('laporan')">📊 Laporan GTK</button>
+<button id="tabGuru" class="btn-tab hidden" onclick="switchTab('guru')">👥 Data GTK + QR</button>
 <span id="authInfo" class="badge-auth" style="margin-left:auto"></span>
 </div>
 <div style="display:grid;grid-template-columns:320px 1fr;gap:16px">
@@ -239,17 +279,17 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <label style="font-size:11px;font-weight:700;margin-top:14px;display:block">Radius Absen</label>
 <div style="display:flex;gap:8px;margin-top:6px"><input id="radiusInput" type="number" min="20" max="70" step="5" value="40" class="input" style="height:40px"/><button id="saveRadiusBtn" type="button" style="height:40px;padding:0 12px;background:#0f355c;color:white;border-radius:12px;display:flex;align-items:center;font-weight:700;border:none;cursor:pointer">m</button></div>
 <div style="font-size:10px;color:#64748b;margin-top:4px">Batas 20m-70m • Default 40m • Silent realtime ke halaman GTK • <span id="radiusLabel">40m</span></div>
-<div style="margin-top:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:10px;font-weight:800;color:#94a3b8">TITIK SEKOLAH • GESER MARKER 🏫</div><span style="font-size:9px;background:#dcfce7;color:#166534;padding:2px 6px;border-radius:999px">Draggable</span></div><div id="schoolCoordDisplay" style="font-weight:700;font-size:12px;color:#0f355c;margin-top:4px">-6.889583,112.286111</div><div style="font-size:10px;color:#64748b">Geser marker / klik map untuk pindah</div><div style="display:flex;gap:6px;margin-top:8px"><button id="btnModeRoad" onclick="setMapMode('road')" style="flex:1;height:32px;border-radius:10px;border:1px solid #0f355c;background:#0f355c;color:white;font-weight:700;font-size:11px;cursor:pointer">🗺️ Road</button><button id="btnModeSat" onclick="setMapMode('sat')" style="flex:1;height:32px;border-radius:10px;border:1px solid #0f355c;background:white;color:#0f355c;font-weight:700;font-size:11px;cursor:pointer">🛰️ Satelit</button></div><div style="margin-top:6px"><button onclick="simpanLokasiSekolah()" style="width:100%;height:32px;border-radius:10px;border:none;background:#0f172a;color:white;font-weight:700;font-size:11px;cursor:pointer">💾 Simpan Lokasi ke Firestore</button></div><div id="rekapInfo" style="margin-top:8px;background:white;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font-size:11px">Memuat...</div></div>
+<div style="margin-top:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:10px;font-weight:800;color:#94a3b8">TITIK SEKOLAH • GESERABLE 🏫</div><span style="font-size:9px;background:#dcfce7;color:#166534;padding:2px 6px;border-radius:999px">Draggable</span></div><div id="schoolCoordDisplay" style="font-weight:700;font-size:12px;color:#0f355c;margin-top:4px">-6.889583,112.286111</div><div style="font-size:10px;color:#64748b">Geser marker / klik map untuk pindah</div><div style="display:flex;gap:6px;margin-top:8px"><button id="btnModeRoad" onclick="setMapMode('road')" style="flex:1;height:32px;border-radius:10px;border:1px solid #0f355c;background:#0f355c;color:white;font-weight:700;font-size:11px;cursor:pointer">🗺️ Road</button><button id="btnModeSat" onclick="setMapMode('sat')" style="flex:1;height:32px;border-radius:10px;border:1px solid #0f355c;background:white;color:#0f355c;font-weight:700;font-size:11px;cursor:pointer">🛰️ Satelit</button></div><div style="margin-top:6px"><button onclick="simpanLokasiSekolah()" style="width:100%;height:32px;border-radius:10px;border:none;background:#0f172a;color:white;font-weight:700;font-size:11px;cursor:pointer">💾 Simpan Lokasi ke Firestore</button></div><div id="rekapInfo" style="margin-top:8px;background:white;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font-size:11px">Memuat...</div></div>
 <div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden"><div id="mapAdmin"></div></div>
 <div style="margin-top:12px;display:grid;gap:8px"><button class="btn btn-primary" style="height:40px" onclick="loadRekap()">🔄 Refresh Laporan</button><button class="btn btn-outline" style="height:40px" onclick="loadPasswords()">🔑 Load Password Custom</button></div>
 </div>
 <div id="panelLaporan">
-<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="font-weight:800;color:#0f355c">📊 Laporan Absen GTK <span id="liveBadge">🟢 Live - auto refresh aktif</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" style="height:36px;width:auto;padding:0 16px" onclick="exportExcel()">📥 Excel</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="exportCSV()">CSV</button><button class="btn" style="height:36px;width:auto;padding:0 16px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b" onclick="clearTest()">🗑️ Hapus Test</button></div></div>
+<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="font-weight:800;color:#0f355c">📊 Laporan Absen GTK <span id="liveBadge">🟢 Live - auto refresh aktif</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" style="height:36px;width:auto;padding:0 16px" onclick="exportExcel()">📥 Excel</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="exportCSV()">CSV</button><button class="btn" style="height:36px;width:auto;padding:0 16px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b" onclick="clearTest()">🗑️ Hapus</button></div></div>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:12px">
 <input id="filterTanggal" type="date" class="input" style="height:36px"/><select id="filterGuruSelect" class="input" style="height:36px"><option value="">Semua GTK</option></select>
 <select id="filterKategori" class="input" style="height:36px"><option value="">Semua Kategori</option><option value="TEPAT_WAKTU">TEPAT_WAKTU</option><option value="TELAT">TELAT</option><option value="PULANG_SEBELUM_WAKTUNYA">PULANG_SEBELUM_WAKTUNYA</option><option value="BELUM_WAKTUNYA_PULANG">BELUM_WAKTUNYA_PULANG</option><option value="LIBUR_SABTU">LIBUR_SABTU</option><option value="LIBUR_MINGGU">LIBUR_MINGGU</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
 <select id="filterJenis" class="input" style="height:36px"><option value="">Semua Jenis</option><option value="MASUK">MASUK</option><option value="PULANG">PULANG</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
-<select id="filterStatus" class="input" style="height:36px"><option value="">VALID+LUAR_RADIUS</option><option value="VALID">VALID</option><option value="LUAR_RADIUS">LUAR_RADIUS</option></select>
+<select id="filterStatus" class="input" style="height:36px"><option value="">RADIUS</option><option value="VALID">VALID</option><option value="LUAR_RADIUS">LUAR_RADIUS</option></select>
 <input id="searchLaporan" class="input" placeholder="Cari nama..." style="height:36px"/>
 </div>
 <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="height:36px;flex:1" onclick="loadRekap()">🔄 Tampilkan</button><button class="btn btn-outline" style="height:36px;width:120px" onclick="resetFilter()">Reset</button></div>
@@ -329,7 +369,7 @@ function getDefaultPassword(nip){
 }
 const firebaseConfig={apiKey:"AIzaSyCSi5QKL-MapUUdGLV4OuiXupXa3XmRKvg",authDomain:"smpn1-brondong-absen.firebaseapp.com",projectId:"smpn1-brondong-absen",storageBucket:"smpn1-brondong-absen.firebasestorage.app",messagingSenderId:"174884842248",appId:"1:174884842248:web:8625540d5f3ff8b7f45abd"};
 let app,db,auth,allAbsen=[];
-try{app=initializeApp(firebaseConfig);db=getFirestore(app);window.db=db;auth=getAuth(app);document.getElementById('authConfigInfo').innerHTML=`✅ Terhubung ke <b>${firebaseConfig.projectId}</b><br>Auth OK • Silakan login`;onAuthStateChanged(auth,(user)=>{if(user){document.getElementById('adminLoginScreen').classList.add('hidden');document.getElementById('adminContent').classList.remove('hidden');document.getElementById('authBadge').textContent=`✅ ${user.email}`;document.getElementById('authBadge').classList.remove('hidden');document.getElementById('logoutBtn').classList.remove('hidden');document.getElementById('authInfo').textContent=`✅ ${user.email}`;document.getElementById('authUid').textContent=`UID: ${user.uid.slice(0,16)}...`;document.getElementById('lastLoginInfo').textContent=`Login: ${user.metadata.lastSignInTime||''}`;initMap();initGuruSelect();loadGurusFromFirestore().then(()=>{ renderGurus(); });loadPasswords();loadRekap();}else{document.getElementById('adminLoginScreen').classList.remove('hidden');document.getElementById('adminContent').classList.add('hidden');document.getElementById('authBadge').classList.add('hidden');document.getElementById('logoutBtn').classList.add('hidden');}});}catch(e){document.getElementById('authConfigInfo').innerHTML=`❌ ${e.message}`;}
+try{app=initializeApp(firebaseConfig);db=getFirestore(app);window.db=db;auth=getAuth(app);document.getElementById('authConfigInfo').innerHTML=`✅ Terhubung ke <b>${firebaseConfig.projectId}</b><br>Auth OK • Silakan login`;onAuthStateChanged(auth,(user)=>{if(user){document.getElementById('adminLoginScreen').classList.add('hidden');document.getElementById('adminContent').classList.remove('hidden');document.getElementById('authBadge').textContent=`✅ ${user.email}`;document.getElementById('authBadge').classList.remove('hidden');document.getElementById('logoutBtn').classList.remove('hidden');document.getElementById('headerTabs')?.classList.remove('hidden');document.getElementById('burgerBtn')?.classList.remove('hidden');document.getElementById('authInfo').textContent=`✅ ${user.email}`;document.getElementById('authUid').textContent=`UID: ${user.uid.slice(0,16)}...`;document.getElementById('lastLoginInfo').textContent=`Login: ${user.metadata.lastSignInTime||''}`;initMap();initGuruSelect();loadGurusFromFirestore().then(()=>{ renderGurus(); });loadPasswords();loadRekap();}else{document.getElementById('adminLoginScreen').classList.remove('hidden');document.getElementById('adminContent').classList.add('hidden');document.getElementById('authBadge').classList.add('hidden');document.getElementById('logoutBtn').classList.add('hidden');document.getElementById('headerTabs')?.classList.add('hidden');document.getElementById('burgerBtn')?.classList.add('hidden');document.getElementById('mobileMenu')?.classList.add('hidden');document.getElementById('mobileMenu')?.classList.remove('show');}});}catch(e){document.getElementById('authConfigInfo').innerHTML=`❌ ${e.message}`;}
 setTimeout(()=>{ if(typeof loadGurusFromFirestore==='function') loadGurusFromFirestore(); }, 1000);
 const eyeOpen=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7Z" stroke="#0f355c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="#0f355c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="1.5" fill="#0f355c"/></svg>`;
 const eyeClosed=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3l18 18M10.58 10.58a3 3 0 0 0 4.24 4.24M9.53 9.53A10.07 10.07 0 0 0 2.39 12c1.73 3.89 6 7 11 7a9.96 9.96 0 0 0 4.22-1M14.12 14.12A3 3 0 0 1 9.88 9.88" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -1521,5 +1561,50 @@ document.addEventListener("DOMContentLoaded", ()=>{
   }
 });
 </script>
+
+<script>
+function toggleMobileMenu(force){
+  const menu=document.getElementById('mobileMenu');
+  if(!menu) return;
+  if(typeof force==='boolean'){
+    if(force) menu.classList.remove('hidden'), menu.classList.add('show');
+    else menu.classList.add('hidden'), menu.classList.remove('show');
+  } else {
+    if(menu.classList.contains('hidden') || !menu.classList.contains('show')){
+      menu.classList.remove('hidden'); menu.classList.add('show');
+    } else {
+      menu.classList.add('hidden'); menu.classList.remove('show');
+    }
+  }
+}
+// Sync header & mobile tabs active state - patch switchTab
+(function(){
+  const origSwitch = window.switchTab;
+  window.switchTab = function(tab){
+    if(typeof origSwitch==='function') origSwitch(tab);
+    else {
+      // fallback if orig not yet defined
+      try{ 
+        document.getElementById('panelLaporan')?.classList.toggle('hidden', tab!=='laporan');
+        document.getElementById('panelGuru')?.classList.toggle('hidden', tab!=='guru');
+      }catch(e){}
+    }
+    const isLaporan = tab==='laporan';
+    const ids = [
+      ['tabLaporan','tabLaporanHeader','tabLaporanMobile'],
+      ['tabGuru','tabGuruHeader','tabGuruMobile']
+    ];
+    // remove active from all
+    document.querySelectorAll('.btn-tab').forEach(b=>b.classList.remove('active'));
+    // add active to correct group
+    const activeGroup = isLaporan ? 0 : 1;
+    ids[activeGroup].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.classList.add('active');
+    });
+  };
+})();
+</script>
+
 </body>
 </html>
