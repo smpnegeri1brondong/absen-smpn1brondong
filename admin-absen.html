@@ -1327,19 +1327,62 @@ function parseAbsenGTK(gid, tanggalStr){
     if(!tgl && d.waktu){ try{ tgl=new Date(d.waktu).toISOString().split('T')[0]; }catch(e){} }
     return tgl===tanggalStr;
   });
-  // FIX LOGIKA: pisahkan MASUK dan PULANG dengan tegas, jangan pakai sorted[0]/last
+  // === SPLIT LOGIC BARU: 15:30-23:59 = PULANG diluar jam kerja, 00:00-05:59 = BELUM_BUKA (abaikan) ===
+  // filter khusus untuk DILUAR_JAM_KERJA lama yang masih kesimpen sebagai DILUAR_JAM_KERJA (bukan MASUK/PULANG)
+  const diluarLama = list.filter(x=>{
+    const ja=(x.jenis_absen||'').toUpperCase();
+    const ka=(x.kategori_absen||'').toUpperCase();
+    // data lama jenis DILUAR_JAM_KERJA (bukan MASUK/PULANG) -> cek jamnya
+    if(ja==='DILUAR_JAM_KERJA' && !ja.includes('MASUK') && !ja.includes('PULANG')){
+      try{
+        const dt=new Date(x.waktu);
+        const menit=dt.getHours()*60+dt.getMinutes();
+        // 00:00-05:59 -> anggap BELUM_BUKA, jangan masuk laporan
+        if(menit>=0 && menit<360) return false; // abaikan
+        // 15:31-23:59 -> anggap PULANG
+        if(menit>930) return true; // >15:30
+      }catch(e){}
+      return false;
+    }
+    return false;
+  });
   let masuk=null, pulang=null;
-  const masukList = list.filter(x=> (x.jenis_absen||'').toUpperCase().includes('MASUK')).sort((a,b)=> new Date(a.waktu)-new Date(b.waktu));
-  const pulangList = list.filter(x=> (x.jenis_absen||'').toUpperCase().includes('PULANG')).sort((a,b)=> new Date(b.waktu)-new Date(a.waktu));
+  // MASUK = yang jenis mengandung MASUK, tapi bukan BELUM_BUKA
+  const masukList = list.filter(x=>{
+    const ja=(x.jenis_absen||'').toUpperCase();
+    const ka=(x.kategori_absen||'').toUpperCase();
+    if(ka==='BELUM_BUKA' || ja==='BELUM_BUKA') return false;
+    return ja.includes('MASUK');
+  }).sort((a,b)=> new Date(a.waktu)-new Date(b.waktu));
+  // PULANG = yang jenis mengandung PULANG + DILUAR lama yang jam sore-malam
+  const pulangList = list.filter(x=>{
+    const ja=(x.jenis_absen||'').toUpperCase();
+    const ka=(x.kategori_absen||'').toUpperCase();
+    if(ka==='BELUM_BUKA' || ja==='BELUM_BUKA') return false;
+    if(ja.includes('PULANG')) return true;
+    return false;
+  }).concat(diluarLama).sort((a,b)=> new Date(b.waktu)-new Date(a.waktu));
   
   if(masukList.length>0) masuk=masukList[0];
   if(pulangList.length>0) pulang=pulangList[0];
   
-  // Jika cuma 1 data dan bukan PULANG, anggap MASUK
+  // Jika cuma 1 data dan bukan PULANG, anggap MASUK (kecuali data itu DILUAR lama yang sudah dipindah ke pulang)
   if(list.length===1){
     const j=(list[0].jenis_absen||'').toUpperCase();
-    if(j.includes('PULANG')){ pulang=list[0]; masuk=null; }
-    else { masuk=list[0]; pulang=null; }
+    const ka=(list[0].kategori_absen||'').toUpperCase();
+    if(ka==='BELUM_BUKA' || j==='BELUM_BUKA'){
+      // 00:00-06:00 jangan masuk laporan sama sekali
+      masuk=null; pulang=null;
+    } else if(j.includes('PULANG') || diluarLama.length>0){
+      pulang=list[0].jenis_absen==='DILUAR_JAM_KERJA' ? (diluarLama[0]||list[0]) : list[0];
+      masuk=null;
+    } else if(j==='DILUAR_JAM_KERJA'){
+      // data lama DILUAR di jam 15:31-23:59 sudah dipindah ke pulang via diluarLama, jadi jangan anggap masuk
+      if(diluarLama.length>0){ pulang=diluarLama[0]; masuk=null; }
+      else { masuk=null; pulang=null; } // 00:00-05:59 abaikan
+    } else {
+      masuk=list[0]; pulang=null;
+    }
   }
   // Koreksi admin selalu prioritas terbaru
   const kMasuk = list.filter(x=>x.is_koreksi && (x.jenis_absen||'').toUpperCase().includes('MASUK')).sort((a,b)=> new Date(b.koreksi_at||b.waktu)-new Date(a.koreksi_at||a.waktu))[0];
