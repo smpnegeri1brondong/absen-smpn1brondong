@@ -322,8 +322,8 @@ function initMap(){
     if(lr){ RADIUS=clampR(lr); }
   }catch(e){}
   map=L.map('miniMap',{zoomControl:false}).setView([CURRENT_LAT,CURRENT_LNG],17);
-  roadLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20});
-  satLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20});
+  roadLayer=L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20, subdomains:['0','1','2','3'], attribution:'&copy; Google'});
+  satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19, attribution:'&copy; Esri'});
   if(MODE_MINI==='satelit') satLayer.addTo(map); else roadLayer.addTo(map);
   circle=L.circle([CURRENT_LAT,CURRENT_LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f355c',fillOpacity:0.12}).addTo(map);
   const ic=L.divIcon({html:'<div style="width:28px;height:28px;background:#0f355c;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white">🏫</div>',iconSize:[28,28],className:''});
@@ -1030,6 +1030,236 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
   console.log('Login fallback attached');
 });
+</script>
+
+
+<!-- 🧪 MODE TEST / SIMULASI TANPA REALTIME -->
+<style>
+#debugFab{position:fixed;bottom:90px;right:16px;z-index:9997;width:56px;height:56px;border-radius:16px;background:#0f172a;color:white;border:none;box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:22px;cursor:pointer;display:none;align-items:center;justify-content:center}
+#debugPanel{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10001;display:none;align-items:flex-end;justify-content:center;padding:0}
+#debugPanel.show{display:flex}
+#debugPanel .debug-card{width:100%;max-width:480px;background:white;border-radius:24px 24px 0 0;max-height:92vh;overflow:auto;padding:18px 16px 24px;animation:pop .2s ease}
+#debugPanel .debug-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:400px){ #debugPanel .debug-grid{grid-template-columns:1fr} }
+</style>
+<button id="debugFab" onclick="openDebugPanel()" title="Test Alert Tanpa Realtime">🧪</button>
+<div id="debugPanel" onclick="if(event.target===this) closeDebugPanel()">
+  <div class="debug-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-weight:800;font-size:15px;color:#0f172a">🧪 Test Alert Tanpa Realtime</div>
+      <button onclick="closeDebugPanel()" style="width:32px;height:32px;border-radius:10px;border:1px solid #e2e8f0;background:white;cursor:pointer">✕</button>
+    </div>
+    <div style="font-size:11px;color:#64748b;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:12px;padding:10px;line-height:1.4;margin-bottom:12px">
+      Gak perlu nunggu Firestore realtime. Isi tanggal & jam simulasi, lalu klik <b>Test Alert</b>.<br>
+      Libur & Pulang Cepat simulasi akan di-inject langsung ke <code>kalenderLiburMap</code> & <code>jamKhususMap</code> tanpa save ke Firestore.
+    </div>
+    <div class="debug-grid">
+      <div><div style="font-size:11px;font-weight:700;margin-bottom:4px">Tanggal Simulasi</div><input id="dbgTanggal" type="date" class="input" style="height:40px"/></div>
+      <div><div style="font-size:11px;font-weight:700;margin-bottom:4px">Jam Simulasi</div><input id="dbgJam" type="time" class="input" style="height:40px"/></div>
+      <div style="grid-column:span 2"><div style="font-size:11px;font-weight:700;margin-bottom:4px">Nama GTK Simulasi (opsional)</div><input id="dbgNama" class="input" placeholder="Kosong = pakai yang login" style="height:40px"/></div>
+      <div style="grid-column:span 2;border-top:1px solid #f1f5f9;padding-top:10px;margin-top:2px"><div style="font-size:11px;font-weight:800;color:#0f355c">🗓 Simulasi Libur</div></div>
+      <div style="grid-column:span 2"><input id="dbgLiburNama" class="input" placeholder="Contoh: Maulid Nabi (kosong = tidak libur)" style="height:40px"/></div>
+      <div style="grid-column:span 2;border-top:1px solid #f1f5f9;padding-top:10px;margin-top:2px"><div style="font-size:11px;font-weight:800;color:#0f355c">⚡ Simulasi Pulang Cepat</div></div>
+      <div><div style="font-size:11px;font-weight:700;margin-bottom:4px">Pulang Mulai</div><input id="dbgPulangMulai" type="time" class="input" style="height:40px"/></div>
+      <div><div style="font-size:11px;font-weight:700;margin-bottom:4px">Pulang Selesai (ops kosong=15:30)</div><input id="dbgPulangSelesai" type="time" class="input" style="height:40px"/></div>
+      <div style="grid-column:span 2"><input id="dbgPulangKet" class="input" placeholder="Keterangan: Rapat Dinas" style="height:40px"/></div>
+    </div>
+    <div style="margin-top:10px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:10px">
+      <div style="font-size:10px;font-weight:800;color:#0c4a6e;margin-bottom:4px">📦 Data Realtime Saat Ini</div>
+      <div id="dbgRealtimeInfo" style="font-size:11px;color:#334155;line-height:1.4">Memuat...</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+      <button onclick="testGetJenisAbsen()" style="height:44px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:800;font-size:12px;cursor:pointer">🔍 Cek getJenisAbsen</button>
+      <button onclick="testAlertSimulasi()" style="height:44px;border-radius:12px;border:none;background:#0f355c;color:white;font-weight:800;font-size:12px;cursor:pointer">🚀 Test Alert</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px">
+      <button onclick="injectMockData()" style="height:40px;border-radius:12px;border:1px dashed #0f355c;background:#f0f9ff;color:#0f355c;font-weight:700;font-size:11px;cursor:pointer">💉 Inject Simulasi ke Map (tanpa save Firestore)</button>
+      <button onclick="clearMockData()" style="height:36px;border-radius:10px;border:1px solid #fecaca;background:#fee2e2;color:#991b1b;font-weight:700;font-size:11px;cursor:pointer">🗑️ Hapus Simulasi (balik ke realtime)</button>
+    </div>
+    <div id="dbgResult" style="margin-top:12px;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;font-size:11px;line-height:1.5;display:none"></div>
+    <div style="margin-top:12px;font-size:10px;color:#94a3b8;text-align:center">Aktifkan via ?debug=1 di URL atau klik logo 3x • Console: testAlertSimulasi(), testGetJenisAbsen()</div>
+  </div>
+</div>
+
+
+<script>
+// ===== DEBUG / TEST TANPA REALTIME =====
+window.debugSimulasi = {active:false};
+function openDebugPanel(){
+  document.getElementById('debugPanel').classList.add('show');
+  updateDebugRealtimeInfo();
+  // set default tanggal jam
+  const now=new Date();
+  const tglInput=document.getElementById('dbgTanggal');
+  const jamInput=document.getElementById('dbgJam');
+  if(tglInput && !tglInput.value){
+    tglInput.value = now.toISOString().split('T')[0];
+  }
+  if(jamInput && !jamInput.value){
+    jamInput.value = now.toTimeString().slice(0,5);
+  }
+}
+function closeDebugPanel(){ document.getElementById('debugPanel').classList.remove('show'); }
+function updateDebugRealtimeInfo(){
+  try{
+    const el=document.getElementById('dbgRealtimeInfo');
+    if(!el) return;
+    const liburCount = window.kalenderLiburMap ? Object.keys(window.kalenderLiburMap).length : 0;
+    const jamCount = window.jamKhususMap ? Object.keys(window.jamKhususMap).length : 0;
+    const liburList = window.kalenderLiburList ? window.kalenderLiburList.slice(0,3).map(x=>x.tanggal+':'+x.keterangan).join('<br>') : '-';
+    const jamList = window.jamKhususList ? window.jamKhususList.slice(0,3).map(x=>x.tanggal+' '+Math.floor(x.mulai/60)+':'+String(x.mulai%60).padStart(2,'0')+(x.selesai?' - '+Math.floor(x.selesai/60)+':'+String(x.selesai%60).padStart(2,'0'):'')+' '+x.keterangan).join('<br>') : '-';
+    el.innerHTML = `<b>Libur:</b> ${liburCount} • <b>Pulang Cepat:</b> ${jamCount}<br><div style="margin-top:4px;font-size:10px">${liburList||'-'}<br>${jamList||'-'}</div>`;
+  }catch(e){}
+}
+function getDebugDate(){
+  const tglStr=document.getElementById('dbgTanggal')?.value;
+  const jamStr=document.getElementById('dbgJam')?.value||'07:00';
+  if(!tglStr) return new Date();
+  const [y,m,d]=tglStr.split('-').map(Number);
+  const [hh,mm]=jamStr.split(':').map(Number);
+  return new Date(y, m-1, d, hh||0, mm||0, 0);
+}
+function injectMockData(){
+  try{
+    const tglStr=document.getElementById('dbgTanggal')?.value;
+    if(!tglStr){ alert('Isi tanggal simulasi dulu'); return; }
+    const liburNama=document.getElementById('dbgLiburNama')?.value?.trim();
+    const pulangMulaiStr=document.getElementById('dbgPulangMulai')?.value;
+    const pulangSelesaiStr=document.getElementById('dbgPulangSelesai')?.value;
+    const pulangKet=document.getElementById('dbgPulangKet')?.value?.trim()||'Rapat Dinas';
+    if(!window.kalenderLiburMap) window.kalenderLiburMap={};
+    if(!window.jamKhususMap) window.jamKhususMap={};
+    if(liburNama){
+      window.kalenderLiburMap[tglStr]=liburNama;
+      if(!window.kalenderLiburList) window.kalenderLiburList=[];
+      window.kalenderLiburList = window.kalenderLiburList.filter(x=>x.tanggal!==tglStr);
+      window.kalenderLiburList.push({tanggal:tglStr, keterangan:liburNama});
+    }
+    if(pulangMulaiStr){
+      function toMenit(s){ if(!s) return null; const [h,m]=s.split(':').map(Number); return h*60+m; }
+      const mulai=toMenit(pulangMulaiStr);
+      let selesai = pulangSelesaiStr ? toMenit(pulangSelesaiStr) : 930;
+      window.jamKhususMap[tglStr]={mulai, selesai, keterangan:pulangKet, tanggal:tglStr};
+      if(!window.jamKhususList) window.jamKhususList=[];
+      window.jamKhususList = window.jamKhususList.filter(x=>x.tanggal!==tglStr);
+      window.jamKhususList.push({tanggal:tglStr, mulai, selesai, keterangan:pulangKet});
+    }
+    window.debugSimulasi.active=true;
+    updateDebugRealtimeInfo();
+    const res=document.getElementById('dbgResult');
+    if(res){ res.style.display='block'; res.innerHTML='✅ Simulasi di-inject (tanpa save Firestore)<br>Tanggal: '+tglStr+'<br>Libur: '+(liburNama||'-')+'<br>Pulang: '+(pulangMulaiStr||'-')+' - '+(pulangSelesaiStr||'15:30 auto')+' '+pulangKet; }
+    if(typeof window.cekJamAbsen==='function') window.cekJamAbsen(getDebugDate());
+    alert('✅ Inject berhasil! Sekarang Test Alert akan pakai data simulasi ini tanpa nunggu realtime.');
+  }catch(e){ alert('Gagal inject: '+e.message); }
+}
+function clearMockData(){
+  try{
+    if(window.loadKalenderLibur) window.loadKalenderLibur();
+    if(window.loadJamKhusus) window.loadJamKhusus();
+    window.debugSimulasi.active=false;
+    const res=document.getElementById('dbgResult');
+    if(res){ res.style.display='block'; res.innerHTML='🗑️ Simulasi dihapus, balik ke data realtime Firestore'; }
+    updateDebugRealtimeInfo();
+    if(typeof window.cekJamAbsen==='function') window.cekJamAbsen();
+  }catch(e){ alert(e.message); }
+}
+function testGetJenisAbsen(){
+  try{
+    const d=getDebugDate();
+    const tglStr=document.getElementById('dbgTanggal')?.value;
+    const info=window.getJenisAbsen(d);
+    const res=document.getElementById('dbgResult');
+    if(res){
+      res.style.display='block';
+      res.innerHTML = `<b>📅 Simulasi:</b> ${d.toLocaleString('id-ID')}<br><b>Jenis:</b> ${info.jenis}<br><b>Kategori:</b> ${info.kategori}<br><b>Label:</b> ${info.label}<br><b>Pesan:</b> ${info.pesan}<br><b>Valid:</b> ${info.valid}<br><b>Telat:</b> ${info.telatMenit||0} menit<br>${info.liburNama?'<b>LiburNama:</b> '+info.liburNama+'<br>':''}${info.jamKhusus?'<b>Pulang Cepat:</b> '+JSON.stringify(info.jamKhusus)+'<br>':''}<div style="margin-top:6px;padding:6px;background:white;border-radius:8px">getJenisAbsen(d) = ${JSON.stringify(info)}</div>`;
+    }
+    if(typeof window.cekJamAbsen==='function') window.cekJamAbsen(d);
+  }catch(e){
+    alert('Gagal: '+e.message);
+  }
+}
+function testAlertSimulasi(){
+  try{
+    const d=getDebugDate();
+    const jamStr=d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' WIB';
+    const jamShort=d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+    const namaSim=document.getElementById('dbgNama')?.value?.trim() || (window.currentGuru?.nama) || 'Budi Santoso, S.Pd (Simulasi)';
+    const info=window.getJenisAbsen(d);
+    const jarakText = window.formatJarak ? window.formatJarak(window.lastDistance||25) : '25m';
+    const jarakInfo = jarakText+' • VALID (simulasi)';
+    // Build same alert logic as in halaman-absen
+    let title='', msg='';
+    const kat=(info.kategori||'').toUpperCase();
+    const jenis=(info.jenis||'').toUpperCase();
+    if(kat==='TEPAT_WAKTU' && jenis==='MASUK'){
+      title='✅ MASUK TEPAT WAKTU'; msg=`<b>${namaSim}</b><br><br>Kamu absen <b>MASUK</b> jam <b>${jamStr}</b><br>Rajinyooo<br><br><span style="background:#dcfce7;color:#166534;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">✅ Tepat Waktu</span>`;
+    } else if(kat==='TELAT'){
+      const telatTxt = info.telatMenit? info.telatMenit+' menit' : '';
+      const telatDetail = info.telatMenit? `<b>${info.telatMenit} menit</b> dari 07:15` : '';
+      title='⚠ TERLAMBAT'; msg=`<b>${namaSim}</b><br><br>Kamu absen <b>MASUK</b> jam <b>${jamStr}</b><br>Terlambat ${telatDetail} (${telatTxt})<br>Jangan diulangi yaa<br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⚠ Terlambat ${telatTxt}</span>`;
+    } else if(kat==='TEPAT_WAKTU' && jenis==='PULANG'){
+      title='✅ PULANGGG YEYY 🎉'; msg=`<b>${namaSim}</b><br><br>Kamu absen <b>PULANG</b> jam <b>${jamStr}</b><br>Selamat beristirahat<br>Hati-hati di jalan<br><br><span style="background:#dcfce7;color:#166534;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">✅ Pulang</span>`;
+    } else if(kat==='LIBUR_NASIONAL'){
+      const namaLibur = info.liburNama || info.label.replace('Libur ','') || 'Hari Besar';
+      title=`🗓 LIBUR ${namaLibur.toUpperCase()}`; msg=`<b>${namaSim}</b><br><br>Libur <b>${namaLibur}</b> loh ini<br>Terlalu rajin kak<br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#e0f2fe;color:#0f355c;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">🗓 Libur ${namaLibur}, tidak perlu absen</span>`;
+    } else if(kat==='PULANG_CEPAT'){
+      const ket = (info.jamKhusus&&info.jamKhusus.keterangan)||'Rapat Dinas';
+      title='⚡ PULANGG CEPATTTTT'; msg=`<b>${namaSim}</b><br><br>Hari ini pulang cepat guyss<br>LESGOOOOO<br><br>Jam: <b>${jamStr}</b><br>Keterangan: <b>${ket}</b><br><br>Jarak: ${jarakInfo}<br><br><span style="background:#e0f2fe;color:#0c4a6e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⚡ Pulang Cepat - ${ket}</span>`;
+    } else if(kat==='BELUM_WAKTUNYA_PULANG_CEPAT'){
+      const ket = (info.jamKhusus&&info.jamKhusus.keterangan)||'Rapat Dinas';
+      const mulaiMenit = info.jamKhusus?info.jamKhusus.mulai:660;
+      const jamMulaiStr = String(Math.floor(mulaiMenit/60)).padStart(2,'0')+':'+String(mulaiMenit%60).padStart(2,'0');
+      title='⏳ BELUM WAKTUNYA PULANG CEPAT'; msg=`<b>${namaSim}</b><br><br>Masih jam <b>${jamStr}</b><br>Pulang cepat hari ini jam <b>${jamMulaiStr}</b><br>Keterangan: <b>${ket}</b><br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Coba lagi jam ${jamMulaiStr}</span>`;
+    } else if(kat==='PULANG_SEBELUM_WAKTUNYA_CEPAT'){
+      const ket = (info.jamKhusus&&info.jamKhusus.keterangan)||'Rapat Dinas';
+      const mulaiMenit = info.jamKhusus?info.jamKhusus.mulai:660;
+      const jamMulaiStr = String(Math.floor(mulaiMenit/60)).padStart(2,'0')+':'+String(mulaiMenit%60).padStart(2,'0');
+      title='⏳ PULANG SEBELUM WAKTUNYA CEPAT'; msg=`<b>${namaSim}</b><br><br>Kamu absen <b>PULANG</b> jam <b>${jamStr}</b><br>Pulang cepat jam <b>${jamMulaiStr}</b><br>Keterangan: <b>${ket}</b><br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Tercatat sebagai Pulang Sebelum Waktunya Cepat (${ket})</span>`;
+    } else if(kat==='BELUM_BUKA'){
+      title='⏰ BELUM BUKA HEYY'; msg=`<b>${namaSim}</b><br><br>Terlalu rajin nih kak<br>Masih jam <b>${jamStr}</b><br>Absen buka nanti jam 06:00<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Coba lagi jam 06:00</span>`;
+    } else if(kat==='BELUM_WAKTUNYA_PULANG'){
+      title='⏳ BELUM WAKTUNYA PULANG YAA MANIEZZ'; msg=`<b>${namaSim}</b><br><br>Masih jam <b>${jamStr}</b><br>Belum waktunya pulang<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Belum bisa absen, coba lagi nanti</span>`;
+    } else if(jenis==='LIBUR'){
+      title='INI HARI LIBUR HEYY'; msg=`<b>${namaSim}</b><br><br>Terlalu Rajin nih mas<br>${info.pesan}<br><br>Absen kamu <b>TETAP TERCATAT</b> di laporan sebagai <b>${info.label}</b><br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#e0f2fe;color:#0f355c;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">Libuuurrrrrrrrrr</span>`;
+    } else if(kat==='DILUAR_JAM_KERJA'){
+      title='🌙 PULANG DI LUAR JAM KERJA'; msg=`<b>${namaSim}</b><br><br>Absen pulang jam <b>${jamStr}</b><br>Udah di luar jam kerja ini<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fee2e2;color:#991b1b;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">📌 Di Luar Jam Kerja</span>`;
+    } else {
+      title=`${info.jenis} - ${info.label}`; msg=`<b>${namaSim}</b><br><br>Absen <b>${info.jenis}</b> jam <b>${jamStr}</b><br>Status: <b>${info.label}</b><br><br>${info.pesan}<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#dcfce7;color:#166534;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">🧪 Simulasi - Tidak disimpan</span>`;
+    }
+    if(typeof window.showCustomAlert==='function') window.showCustomAlert(title, msg);
+    else alert(title+'\n'+msg.replace(/<[^>]*>/g,''));
+    const res=document.getElementById('dbgResult');
+    if(res){ res.style.display='block'; res.innerHTML = `<b>🚀 Alert Ditampilkan:</b> ${title}<br><b>Info:</b> ${info.jenis} - ${info.kategori} - ${info.label}`; }
+  }catch(e){ alert('Gagal test alert: '+e.message); }
+}
+// Auto-show FAB if ?debug=1 or localStorage
+(function initDebugMode(){
+  try{
+    const urlParams=new URLSearchParams(location.search);
+    const isDebug = urlParams.get('debug')==='1' || urlParams.get('test')==='1' || localStorage.getItem('SI-ABSEN_DEBUG')==='1';
+    const fab=document.getElementById('debugFab');
+    if(isDebug && fab){ fab.style.display='flex'; }
+    // Triple click logo to enable
+    let clickCount=0, lastClick=0;
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const logo=document.querySelector('.header img')?.parentElement || document.querySelector('.header');
+      if(logo){
+        logo.addEventListener('click', ()=>{
+          const now=Date.now();
+          if(now-lastClick>2000) clickCount=0;
+          clickCount++; lastClick=now;
+          if(clickCount>=3){
+            localStorage.setItem('SI-ABSEN_DEBUG','1');
+            const f=document.getElementById('debugFab');
+            if(f) f.style.display='flex';
+            alert('🧪 Debug Mode Aktif! Tombol 🧪 muncul di kanan bawah.\n\nUntuk nonaktifkan: localStorage.removeItem("SI-ABSEN_DEBUG")');
+            clickCount=0;
+          }
+        });
+      }
+    });
+  }catch(e){}
+})();
 </script>
 
 </body>
