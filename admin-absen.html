@@ -279,17 +279,17 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <label style="font-size:11px;font-weight:700;margin-top:14px;display:block">Radius Absen</label>
 <div style="display:flex;gap:8px;margin-top:6px"><input id="radiusInput" type="number" min="20" max="70" step="5" value="40" class="input" style="height:40px"/><button id="saveRadiusBtn" type="button" style="height:40px;padding:0 12px;background:#0f355c;color:white;border-radius:12px;display:flex;align-items:center;font-weight:700;border:none;cursor:pointer">m</button></div>
 <div style="font-size:10px;color:#64748b;margin-top:4px">Batas 20m-70m • Default 40m • Silent realtime ke halaman GTK • <span id="radiusLabel">40m</span></div>
-<div style="margin-top:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:10px;font-weight:800;color:#94a3b8">TITIK SEKOLAH • GESERABLE 🏫</div><span style="font-size:9px;background:#dcfce7;color:#166534;padding:2px 6px;border-radius:999px">Draggable</span></div><div id="schoolCoordDisplay" style="font-weight:700;font-size:12px;color:#0f355c;margin-top:4px">-6.889583,112.286111</div><div style="font-size:10px;color:#64748b">Geser marker / klik map untuk pindah</div><div style="display:flex;gap:6px;margin-top:8px"><button id="btnModeRoad" onclick="setMapMode('road')" style="flex:1;height:32px;border-radius:10px;border:1px solid #0f355c;background:#0f355c;color:white;font-weight:700;font-size:11px;cursor:pointer">🗺️ Road</button><button id="btnModeSat" onclick="setMapMode('sat')" style="flex:1;height:32px;border-radius:10px;border:1px solid #0f355c;background:white;color:#0f355c;font-weight:700;font-size:11px;cursor:pointer">🛰️ Satelit</button></div><div style="margin-top:6px"><button onclick="simpanLokasiSekolah()" style="width:100%;height:32px;border-radius:10px;border:none;background:#0f172a;color:white;font-weight:700;font-size:11px;cursor:pointer">💾 Simpan Lokasi ke Firestore</button></div><div id="rekapInfo" style="margin-top:8px;background:white;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font-size:11px">Memuat...</div></div>
+<div style="margin-top:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:10px;font-weight:800;color:#94a3b8">TITIK SEKOLAH • GESER MARKER 🏫</div><span style="font-size:9px;background:#dcfce7;color:#166534;padding:2px 6px;border-radius:999px">Draggable</span></div><!-- KOORDINAT DISEMBUNYIKAN SESUAI REQUEST - TETAP UPDATE DI BALIK LAYAR --><div id="schoolCoordDisplay" style="display:none;font-weight:700;font-size:12px;color:#0f355c;margin-top:4px">-6.907563,112.210813</div><div style="font-size:10px;color:#64748b;margin-top:4px">Geser marker / klik map untuk pindah • Koordinat auto-sync</div><div style="display:flex;gap:6px;margin-top:8px"><button id="btnModeRoad" onclick="setMapMode('road')" style="flex:1;height:32px;border-radius:10px;border:1px solid #0f355c;background:#0f355c;color:white;font-weight:700;font-size:11px;cursor:pointer">🗺️ Road</button><button id="btnModeSat" onclick="setMapMode('sat')" style="flex:1;height:32px;border-radius:10px;border:1px solid #0f355c;background:white;color:#0f355c;font-weight:700;font-size:11px;cursor:pointer">🛰️ Satelit</button></div><div style="margin-top:6px"><button onclick="simpanLokasiSekolah()" style="width:100%;height:32px;border-radius:10px;border:none;background:#0f172a;color:white;font-weight:700;font-size:11px;cursor:pointer">💾 Simpan Lokasi ke Firestore</button></div><div id="rekapInfo" style="margin-top:8px;background:white;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font-size:11px;line-height:1.4">Memuat absensi...</div></div>
 <div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden"><div id="mapAdmin"></div></div>
 <div style="margin-top:12px;display:grid;gap:8px"><button class="btn btn-primary" style="height:40px" onclick="loadRekap()">🔄 Refresh Laporan</button><button class="btn btn-outline" style="height:40px" onclick="loadPasswords()">🔑 Load Password Custom</button></div>
 </div>
 <div id="panelLaporan">
-<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="font-weight:800;color:#0f355c">📊 Laporan Absen GTK <span id="liveBadge">🟢 Live - auto refresh aktif</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" style="height:36px;width:auto;padding:0 16px" onclick="exportExcel()">📥 Excel</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="exportCSV()">CSV</button><button class="btn" style="height:36px;width:auto;padding:0 16px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b" onclick="clearTest()">🗑️ Hapus</button></div></div>
+<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="font-weight:800;color:#0f355c">📊 Laporan Absen GTK <span id="liveBadge">🟢 Live - auto refresh aktif</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" style="height:36px;width:auto;padding:0 16px" onclick="exportExcel()">📥 Excel</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="exportCSV()">CSV</button><button class="btn" style="height:36px;width:auto;padding:0 16px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b" onclick="clearTest()">🗑️ Hapus Test</button></div></div>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:12px">
 <input id="filterTanggal" type="date" class="input" style="height:36px"/><select id="filterGuruSelect" class="input" style="height:36px"><option value="">Semua GTK</option></select>
 <select id="filterKategori" class="input" style="height:36px"><option value="">Semua Kategori</option><option value="TEPAT_WAKTU">TEPAT_WAKTU</option><option value="TELAT">TELAT</option><option value="PULANG_SEBELUM_WAKTUNYA">PULANG_SEBELUM_WAKTUNYA</option><option value="BELUM_WAKTUNYA_PULANG">BELUM_WAKTUNYA_PULANG</option><option value="LIBUR_SABTU">LIBUR_SABTU</option><option value="LIBUR_MINGGU">LIBUR_MINGGU</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
 <select id="filterJenis" class="input" style="height:36px"><option value="">Semua Jenis</option><option value="MASUK">MASUK</option><option value="PULANG">PULANG</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
-<select id="filterStatus" class="input" style="height:36px"><option value="">RADIUS</option><option value="VALID">VALID</option><option value="LUAR_RADIUS">LUAR_RADIUS</option></select>
+<select id="filterStatus" class="input" style="height:36px"><option value="">VALID+LUAR_RADIUS</option><option value="VALID">VALID</option><option value="LUAR_RADIUS">LUAR_RADIUS</option></select>
 <input id="searchLaporan" class="input" placeholder="Cari nama..." style="height:36px"/>
 </div>
 <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="height:36px;flex:1" onclick="loadRekap()">🔄 Tampilkan</button><button class="btn btn-outline" style="height:36px;width:120px" onclick="resetFilter()">Reset</button></div>
@@ -428,10 +428,16 @@ function initMap(){
   const schoolIcon = L.divIcon({html:'<div style="width:30px;height:30px;background:#0f355c;border:3px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;box-shadow:0 2px 8px rgba(0,0,0,.3);font-size:14px">🏫</div>',iconSize:[30,30],className:''});
   adminMarker=L.marker([LAT,LNG],{icon:schoolIcon, draggable:true, autoPan:true}).addTo(mapAdmin).bindPopup('🏫 SMPN 1 Brondong<br><small>Geser marker untuk pindah lokasi</small>');
 
-  function updateCoordDisplay(lat,lng){
-    const el=document.getElementById('schoolCoordDisplay');
-    if(el) el.textContent=lat.toFixed(6)+','+lng.toFixed(6);
-  }
+  window.updateCoordDisplay = function(lat,lng){
+    try{
+      const el=document.getElementById('schoolCoordDisplay');
+      if(el) el.textContent=lat.toFixed(6)+','+lng.toFixed(6);
+      // also store globally for debug
+      window.LAST_SCHOOL_COORD = lat.toFixed(6)+','+lng.toFixed(6);
+      console.log('📍 Koordinat update:', lat.toFixed(6)+','+lng.toFixed(6));
+    }catch(e){}
+  };
+  function updateCoordDisplay(lat,lng){ return window.updateCoordDisplay(lat,lng); }
   updateCoordDisplay(LAT,LNG);
 
   // Drag update realtime
@@ -439,6 +445,7 @@ function initMap(){
     const pos=e.target.getLatLng();
     adminCircle.setLatLng(pos);
     LAT=pos.lat; LNG=pos.lng;
+    try{ window.updateCoordDisplay(pos.lat,pos.lng); }catch(err){}
     updateCoordDisplay(pos.lat,pos.lng);
     if(adminMarkerUser && adminLine){
       const d=mapAdmin.distance([pos.lat,pos.lng],[adminMarkerUser.getLatLng().lat, adminMarkerUser.getLatLng().lng]);
@@ -500,14 +507,32 @@ function initMap(){
     }
   };
   window.simpanLokasiSekolah=async()=>{
-    const pos=adminMarker.getLatLng();
     try{
+      const pos = (typeof adminMarker!=='undefined' && adminMarker) ? adminMarker.getLatLng() : {lat: LAT, lng: LNG};
+      // Simpan lokal dulu biar langsung kepake
+      try{
+        localStorage.setItem('SCHOOL_LAT', String(pos.lat));
+        localStorage.setItem('SCHOOL_LNG', String(pos.lng));
+        localStorage.setItem('LAT', String(pos.lat));
+        localStorage.setItem('LNG', String(pos.lng));
+        LAT=pos.lat; LNG=pos.lng;
+        const el=document.getElementById('schoolCoordDisplay');
+        if(el) el.textContent=pos.lat.toFixed(6)+','+pos.lng.toFixed(6);
+      }catch(e){}
       const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
       const d = window.db || (typeof db!=='undefined'?db:null);
-      if(!d) return alert('Firestore belum siap');
+      if(!d){
+        alert('✅ Lokasi disimpan lokal\n'+pos.lat.toFixed(6)+','+pos.lng.toFixed(6)+'\nFirestore belum siap, tapi halaman absen akan pakai lokal dulu');
+        return;
+      }
       await setDoc(doc(d, "settings", "config"), {lat:pos.lat, lng:pos.lng, latitude:pos.lat, longitude:pos.lng, updated_at:new Date().toISOString(), updated_by:'admin-manual'}, {merge:true});
-      alert('✅ Lokasi disimpan\n'+pos.lat.toFixed(6)+','+pos.lng.toFixed(6)+'\nHalaman absen akan auto update');
-    }catch(e){ alert('Gagal: '+e.message); }
+      const info=document.getElementById('rekapInfo');
+      if(info) info.textContent='✅ Lokasi disimpan: '+pos.lat.toFixed(5)+','+pos.lng.toFixed(5)+' • Halaman absen auto update';
+      alert('✅ Lokasi disimpan\n'+pos.lat.toFixed(6)+','+pos.lng.toFixed(6)+'\nHalaman absen akan auto update via Firestore');
+    }catch(e){ 
+      console.error(e);
+      alert('Gagal: '+e.message); 
+    }
   };
 
   // Set initial button state
@@ -918,8 +943,15 @@ document.getElementById('totalDiluar').textContent=filtered.filter(d=>d.kategori
   }catch(e){ console.log('cards err', e); }
   setTimeout(()=>{ document.querySelectorAll('.chk-laporan').forEach(ch=>{ ch.addEventListener('change', updateBulkBar); }); updateBulkBar(); },100); }
 
-document.getElementById('filterTanggal').onchange=applyFilter;document.getElementById('filterGuruSelect').onchange=applyFilter;document.getElementById('filterKategori').onchange=applyFilter;document.getElementById('filterJenis').onchange=applyFilter;document.getElementById('filterStatus').onchange=applyFilter;document.getElementById('searchLaporan').oninput=applyFilter;
-window.resetFilter=()=>{document.getElementById('filterTanggal').value='';document.getElementById('filterGuruSelect').value='';document.getElementById('filterKategori').value='';document.getElementById('filterJenis').value='';document.getElementById('filterStatus').value='';document.getElementById('searchLaporan').value='';applyFilter();};
+
+document.getElementById('filterTanggal').onchange=()=>{ if(typeof renderLaporanBaru==='function') renderLaporanBaru(); };
+document.getElementById('filterGuruSelect').onchange=()=>{ if(typeof renderLaporanBaru==='function') renderLaporanBaru(); };
+document.getElementById('filterKategori').onchange=()=>{ if(typeof renderLaporanBaru==='function') renderLaporanBaru(); };
+document.getElementById('filterJenis').onchange=()=>{ if(typeof renderLaporanBaru==='function') renderLaporanBaru(); };
+document.getElementById('filterStatus').onchange=()=>{ if(typeof renderLaporanBaru==='function') renderLaporanBaru(); };
+document.getElementById('searchLaporan').oninput=()=>{ if(typeof renderLaporanBaru==='function') renderLaporanBaru(); };
+
+window.resetFilter=()=>{const ids=['filterTanggal','filterGuruSelect','filterKategori','filterJenis','filterStatus','searchLaporan']; ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; }); if(typeof renderLaporanBaru==='function') renderLaporanBaru(); else if(typeof applyFilter==='function') applyFilter();};
 window.exportExcel=()=>{if(allAbsen.length===0){alert('Load dulu');return;}const tgl=document.getElementById('filterTanggal').value;const gid=document.getElementById('filterGuruSelect').value;const kat=document.getElementById('filterKategori').value;let filtered=allAbsen;if(tgl){filtered=filtered.filter(d=>new Date(d.waktu).toISOString().split('T')[0]===tgl);} if(gid){filtered=filtered.filter(d=>d.gid===gid);} if(kat){filtered=filtered.filter(d=>d.kategori_absen===kat);}const rows=filtered.map(d=>{const dt=new Date(d.waktu);return{GID:d.gid,Nama:d.nama,Tanggal:dt.toLocaleDateString('id-ID'),Jam:dt.toLocaleTimeString('id-ID'),Jenis:d.jenis_absen||'',Kategori:d.kategori_absen||'',Label:d.label_absen||'',Status_Radius:d.status||'',Jarak_meter:d.jarak_meter||0,Telat_menit:d.telat_menit||0,PlusCode:d.plus_code||'',Latitude:d.lat||'',Longitude:d.lng||'',Waktu_ISO:d.waktu};});const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Laporan Absen");XLSX.writeFile(wb,`laporan-absen-V4-${new Date().toISOString().split('T')[0]}.xlsx`);};
 window.exportCSV=async()=>{if(allAbsen.length===0){alert('Load dulu');return;}let csv="GID,Nama,Tanggal,Jam,Jenis,Kategori,Status,Jarak,Telat,PlusCode\n";const tgl=document.getElementById('filterTanggal').value;let filtered=allAbsen;if(tgl){filtered=filtered.filter(d=>new Date(d.waktu).toISOString().split('T')[0]===tgl);}filtered.forEach(d=>{const dt=new Date(d.waktu);csv+=`"${d.gid}","${d.nama}","${dt.toLocaleDateString('id-ID')}","${dt.toLocaleTimeString('id-ID')}","${d.jenis_absen||''}","${d.kategori_absen||''}","${d.status}",${d.jarak_meter||0},${d.telat_menit||0},"${d.plus_code||''}"\n`;});const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`laporan-V4-${new Date().toISOString().split('T')[0]}.csv`;a.click();};
 window.clearTest=async()=>{if(!confirm('Hapus semua data LUAR_RADIUS?'))return;try{const q=query(collection(db,"absensi"));const snap=await getDocs(q);let del=0;for(const d of snap.docs){const data=d.data();if(data.status==='LUAR_RADIUS'||(data.jarak_meter&&data.jarak_meter>100)){await deleteDoc(doc(db,"absensi",d.id));del++;}}alert(`${del} data dihapus`);loadRekap();}catch(e){alert(e.message);}};
@@ -991,6 +1023,43 @@ async function loadRadiusV5(){
   }
 }
 loadRadiusV5();
+
+async function loadLocationFromFirestore(){
+  try{
+    const {doc, getDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d = window.db || (typeof db!=='undefined'?db:null);
+    if(!d) return;
+    const snap = await getDoc(doc(d, "settings", "config"));
+    if(snap.exists()){
+      const data=snap.data();
+      let nLat = data.latitude || data.lat;
+      let nLng = data.longitude || data.lng || data.lon;
+      if(nLat && nLng){
+        nLat=parseFloat(nLat); nLng=parseFloat(nLng);
+        if(!isNaN(nLat) && !isNaN(nLng)){
+          LAT=nLat; LNG=nLng;
+          try{
+            localStorage.setItem('SCHOOL_LAT', String(nLat));
+            localStorage.setItem('SCHOOL_LNG', String(nLng));
+            localStorage.setItem('LAT', String(nLat));
+            localStorage.setItem('LNG', String(nLng));
+            const el=document.getElementById('schoolCoordDisplay');
+            if(el) el.textContent=nLat.toFixed(6)+','+nLng.toFixed(6);
+            if(typeof mapAdmin!=='undefined' && mapAdmin){
+              mapAdmin.setView([nLat,nLng], 16);
+              if(typeof adminMarker!=='undefined' && adminMarker) adminMarker.setLatLng([nLat,nLng]);
+              if(typeof adminCircle!=='undefined' && adminCircle) adminCircle.setLatLng([nLat,nLng]);
+            }
+          }catch(e){}
+          console.log('✅ Lokasi load dari Firestore:', nLat, nLng);
+        }
+      }
+    }
+  }catch(e){ console.log('loadLocation fail', e.message); }
+}
+
+loadLocationFromFirestore();
+setTimeout(loadLocationFromFirestore, 1500);
 
 // === LIBUR LOGIC ===
 function getKategoriAbsenV5(date){
@@ -1201,6 +1270,56 @@ window.getJenisAbsen=(d)=>{
 };
 window.allAbsen = window.allAbsen || [];
 function getTanggalLaporan(){ const el=document.getElementById('filterTanggal'); if(el&&el.value) return el.value; return new Date().toISOString().split('T')[0]; }
+function getLabelJamKerja(tanggalStr){
+  try{
+    let d;
+    if(tanggalStr){
+      // parse YYYY-MM-DD
+      const parts=tanggalStr.split('-');
+      if(parts.length===3) d=new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+      else d=new Date(tanggalStr);
+    } else {
+      d=new Date();
+    }
+    if(isNaN(d.getTime())) d=new Date();
+    const day=d.getDay(); // 0=minggu,5=jumat,6=sabtu
+    if(day===5){
+      return {text:'Jam: 06:00-07:15 Tepat, 10:00-15:30 Pulang (Jumat)', hari:'Jumat', masuk:'06:00-07:15', pulang:'10:00-15:30'};
+    } else if(day===6){
+      return {text:'Jam: Libur Sabtu', hari:'Sabtu', masuk:'Libur', pulang:'Libur'};
+    } else if(day===0){
+      return {text:'Jam: Libur Minggu', hari:'Minggu', masuk:'Libur', pulang:'Libur'};
+    } else {
+      return {text:'Jam: 06:00-07:15 Tepat, 13:50-15:30 Pulang (Senin-Kamis)', hari:'Senin-Kamis', masuk:'06:00-07:15', pulang:'13:50-15:30'};
+    }
+  }catch(e){
+    return {text:'Jam: 06:00-07:15 Tepat, 13:50-15:30 Pulang (Senin-Kamis)', hari:'Senin-Kamis', masuk:'06:00-07:15', pulang:'13:50-15:30'};
+  }
+}
+function updateJamLabel(){
+  const tgl=getTanggalLaporan();
+  const label=getLabelJamKerja(tgl);
+  // update rekapInfo if exists and has data count
+  const info=document.getElementById('rekapInfo');
+  if(info){
+    // keep existing count if already has number
+    const txt=info.textContent||'';
+    const m=txt.match(/(\d+)\s*(absensi|data)/);
+    const count=m?m[1]: (window.allAbsen?window.allAbsen.length:'');
+    if(count!=='' && count!==undefined){
+      info.textContent=count+' absensi tercatat • Live auto-refresh • '+label.text;
+    } else {
+      // if no count yet, just set label
+      if(txt.includes('Memuat')) return; // jangan overwrite saat memuat
+      info.textContent='Live auto-refresh • '+label.text;
+    }
+  }
+  // also update any element with id jamKerjaLabel if exists
+  const jl=document.getElementById('jamKerjaLabel');
+  if(jl) jl.textContent=label.text;
+  return label;
+}
+
 function parseAbsenGTK(gid, tanggalStr){
   const list = allAbsen.filter(d=>{
     if(d.gid!==gid) return false;
@@ -1247,32 +1366,93 @@ function badgeStatus(rec){
 window.renderLaporanBaru = function(){
   const body=document.getElementById('rekapBody'); if(!body) return;
   const tanggalStr=getTanggalLaporan();
+  const jamLabel=getLabelJamKerja(tanggalStr); // dinamis Jumat vs Senin-Kamis
+  updateJamLabel();
   const searchEl=document.getElementById('searchLaporan');
   const search=searchEl?searchEl.value.toLowerCase():'';
+  const filterGuru = document.getElementById('filterGuruSelect')?.value || '';
+  const filterKategori = document.getElementById('filterKategori')?.value || '';
+  const filterJenis = document.getElementById('filterJenis')?.value || '';
+  const filterStatus = document.getElementById('filterStatus')?.value || '';
+
   let listGuru=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));
-  if(search) listGuru=listGuru.filter(g=> g.nama.toLowerCase().includes(search) || g.gid.toLowerCase().includes(search));
-  if(listGuru.length===0){
-    body.innerHTML='<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:20px">Belum ada data GTK</td></tr>';
+
+  // Filter Guru dropdown (Semua GTK)
+  if(filterGuru){
+    listGuru = listGuru.filter(g=> g.gid===filterGuru);
+  }
+
+  // Filter search nama
+  if(search){
+    listGuru=listGuru.filter(g=> g.nama.toLowerCase().includes(search) || g.gid.toLowerCase().includes(search));
+  }
+
+  // Parse semua dulu
+  let parsedList = listGuru.map(g=>{
+    const parsed=parseAbsenGTK(g.gid, tanggalStr);
+    return {guru:g, masuk:parsed.masuk, pulang:parsed.pulang};
+  });
+
+  // Filter Kategori (Semua Kategori)
+  if(filterKategori){
+    parsedList = parsedList.filter(item=>{
+      const katMasuk = (item.masuk?.kategori_absen||'').toUpperCase();
+      const katPulang = (item.pulang?.kategori_absen||'').toUpperCase();
+      const katMasuk2 = (item.masuk?.kategori||'').toUpperCase();
+      const katPulang2 = (item.pulang?.kategori||'').toUpperCase();
+      return katMasuk===filterKategori || katPulang===filterKategori || katMasuk2===filterKategori || katPulang2===filterKategori;
+    });
+  }
+
+  // Filter Jenis (Semua Jenis)
+  if(filterJenis){
+    parsedList = parsedList.filter(item=>{
+      if(filterJenis==='MASUK') return !!item.masuk;
+      if(filterJenis==='PULANG') return !!item.pulang;
+      if(filterJenis==='DILUAR_JAM_KERJA'){
+        const k1=(item.masuk?.kategori_absen||'').toUpperCase();
+        const k2=(item.pulang?.kategori_absen||'').toUpperCase();
+        return k1==='DILUAR_JAM_KERJA' || k2==='DILUAR_JAM_KERJA';
+      }
+      const jM=(item.masuk?.jenis_absen||'').toUpperCase();
+      const jP=(item.pulang?.jenis_absen||'').toUpperCase();
+      return jM===filterJenis || jP===filterJenis;
+    });
+  }
+
+  // Filter RADIUS = VALID / LUAR_RADIUS (filterStatus)
+  if(filterStatus){
+    parsedList = parsedList.filter(item=>{
+      const sM=(item.masuk?.status||'').toUpperCase();
+      const sP=(item.pulang?.status||'').toUpperCase();
+      if(filterStatus==='VALID') return sM==='VALID' || sP==='VALID';
+      if(filterStatus==='LUAR_RADIUS') return sM==='LUAR_RADIUS' || sP==='LUAR_RADIUS';
+      return true;
+    });
+  }
+
+  if(parsedList.length===0){
+    body.innerHTML='<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:20px">Tidak ada data sesuai filter</td></tr>';
     const cardsEl=document.getElementById('laporanCards');
-    if(cardsEl) cardsEl.innerHTML='<div style="text-align:center;color:#94a3b8;padding:20px">Belum ada data GTK</div>';
-    // update total 0
+    if(cardsEl) cardsEl.innerHTML='<div style="text-align:center;color:#94a3b8;padding:20px">Tidak ada data sesuai filter<br><span style="font-size:11px">Coba reset filter</span></div>';
     const t1=document.getElementById('totalAbsen'); if(t1) t1.textContent='0';
     const t2=document.getElementById('totalTepat'); if(t2) t2.textContent='0';
     const t3=document.getElementById('totalTelat'); if(t3) t3.textContent='0';
     const t4=document.getElementById('totalDiluar'); if(t4) t4.textContent='0';
     return;
   }
+
   body.innerHTML='';
   const cardsEl=document.getElementById('laporanCards');
   let cardsHtml='';
-  let countTotal=listGuru.length;
+  let countTotal=parsedList.length;
   let countTepat=0;
   let countTelat=0;
   let countSudahMasuk=0;
 
-  listGuru.forEach((g, idx)=>{
-    const parsed=parseAbsenGTK(g.gid, tanggalStr);
-    const masuk=parsed.masuk; const pulang=parsed.pulang;
+  parsedList.forEach((item, idx)=>{
+    const g=item.guru;
+    const masuk=item.masuk; const pulang=item.pulang;
     const telatMasuk = masuk ? (masuk.telat_menit||masuk.telat||0) : 0;
     const telatText = masuk ? formatTelat(telatMasuk) : '-';
     const jamMasuk = masuk ? new Date(masuk.waktu).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}) : '-';
@@ -1284,7 +1464,6 @@ window.renderLaporanBaru = function(){
     else if(!masuk && pulang) keterangan='Pulang '+jamPulang;
     else if(masuk && pulang) keterangan=jamMasuk+' - '+jamPulang;
 
-    // hitung total
     if(masuk){
       countSudahMasuk++;
       const kat=(masuk.kategori_absen||'').toUpperCase();
@@ -1296,7 +1475,6 @@ window.renderLaporanBaru = function(){
     tr.innerHTML='<td style="font-weight:800">'+(g.no||idx+1)+'</td><td><div style="font-weight:700">'+g.nama+'</div><div style="font-size:10px;color:#64748b">'+g.gid+'</div></td><td>'+badgeStatus(masuk)+'</td><td style="font-weight:700;color:'+(telatMasuk>0?'#d97706':'#64748b')+'">'+telatText+'</td><td>'+badgeStatus(pulang)+'</td><td style="font-size:11px">'+keterangan+'</td><td><button style="height:32px;padding:0 10px;border-radius:10px;border:1px solid #e2e8f0;background:white;font-weight:700;font-size:11px;cursor:pointer" onclick="openKoreksi(\''+g.gid+'\',\''+g.nama.replace(/\'/g,"\'")+ '\',\''+tanggalStr+'\')">✏️ Koreksi</button></td>';
     body.appendChild(tr);
 
-    // FIX HP: pakai badgeStatus biar gak ada jam dobel
     const badgeMasukHtml = badgeStatus(masuk);
     const badgePulangHtml = badgeStatus(pulang);
     cardsHtml+=`
@@ -1312,12 +1490,13 @@ window.renderLaporanBaru = function(){
   });
   if(cardsEl){ cardsEl.innerHTML=cardsHtml || '<div style="text-align:center;color:#94a3b8;padding:20px">Belum ada data GTK</div>'; }
 
-  // UPDATE TOTAL - sesuai jumlah GTK
+  // UPDATE TOTAL - sesuai filter aktif
   const elTotal=document.getElementById('totalAbsen'); if(elTotal) elTotal.textContent=countTotal;
   const elTepat=document.getElementById('totalTepat'); if(elTepat) elTepat.textContent=countTepat;
   const elTelat=document.getElementById('totalTelat'); if(elTelat) elTelat.textContent=countTelat;
   const elDiluar=document.getElementById('totalDiluar'); if(elDiluar) elDiluar.textContent=countTotal-countSudahMasuk;
 };
+
 window.renderRekap = window.renderLaporanBaru;
 window.applyFilter = window.renderLaporanBaru;
 async function loadAbsensiRealtime(){
@@ -1330,7 +1509,7 @@ async function loadAbsensiRealtime(){
       window.allAbsen=[]; allAbsen=[];
       snap.forEach(docSnap=>{ const data=docSnap.data(); data._id=docSnap.id; allAbsen.push(data); window.allAbsen.push(data); });
       const info=document.getElementById('rekapInfo');
-      if(info) info.textContent=allAbsen.length+' data dimuat • Live • Jam: 06:00-07:15 Tepat, 13:50-15:30 Pulang (Senin-Kamis)';
+      if(info){ const lbl=getLabelJamKerja(getTanggalLaporan()); info.textContent=allAbsen.length+' absensi tercatat • Live auto-refresh • '+lbl.text; }
       if(document.getElementById('rekapBody')) renderLaporanBaru();
     });
   }catch(e){ console.log('load absensi realtime fail', e.message); }
