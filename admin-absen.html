@@ -479,6 +479,8 @@ document.getElementById('forgotBtn').onclick=async()=>{
 };
 
 // === FITUR BARU: LIBUR & PULANG CEPAT CRUD ===
+window.kalenderLiburMap=window.kalenderLiburMap||{};
+window.kalenderLiburList=window.kalenderLiburList||[];
 async function loadLibur(){
   try{
     const listEl=document.getElementById('liburList');
@@ -487,6 +489,18 @@ async function loadLibur(){
     const arr=[];
     snap.forEach(d=>{ const data=d.data(); arr.push({id:d.id, tanggal:data.tanggal||d.id, keterangan:data.keterangan||data.nama||'Libur'}); });
     arr.sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
+    // === FIX: populate map untuk deteksi libur di laporan ===
+    try{
+      window.kalenderLiburMap={};
+      arr.forEach(x=>{ window.kalenderLiburMap[x.tanggal]=x.keterangan; });
+      window.kalenderLiburList=arr;
+      console.log('✅ kalenderLiburMap loaded', Object.keys(window.kalenderLiburMap).length);
+      // auto re-render laporan jika sudah ada tanggal
+      if(typeof renderLaporanBaru==='function' && document.getElementById('rekapBody')){
+        const tgl = (typeof getTanggalLaporan==='function'? getTanggalLaporan() : null);
+        if(tgl) { /* jangan auto render biar gak ganggu filter, tapi siap */ }
+      }
+    }catch(e){}
     if(listEl){
       if(arr.length===0) listEl.innerHTML='<div style="text-align:center;color:#94a3b8;padding:12px">Belum ada libur. Tambah di atas.</div>';
       else listEl.innerHTML=arr.map(x=>`
@@ -498,6 +512,36 @@ async function loadLibur(){
   }catch(e){ console.log('loadLibur fail', e); const el=document.getElementById('liburList'); if(el) el.innerHTML='❌ '+e.message; }
 }
 window.loadLibur=loadLibur;
+
+async function startLiburLiveSync(){
+  try{
+    const {collection, onSnapshot} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d = window.db || (typeof db!=='undefined'?db:null);
+    if(!d) return;
+    const col = collection(d, "kalender_libur");
+    onSnapshot(col, (snap)=>{
+      try{
+        window.kalenderLiburMap = window.kalenderLiburMap||{};
+        const arr=[];
+        snap.forEach(docSnap=>{
+          const data=docSnap.data();
+          const tgl=data.tanggal||docSnap.id;
+          const ket=data.keterangan||data.nama||'Libur';
+          arr.push({id:docSnap.id, tanggal:tgl, keterangan:ket});
+          window.kalenderLiburMap[tgl]=ket;
+        });
+        window.kalenderLiburList=arr;
+        console.log('📅 kalender libur live sync', arr.length);
+        // re-render laporan biar badge libur langsung update tanpa refresh
+        if(typeof renderLaporanBaru==='function' && document.getElementById('filterTanggal')?.value){
+          renderLaporanBaru();
+        }
+      }catch(e){ console.log('libur live sync parse fail', e); }
+    });
+  }catch(e){ console.log('libur live sync fail', e.message); }
+}
+setTimeout(startLiburLiveSync, 2500);
+
 
 window.simpanLibur=async()=>{
   const tgl=document.getElementById('liburTanggal')?.value;
@@ -1587,33 +1631,27 @@ function parseAbsenGTK(gid, tanggalStr){
     return tgl===tanggalStr;
   });
   // === SPLIT LOGIC BARU: 15:30-23:59 = PULANG diluar jam kerja, 00:00-05:59 = BELUM_BUKA (abaikan) ===
-  // filter khusus untuk DILUAR_JAM_KERJA lama yang masih kesimpen sebagai DILUAR_JAM_KERJA (bukan MASUK/PULANG)
   const diluarLama = list.filter(x=>{
     const ja=(x.jenis_absen||'').toUpperCase();
     const ka=(x.kategori_absen||'').toUpperCase();
-    // data lama jenis DILUAR_JAM_KERJA (bukan MASUK/PULANG) -> cek jamnya
     if(ja==='DILUAR_JAM_KERJA' && !ja.includes('MASUK') && !ja.includes('PULANG')){
       try{
         const dt=new Date(x.waktu);
         const menit=dt.getHours()*60+dt.getMinutes();
-        // 00:00-05:59 -> anggap BELUM_BUKA, jangan masuk laporan
-        if(menit>=0 && menit<360) return false; // abaikan
-        // 15:31-23:59 -> anggap PULANG
-        if(menit>930) return true; // >15:30
+        if(menit>=0 && menit<360) return false;
+        if(menit>930) return true;
       }catch(e){}
       return false;
     }
     return false;
   });
   let masuk=null, pulang=null;
-  // MASUK = yang jenis mengandung MASUK, tapi bukan BELUM_BUKA
   const masukList = list.filter(x=>{
     const ja=(x.jenis_absen||'').toUpperCase();
     const ka=(x.kategori_absen||'').toUpperCase();
     if(ka==='BELUM_BUKA' || ja==='BELUM_BUKA') return false;
     return ja.includes('MASUK');
   }).sort((a,b)=> new Date(a.waktu)-new Date(b.waktu));
-  // PULANG = yang jenis mengandung PULANG + DILUAR lama yang jam sore-malam
   const pulangList = list.filter(x=>{
     const ja=(x.jenis_absen||'').toUpperCase();
     const ka=(x.kategori_absen||'').toUpperCase();
@@ -1625,29 +1663,53 @@ function parseAbsenGTK(gid, tanggalStr){
   if(masukList.length>0) masuk=masukList[0];
   if(pulangList.length>0) pulang=pulangList[0];
   
-  // Jika cuma 1 data dan bukan PULANG, anggap MASUK (kecuali data itu DILUAR lama yang sudah dipindah ke pulang)
   if(list.length===1){
     const j=(list[0].jenis_absen||'').toUpperCase();
     const ka=(list[0].kategori_absen||'').toUpperCase();
     if(ka==='BELUM_BUKA' || j==='BELUM_BUKA'){
-      // 00:00-06:00 jangan masuk laporan sama sekali
       masuk=null; pulang=null;
     } else if(j.includes('PULANG') || diluarLama.length>0){
       pulang=list[0].jenis_absen==='DILUAR_JAM_KERJA' ? (diluarLama[0]||list[0]) : list[0];
       masuk=null;
     } else if(j==='DILUAR_JAM_KERJA'){
-      // data lama DILUAR di jam 15:31-23:59 sudah dipindah ke pulang via diluarLama, jadi jangan anggap masuk
       if(diluarLama.length>0){ pulang=diluarLama[0]; masuk=null; }
-      else { masuk=null; pulang=null; } // 00:00-05:59 abaikan
+      else { masuk=null; pulang=null; }
     } else {
       masuk=list[0]; pulang=null;
     }
   }
-  // Koreksi admin selalu prioritas terbaru
   const kMasuk = list.filter(x=>x.is_koreksi && (x.jenis_absen||'').toUpperCase().includes('MASUK')).sort((a,b)=> new Date(b.koreksi_at||b.waktu)-new Date(a.koreksi_at||a.waktu))[0];
   const kPulang = list.filter(x=>x.is_koreksi && (x.jenis_absen||'').toUpperCase().includes('PULANG')).sort((a,b)=> new Date(b.koreksi_at||b.waktu)-new Date(a.koreksi_at||a.waktu))[0];
   if(kMasuk) masuk=kMasuk;
   if(kPulang) pulang=kPulang;
+
+  // === FIX LIBUR: jika masih kosong, cek libur nasional & weekend ===
+  if(!masuk && !pulang){
+    try{
+      const liburMap = window.kalenderLiburMap || {};
+      const namaLibur = liburMap[tanggalStr];
+      if(namaLibur){
+        const fake = {kategori_absen:'LIBUR_NASIONAL', label_absen:'Libur '+namaLibur, jenis_absen:'LIBUR', liburNama:namaLibur, tanggal:tanggalStr, is_libur:true, is_libur_nasional:true};
+        return {masuk:fake, pulang:fake};
+      }
+      const parts = tanggalStr.split('-');
+      let d=null;
+      if(parts.length===3) d=new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+      else d=new Date(tanggalStr);
+      if(d && !isNaN(d.getTime())){
+        const day=d.getDay();
+        if(day===6){
+          const fake = {kategori_absen:'LIBUR_SABTU', label_absen:'Libur Sabtu', jenis_absen:'LIBUR', tanggal:tanggalStr, is_libur:true};
+          return {masuk:fake, pulang:fake};
+        }
+        if(day===0){
+          const fake = {kategori_absen:'LIBUR_MINGGU', label_absen:'Libur Minggu', jenis_absen:'LIBUR', tanggal:tanggalStr, is_libur:true};
+          return {masuk:fake, pulang:fake};
+        }
+      }
+    }catch(e){}
+  }
+
   return {masuk, pulang};
 }
 function badgeStatus(rec){
@@ -1657,6 +1719,9 @@ function badgeStatus(rec){
   const isKoreksi = !!rec.is_koreksi;
   // Samain semua badge biar TELAT hasil koreksi = Terlambat Masuk kayak data QR asli
   if(kat.includes('LIBUR')){
+    if(kat==='LIBUR_NASIONAL'){
+      return '<span class="badge badge-libur">🏖️ '+(rec.label_absen||'Libur '+(rec.liburNama||''))+(isKoreksi?' ✏️':'')+'</span>';
+    }
     return '<span class="badge badge-libur">🏖️ '+(kat==='LIBUR_SABTU'?'Libur Sabtu':kat==='LIBUR_MINGGU'?'Libur Minggu':(rec.label_absen||'Libur'))+(isKoreksi?' ✏️':'')+'</span>';
   }
   if(kat.includes('BELUM')){
@@ -1780,7 +1845,12 @@ window.renderLaporanBaru = function(){
     const jamMasuk = masuk ? new Date(masuk.waktu).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}) : '-';
     const jamPulang = pulang ? new Date(pulang.waktu).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}) : '-';
     let keterangan='-';
-    if(!masuk && !pulang) keterangan='-';
+    const isLiburMasuk = masuk && ((masuk.kategori_absen||'').toUpperCase().includes('LIBUR') || masuk.is_libur);
+    const isLiburPulang = pulang && ((pulang.kategori_absen||'').toUpperCase().includes('LIBUR') || pulang.is_libur);
+    if(isLiburMasuk || isLiburPulang){
+      const nama = (masuk&&masuk.liburNama) || (pulang&&pulang.liburNama) || (masuk&&masuk.label_absen) || (pulang&&pulang.label_absen) || 'Libur';
+      keterangan = nama;
+    } else if(!masuk && !pulang) keterangan='-';
     else if(masuk && masuk.is_koreksi) keterangan=masuk.keterangan||'Dikoreksi admin';
     else if(masuk && !pulang) keterangan='Sudah masuk '+jamMasuk+', belum pulang';
     else if(!masuk && pulang) keterangan='Pulang '+jamPulang;
