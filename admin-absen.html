@@ -309,6 +309,9 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
   <div style="display:flex;gap:8px"><button style="background:white;color:#0f172a;height:36px;padding:0 14px;border-radius:8px;font-weight:800;border:none;cursor:pointer" onclick="exportTerpilih()">Export Terpilih</button><button style="background:#fecaca;color:#991b1b;height:36px;padding:0 14px;border-radius:8px;font-weight:800;border:1px solid #fecaca;cursor:pointer" onclick="hapusTerpilih()">Hapus Terpilih</button><button style="background:#334155;color:white;height:36px;padding:0 14px;border-radius:8px;font-weight:700;border:none;cursor:pointer" onclick="batalPilih()">Batal</button></div>
 </div>
 <div class="table-wrap" style="margin-top:12px"><table><thead><tr><th style="width:45px">No</th><th>GTK</th><th>Status Masuk</th><th>Telat</th><th>Status Pulang</th><th>Keterangan</th><th style="width:85px">Aksi</th></tr></thead><tbody id="rekapBody"><tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:20px">Klik Tampilkan</td></tr></tbody></table></div>
+
+to{transform:scale(1);opacity:1}}</style>
+
 <div id="laporanCards" style="display:none;margin-top:12px"></div>
 </div>
 <div id="panelGuru" class="hidden">
@@ -436,7 +439,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, query, getDocs, orderBy, limit, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-const LAT=-6.9075625, LNG=112.2108125; let RADIUS=40;
+let LAT=-6.9075625, LNG=112.2108125; let RADIUS=40;
 const gurus = []; window.gurus=gurus; window.gurus=gurus; // DIHAPUS hardcode password - load dari Firestore, urut 1-44
 function getDefaultPassword(nip){
   if(!nip || nip==="-") return "snebron0000";
@@ -1249,6 +1252,7 @@ async function loadLocationFromFirestore(){
               if(typeof adminMarker!=='undefined' && adminMarker) adminMarker.setLatLng([nLat,nLng]);
               if(typeof adminCircle!=='undefined' && adminCircle) adminCircle.setLatLng([nLat,nLng]);
             }
+            if(typeof window.updateCoordDisplay==='function'){ window.updateCoordDisplay(nLat,nLng); }
           }catch(e){}
           console.log('✅ Lokasi load dari Firestore:', nLat, nLng);
         }
@@ -1257,8 +1261,64 @@ async function loadLocationFromFirestore(){
   }catch(e){ console.log('loadLocation fail', e.message); }
 }
 
+async function startLocationLiveSync(){
+  try{
+    const {doc, onSnapshot} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d = window.db || (typeof db!=='undefined'?db:null);
+    if(!d) return;
+    const ref = doc(d, "settings", "config");
+    onSnapshot(ref, (snap)=>{
+      if(!snap.exists()) return;
+      const data=snap.data();
+      let nLat = data.latitude || data.lat;
+      let nLng = data.longitude || data.lng || data.lon;
+      if(nLat && nLng){
+        nLat=parseFloat(nLat); nLng=parseFloat(nLng);
+        if(isNaN(nLat) || isNaN(nLng)) return;
+        // cegah loop saat drag sendiri
+        if(typeof window.isSavingLocation!=='undefined' && window.isSavingLocation) return;
+        if(Math.abs(nLat-LAT)<0.000001 && Math.abs(nLng-LNG)<0.000001) return;
+        LAT=nLat; LNG=nLng;
+        try{
+          localStorage.setItem('SCHOOL_LAT', String(nLat));
+          localStorage.setItem('SCHOOL_LNG', String(nLng));
+          localStorage.setItem('LAT', String(nLat));
+          localStorage.setItem('LNG', String(nLng));
+          const el=document.getElementById('schoolCoordDisplay');
+          if(el) el.textContent=nLat.toFixed(6)+','+nLng.toFixed(6);
+          if(typeof mapAdmin!=='undefined' && mapAdmin){
+            mapAdmin.setView([nLat,nLng], 16);
+            if(typeof adminMarker!=='undefined' && adminMarker) adminMarker.setLatLng([nLat,nLng]);
+            if(typeof adminCircle!=='undefined' && adminCircle) adminCircle.setLatLng([nLat,nLng]);
+          }
+          if(typeof window.updateCoordDisplay==='function'){ window.updateCoordDisplay(nLat,nLng); }
+          const info=document.getElementById('rekapInfo');
+          if(info) info.textContent='📍 Lokasi sync realtime: '+nLat.toFixed(5)+','+nLng.toFixed(5)+' • Auto update';
+        }catch(e){}
+        console.log('📍 Lokasi live sync admin:', nLat, nLng);
+      }
+      if(data.radius!==undefined){
+        try{
+          const r = (typeof clampR==='function'? clampR(data.radius) : parseInt(data.radius));
+          if(r!==RADIUS){
+            RADIUS=r;
+            const radiusInputEl=document.getElementById('radiusInput');
+            const radiusLabelEl=document.getElementById('radiusLabel');
+            if(radiusInputEl) radiusInputEl.value=r;
+            if(radiusLabelEl) radiusLabelEl.textContent=r+'m';
+            if(typeof adminCircle!=='undefined' && adminCircle) adminCircle.setRadius(r);
+            localStorage.setItem('RADIUS_CUSTOM', String(r));
+            localStorage.setItem('RADIUS_METER', String(r));
+          }
+        }catch(e){}
+      }
+    });
+  }catch(e){ console.log('location live sync fail', e.message); }
+}
+
 loadLocationFromFirestore();
 setTimeout(loadLocationFromFirestore, 1500);
+setTimeout(startLocationLiveSync, 2000);
 
 // === LIBUR LOGIC ===
 function getKategoriAbsenV5(date){
