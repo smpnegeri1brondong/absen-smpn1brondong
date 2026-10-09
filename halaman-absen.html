@@ -220,8 +220,8 @@ function initMap(){
     if(lr){ RADIUS=clampR(lr); }
   }catch(e){}
   map=L.map('miniMap',{zoomControl:false}).setView([CURRENT_LAT,CURRENT_LNG],17);
-  roadLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20});
-  satLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20});
+  roadLayer=L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20, subdomains:['0','1','2','3'], attribution:'&copy; Google'});
+  satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19, attribution:'&copy; Esri'});
   if(MODE_MINI==='satelit') satLayer.addTo(map); else roadLayer.addTo(map);
   circle=L.circle([CURRENT_LAT,CURRENT_LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f355c',fillOpacity:0.12}).addTo(map);
   const ic=L.divIcon({html:'<div style="width:28px;height:28px;background:#0f355c;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white">🏫</div>',iconSize:[28,28],className:''});
@@ -469,7 +469,7 @@ async function prosesAbsenOtomatis(){
     document.getElementById('c3').innerHTML=`Belum Waktunya <div>⏳</div>`; document.getElementById('c3').style.background='#ffedd5';
     document.getElementById('firebaseStatus').textContent=`⏳ Belum waktunya pulang - tidak tercatat`;
     setTimeout(()=>{
-      showCustomAlert('⏳ BELUM WAKTUNYA PULANG YAA MANIEZZ', `<b>${currentGuru.nama}</b><br><br>Jam <b>${jamStr}</b><br>Belum waktunya pulang<br><br>Pulang resmi: <b>13:50-15:30</b> (Jumat 10:00-15:30)<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Belum bisa absen, coba lagi nanti</span>`);
+      showCustomAlert('⏳ BELUM WAKTUNYA PULANG YAA MANIEZZ', `<b>${currentGuru.nama}</b><br><br>Masih jam <b>${jamStr}</b><br>Belum waktunya pulang<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Belum bisa absen, coba lagi nanti</span>`);
     },400);
     setTimeout(()=>{ document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 SCAN LAGI'; },2000);
     return;
@@ -577,7 +577,7 @@ async function prosesAbsenOtomatis(){
       msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen <b>PULANG</b> jam <b>${jamStr}</b><br>${jamInfo.pesan}<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Tercatat sebagai Pulang Sebelum Waktunya (final, tidak bisa pulang lagi)</span><br><br><span style="font-size:10px;color:#64748b">Jika ada kasus khusus, hubungi admin untuk koreksi</span>`;
     } else if(kat==='BELUM_WAKTUNYA_PULANG'){
       title='⏳ BELUM WAKTUNYA PULANG YAA MANIEZZ';
-      msg=`<b>${currentGuru.nama}</b><br><br>Jam <b>${jamStr}</b><br>Belum waktunya pulang<br><br>Pulang resmi: <b>13:50-15:30</b> (Jumat 10:00-15:30)<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Belum bisa absen, coba lagi nanti</span>`;
+      msg=`<b>${currentGuru.nama}</b><br><br>Masih jam <b>${jamStr}</b><br>Belum waktunya pulang<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Belum bisa absen, coba lagi nanti</span>`;
     } else if(jenis==='LIBUR'){
       title='INI HARI LIBUR HEYY';
       msg=`<b>${currentGuru.nama}</b><br><br>Terlalu Rajin nih mas<br>${jamInfo.pesan}<br><br>Absen kamu <b>TETAP TERCATAT</b> di laporan sebagai <b>${jamInfo.label}</b><br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#e0f2fe;color:#0f355c;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">Libuuurrrrrrrrrr</span>`;
