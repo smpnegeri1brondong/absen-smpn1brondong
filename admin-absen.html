@@ -44,6 +44,12 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 .badge-libur{background:#fee2e2;border-color:#fecaca;color:#991b1b}
 .badge-belum{background:#ffedd5;border-color:#fed7aa;color:#9a3412}
 .badge-awal{background:#fef9c3;border-color:#fde68a;color:#854d0e}
+
+.badge-sakit{background:#dbeafe;border-color:#bfdbfe;color:#1e40af}
+.badge-dinas{background:#ede9fe;border-color:#ddd6fe;color:#5b21b6}
+.badge-keluarga{background:#fef9c3;border-color:#fde68a;color:#854d0e}
+.badge-izin{background:#f1f5f9;border-color:#e2e8f0;color:#334155}
+
 #liveBadge{background:#dcfce7;color:#166534;padding:3px 8px;border-radius:999px;font-size:10px;margin-left:6px}
 #authBadge{ display:none !important; }
 
@@ -212,6 +218,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <nav id="headerTabs" class="header-tabs hidden" style="display:flex;gap:8px;align-items:center">
   <button id="tabLaporanHeader" class="btn-tab active" onclick="switchTab('laporan')">📊 Laporan</button>
   <button id="tabGuruHeader" class="btn-tab" onclick="switchTab('guru')">👥 GTK</button>
+  <button id="tabIzinHeader" class="btn-tab" onclick="switchTab('izin')">📝 Izin</button>
   <button id="tabLiburHeader" class="btn-tab" onclick="switchTab('libur')">🗓 Libur</button>
   <button id="tabPulangHeader" class="btn-tab" onclick="switchTab('pulang')">⚡ Pulang Cepat</button>
 </nav>
@@ -226,6 +233,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div id="mobileMenu" class="mobile-menu hidden" style="position:sticky;top:64px;z-index:9998;background:white;border-bottom:1px solid #e2e8f0;padding:12px 16px;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,.06)">
   <button id="tabLaporanMobile" class="btn-tab active" style="width:100%;justify-content:flex-start" onclick="switchTab('laporan');toggleMobileMenu(false)">📊 Laporan GTK</button>
   <button id="tabGuruMobile" class="btn-tab" style="width:100%;justify-content:flex-start" onclick="switchTab('guru');toggleMobileMenu(false)">👥 Data GTK + QR</button>
+  <button id="tabIzinMobile" class="btn-tab" style="width:100%;justify-content:flex-start" onclick="switchTab('izin');toggleMobileMenu(false)">📝 Atur Izin</button>
   <button id="tabLiburMobile" class="btn-tab" style="width:100%;justify-content:flex-start" onclick="switchTab('libur');toggleMobileMenu(false)">🗓 Atur Libur</button>
   <button id="tabPulangMobile" class="btn-tab" style="width:100%;justify-content:flex-start" onclick="switchTab('pulang');toggleMobileMenu(false)">⚡ Pulang Cepat</button>
   <button style="width:100%;height:36px;border-radius:10px;border:1px solid #e2e8f0;background:white;font-weight:700" onclick="doLogout()">Logout</button>
@@ -290,7 +298,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="font-weight:800;color:#0f355c">📊 Laporan Absen GTK <span id="liveBadge">🟢 Live - auto refresh aktif</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" style="height:36px;width:auto;padding:0 16px" onclick="exportExcel()">📥 Excel</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="exportCSV()">CSV</button><button class="btn" style="height:36px;width:auto;padding:0 16px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b" onclick="clearTest()">🗑️ Hapus Test</button></div></div>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:12px">
 <input id="filterTanggal" type="date" class="input" style="height:36px"/><select id="filterGuruSelect" class="input" style="height:36px"><option value="">Semua GTK</option></select>
-<select id="filterKategori" class="input" style="height:36px"><option value="">Semua Kategori</option><option value="TEPAT_WAKTU">TEPAT_WAKTU</option><option value="TELAT">TELAT</option><option value="PULANG_SEBELUM_WAKTUNYA">PULANG_SEBELUM_WAKTUNYA</option><option value="BELUM_WAKTUNYA_PULANG">BELUM_WAKTUNYA_PULANG</option><option value="LIBUR_SABTU">LIBUR_SABTU</option><option value="LIBUR_MINGGU">LIBUR_MINGGU</option><option value="LIBUR_NASIONAL">LIBUR_NASIONAL</option><option value="PULANG_CEPAT">PULANG_CEPAT</option><option value="BELUM_WAKTUNYA_PULANG_CEPAT">BELUM_WAKTUNYA_PULANG_CEPAT</option><option value="PULANG_SEBELUM_WAKTUNYA_CEPAT">PULANG_SEBELUM_CEPAT</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
+<select id="filterKategori" class="input" style="height:36px"><option value="">Semua Kategori</option><option value="TEPAT_WAKTU">TEPAT_WAKTU</option><option value="TELAT">TELAT</option><option value="PULANG_SEBELUM_WAKTUNYA">PULANG_SEBELUM_WAKTUNYA</option><option value="BELUM_WAKTUNYA_PULANG">BELUM_WAKTUNYA_PULANG</option><option value="SAKIT">SAKIT</option><option value="DINAS_LUAR">DINAS_LUAR</option><option value="URUSAN_KELUARGA">URUSAN_KELUARGA</option><option value="IZIN_LAIN">IZIN_LAIN</option><option value="LIBUR_SABTU">LIBUR_SABTU</option><option value="LIBUR_MINGGU">LIBUR_MINGGU</option><option value="LIBUR_NASIONAL">LIBUR_NASIONAL</option><option value="PULANG_CEPAT">PULANG_CEPAT</option><option value="BELUM_WAKTUNYA_PULANG_CEPAT">BELUM_WAKTUNYA_PULANG_CEPAT</option><option value="PULANG_SEBELUM_WAKTUNYA_CEPAT">PULANG_SEBELUM_CEPAT</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
 <select id="filterJenis" class="input" style="height:36px"><option value="">Semua Jenis</option><option value="MASUK">MASUK</option><option value="PULANG">PULANG</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
 <select id="filterStatus" class="input" style="height:36px"><option value="">VALID+LUAR_RADIUS</option><option value="VALID">VALID</option><option value="LUAR_RADIUS">LUAR_RADIUS</option></select>
 <input id="searchLaporan" class="input" placeholder="Cari nama..." style="height:36px"/>
@@ -309,9 +317,6 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
   <div style="display:flex;gap:8px"><button style="background:white;color:#0f172a;height:36px;padding:0 14px;border-radius:8px;font-weight:800;border:none;cursor:pointer" onclick="exportTerpilih()">Export Terpilih</button><button style="background:#fecaca;color:#991b1b;height:36px;padding:0 14px;border-radius:8px;font-weight:800;border:1px solid #fecaca;cursor:pointer" onclick="hapusTerpilih()">Hapus Terpilih</button><button style="background:#334155;color:white;height:36px;padding:0 14px;border-radius:8px;font-weight:700;border:none;cursor:pointer" onclick="batalPilih()">Batal</button></div>
 </div>
 <div class="table-wrap" style="margin-top:12px"><table><thead><tr><th style="width:45px">No</th><th>GTK</th><th>Status Masuk</th><th>Telat</th><th>Status Pulang</th><th>Keterangan</th><th style="width:85px">Aksi</th></tr></thead><tbody id="rekapBody"><tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:20px">Klik Tampilkan</td></tr></tbody></table></div>
-
-to{transform:scale(1);opacity:1}}</style>
-
 <div id="laporanCards" style="display:none;margin-top:12px"></div>
 </div>
 <div id="panelGuru" class="hidden">
@@ -387,6 +392,72 @@ to{transform:scale(1);opacity:1}}</style>
     </div>
   </div>
 </div>
+
+<!-- PANEL IZIN -->
+
+<!-- PANEL IZIN -->
+<div id="panelIzin" class="hidden">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div style="font-weight:800;color:#0f355c">📝 Atur Izin GTK</div>
+      <div style="font-size:10px;color:#64748b">Tanpa upload foto • Bukti via WA • Blok FULL sebelum kamera</div>
+    </div>
+    <div style="margin-top:14px;background:#f0f9ff;border:1px dashed #bae6fd;border-radius:14px;padding:14px">
+      <div style="font-size:11px;font-weight:800;color:#0f355c;margin-bottom:8px">➕ Tambah Izin Baru</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <div style="font-size:11px;font-weight:700;margin-bottom:4px">Pilih GTK</div>
+          <select id="izinGuruSelect" class="input" style="height:40px"></select>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;margin-bottom:4px">Jenis Izin</div>
+          <select id="izinJenis" class="input" style="height:40px">
+            <option value="SAKIT">🩺 SAKIT</option>
+            <option value="DINAS_LUAR">✈️ DINAS LUAR</option>
+            <option value="URUSAN_KELUARGA">👨‍👩‍👧 URUSAN KELUARGA</option>
+            <option value="IZIN_LAIN">📝 IZIN LAIN</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px">
+        <div>
+          <div style="font-size:11px;font-weight:700;margin-bottom:4px">Scope</div>
+          <select id="izinScope" class="input" style="height:40px">
+            <option value="FULL">FULL Seharian (Blok)</option>
+            <option value="MASUK">MASUK Aja (Telat/Dinas Pagi)</option>
+            <option value="PULANG">PULANG Aja (Pulang Awal)</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;margin-bottom:4px">Tanggal Mulai</div>
+          <input id="izinTanggalMulai" type="date" class="input" style="height:40px"/>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;margin-bottom:4px">Tanggal Selesai</div>
+          <input id="izinTanggalSelesai" type="date" class="input" style="height:40px"/>
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <div style="font-size:11px;font-weight:700;margin-bottom:4px">Keterangan (WA)</div>
+        <input id="izinKeterangan" class="input" placeholder="Contoh: Sakit flu, surat di WA Bu Admin / Dinas ke Dinas Pendidikan jam 08-11" style="height:40px"/>
+      </div>
+      <button onclick="simpanIzin()" style="margin-top:10px;width:100%;height:44px;border-radius:12px;border:none;background:#0f172a;color:white;font-weight:800;cursor:pointer">💾 Simpan Izin</button>
+      <div style="font-size:9px;color:#64748b;margin-top:6px;line-height:1.3">
+        Logic: FULL = blok total sebelum kamera, MASUK = tetap absen Masuk saat balik (jam tercatat sebagai Dinas Luar dll), PULANG = tetap absen Pulang saat pergi. Libur Sabtu/Minggu/Nasional prioritas di atas izin. Tanpa upload foto, bukti via WA grup dinas.
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <div style="font-weight:700;font-size:12px;color:#0f355c;margin-bottom:8px">📋 Daftar Izin Tersimpan (Live)</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <input id="searchIzin" class="input" placeholder="Cari nama / jenis..." style="height:36px;flex:1;min-width:180px" oninput="renderIzinList()"/>
+        <input id="filterIzinTanggal" type="date" class="input" style="height:36px;width:160px" onchange="renderIzinList()"/>
+        <button class="btn btn-outline" style="height:36px;width:auto;padding:0 12px;font-size:11px" onclick="document.getElementById('searchIzin').value='';document.getElementById('filterIzinTanggal').value='';renderIzinList()">Reset</button>
+      </div>
+      <div id="izinList" style="display:grid;gap:8px"><div style="text-align:center;color:#94a3b8;padding:12px">Memuat izin...</div></div>
+    </div>
+  </div>
+</div>
+
 
 <!-- PANEL PULANG CEPAT -->
 <div id="panelPulang" class="hidden">
@@ -626,14 +697,217 @@ window.hapusPulangCepat=async(id)=>{
 // Auto load libur & pulang saat admin login
 setTimeout(()=>{ if(typeof db!=='undefined' && db){ loadLibur(); loadPulangCepat(); } }, 2000);
 
+
+// === FITUR BARU: IZIN GTK FLEKSIBEL (FULL/MASUK/PULANG) ===
+window.izinList = window.izinList || [];
+window.izinMapByGID = window.izinMapByGID || {}; // gid -> list
+
+function isTanggalInRange(tgl, mulai, selesai){
+  if(!tgl || !mulai) return false;
+  const s = selesai || mulai;
+  return tgl >= mulai && tgl <= s;
+}
+
+function getIzinForDate(gid, tanggalStr){
+  const list = window.izinList || [];
+  return list.filter(z=>{
+    if(z.gid !== gid) return false;
+    if((z.status||'DISETUJUI') !== 'DISETUJUI') return false;
+    const mulai = z.tanggal_mulai || z.tanggal;
+    const selesai = z.tanggal_selesai || mulai;
+    return isTanggalInRange(tanggalStr, mulai, selesai);
+  });
+}
+
+function getIzinBadgeInfo(jenis){
+  const j = (jenis||'').toUpperCase();
+  if(j==='SAKIT') return {icon:'🩺', label:'Sakit', cls:'badge-sakit', title:'HARI INI ANDA IZIN SAKIT'};
+  if(j==='DINAS_LUAR') return {icon:'✈️', label:'Dinas Luar', cls:'badge-dinas', title:'HARI INI ANDA DINAS LUAR'};
+  if(j==='URUSAN_KELUARGA') return {icon:'👨‍👩‍👧', label:'Urusan Keluarga', cls:'badge-keluarga', title:'HARI INI ANDA IZIN URUSAN KELUARGA'};
+  return {icon:'📝', label: jenis||'Izin', cls:'badge-izin', title:'HARI INI ANDA IZIN'};
+}
+
+async function loadIzin(){
+  try{
+    const listEl = document.getElementById('izinList');
+    if(listEl) listEl.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:12px">Memuat izin...</div>';
+    const snap = await getDocs(collection(db, "izin"));
+    const arr = [];
+    snap.forEach(d=>{
+      const data = d.data();
+      arr.push({
+        id: d.id,
+        gid: data.gid,
+        nama: data.nama||data.nama_gtk||'-',
+        jenis: data.jenis||'SAKIT',
+        scope: data.scope||'FULL',
+        tanggal_mulai: data.tanggal_mulai||data.tanggal||'',
+        tanggal_selesai: data.tanggal_selesai||data.tanggal_mulai||data.tanggal||'',
+        keterangan: data.keterangan||'',
+        status: data.status||'DISETUJUI',
+        created_at: data.created_at||''
+      });
+    });
+    arr.sort((a,b)=> b.tanggal_mulai.localeCompare(a.tanggal_mulai));
+    window.izinList = arr;
+    // build map
+    const map = {};
+    arr.forEach(z=>{ if(!map[z.gid]) map[z.gid]=[]; map[z.gid].push(z); });
+    window.izinMapByGID = map;
+    console.log('✅ izin loaded', arr.length);
+    renderIzinList();
+    // populate guru select if empty
+    try{
+      const sel = document.getElementById('izinGuruSelect');
+      if(sel && sel.options.length===0){
+        const gurusArr = (typeof gurus!=='undefined'? gurus : window.gurus||[]);
+        sel.innerHTML = '<option value="">Pilih GTK...</option>' + gurusArr.map(g=>`<option value="${g.gid}">${g.nama} - ${g.gid}</option>`).join('');
+      }
+    }catch(e){}
+    // re-render laporan if needed
+    if(typeof renderLaporanBaru==='function' && document.getElementById('filterTanggal')?.value){
+      renderLaporanBaru();
+    }
+  }catch(e){
+    console.log('loadIzin fail', e);
+    const el = document.getElementById('izinList');
+    if(el) el.innerHTML = '❌ '+e.message;
+  }
+}
+window.loadIzin = loadIzin;
+
+async function startIzinLiveSync(){
+  try{
+    const {collection, onSnapshot} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d = window.db || (typeof db!=='undefined'?db:null);
+    if(!d) return;
+    const col = collection(d, "izin");
+    onSnapshot(col, (snap)=>{
+      try{
+        const arr = [];
+        snap.forEach(docSnap=>{
+          const data = docSnap.data();
+          arr.push({
+            id: docSnap.id,
+            gid: data.gid,
+            nama: data.nama||'-',
+            jenis: data.jenis||'SAKIT',
+            scope: data.scope||'FULL',
+            tanggal_mulai: data.tanggal_mulai||data.tanggal||'',
+            tanggal_selesai: data.tanggal_selesai||data.tanggal_mulai||data.tanggal||'',
+            keterangan: data.keterangan||'',
+            status: data.status||'DISETUJUI',
+            created_at: data.created_at||''
+          });
+        });
+        arr.sort((a,b)=> b.tanggal_mulai.localeCompare(a.tanggal_mulai));
+        window.izinList = arr;
+        const map = {};
+        arr.forEach(z=>{ if(!map[z.gid]) map[z.gid]=[]; map[z.gid].push(z); });
+        window.izinMapByGID = map;
+        console.log('📝 izin live sync', arr.length);
+        renderIzinList();
+        if(typeof renderLaporanBaru==='function' && document.getElementById('filterTanggal')?.value){
+          renderLaporanBaru();
+        }
+      }catch(e){ console.log('izin live sync parse fail', e); }
+    });
+  }catch(e){ console.log('izin live sync fail', e.message); }
+}
+setTimeout(startIzinLiveSync, 2800);
+
+window.renderIzinList = function(){
+  const listEl = document.getElementById('izinList');
+  if(!listEl) return;
+  const arr = window.izinList||[];
+  const search = (document.getElementById('searchIzin')?.value||'').toLowerCase();
+  const filterTgl = document.getElementById('filterIzinTanggal')?.value||'';
+  let filtered = arr;
+  if(search){
+    filtered = filtered.filter(z=> (z.nama||'').toLowerCase().includes(search) || (z.jenis||'').toLowerCase().includes(search) || (z.gid||'').toLowerCase().includes(search) || (z.keterangan||'').toLowerCase().includes(search));
+  }
+  if(filterTgl){
+    filtered = filtered.filter(z=> isTanggalInRange(filterTgl, z.tanggal_mulai, z.tanggal_selesai));
+  }
+  if(filtered.length===0){
+    listEl.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:12px">Belum ada izin. Tambah di atas.</div>';
+    return;
+  }
+  listEl.innerHTML = filtered.map(z=>{
+    const badge = getIzinBadgeInfo(z.jenis);
+    const scopeLabel = z.scope==='FULL' ? 'FULL Seharian (Blok)' : (z.scope==='MASUK' ? 'MASUK Aja' : 'PULANG Aja');
+    const tglLabel = z.tanggal_mulai===z.tanggal_selesai ? z.tanggal_mulai : `${z.tanggal_mulai} s/d ${z.tanggal_selesai} (${Math.ceil((new Date(z.tanggal_selesai)-new Date(z.tanggal_mulai))/(1000*60*60*24))+1} hari)`;
+    return `<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div style="flex:1">
+        <div style="font-weight:800;font-size:12px">${badge.icon} ${z.nama} • ${z.gid} <span style="font-weight:600;color:#64748b">• ${scopeLabel}</span></div>
+        <div style="font-size:11px;color:#334155;margin-top:2px"><span class="badge ${badge.cls}" style="font-size:10px">${badge.icon} ${badge.label}</span> 📅 ${tglLabel}</div>
+        <div style="font-size:11px;color:#475569;margin-top:4px">📝 ${z.keterangan||'-'}</div>
+      </div>
+      <button onclick="hapusIzin('${z.id}')" style="height:32px;padding:0 12px;border-radius:8px;border:1px solid #fecaca;background:#fee2e2;color:#991b1b;font-weight:700;font-size:11px;cursor:pointer">Hapus</button>
+    </div>`;
+  }).join('');
+};
+
+window.simpanIzin = async()=>{
+  const gid = document.getElementById('izinGuruSelect')?.value||'';
+  const jenis = document.getElementById('izinJenis')?.value||'SAKIT';
+  const scope = document.getElementById('izinScope')?.value||'FULL';
+  const mulai = document.getElementById('izinTanggalMulai')?.value||'';
+  const selesai = document.getElementById('izinTanggalSelesai')?.value||mulai;
+  const ket = document.getElementById('izinKeterangan')?.value?.trim()||'';
+  if(!gid){ alert('Pilih GTK dulu!'); return; }
+  if(!mulai){ alert('Isi tanggal mulai!'); return; }
+  if(!ket){ alert('Isi keterangan!'); return; }
+  // find nama
+  let nama = gid;
+  try{
+    const g = (typeof gurus!=='undefined'? gurus.find(x=>x.gid===gid) : null) || (window.gurus||[]).find(x=>x.gid===gid);
+    if(g) nama = g.nama;
+  }catch(e){}
+  try{
+    const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const id = `${gid}_${mulai}_${scope}_${Date.now()}`;
+    await setDoc(doc(db, "izin", id), {
+      gid: gid,
+      nama: nama,
+      jenis: jenis,
+      scope: scope,
+      tanggal: mulai,
+      tanggal_mulai: mulai,
+      tanggal_selesai: selesai,
+      keterangan: ket,
+      status: 'DISETUJUI',
+      created_at: new Date().toISOString(),
+      created_by: 'admin'
+    }, {merge:true});
+    alert(`✅ Izin ${jenis} ${scope} untuk ${nama} ${mulai}${mulai!==selesai?' s/d '+selesai:''} tersimpan!\n${scope==='FULL'?'Alert GTK: FULL blok sebelum kamera':'Alert GTK: tetap wajib absen jam berapapun, tercatat sebagai '+jenis}`);
+    document.getElementById('izinKeterangan').value='';
+    loadIzin();
+  }catch(e){ alert('Gagal: '+e.message); }
+};
+
+window.hapusIzin = async(id)=>{
+  if(!confirm('Hapus izin '+id+'?')) return;
+  try{
+    const {doc, deleteDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    await deleteDoc(doc(db, "izin", id));
+    loadIzin();
+  }catch(e){ alert('Gagal hapus: '+e.message); }
+};
+
+// Auto load izin
+setTimeout(()=>{ if(typeof db!=='undefined' && db){ loadIzin(); } }, 2100);
+
+
 window.doLogout=async()=>{await signOut(auth);};
 window.switchTab=(tab)=>{
-  const tabs=['laporan','guru','libur','pulang'];
+  const tabs=['laporan','guru','izin','libur','pulang'];
   tabs.forEach(t=>{
-    document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1))?.classList.toggle('active', tab===t);
-    document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)+'Header')?.classList.toggle('active', tab===t);
-    document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)+'Mobile')?.classList.toggle('active', tab===t);
-    document.getElementById('panel'+t.charAt(0).toUpperCase()+t.slice(1))?.classList.toggle('hidden', tab!==t);
+    const cap = t.charAt(0).toUpperCase()+t.slice(1);
+    document.getElementById('tab'+cap)?.classList.toggle('active', tab===t);
+    document.getElementById('tab'+cap+'Header')?.classList.toggle('active', tab===t);
+    document.getElementById('tab'+cap+'Mobile')?.classList.toggle('active', tab===t);
+    document.getElementById('panel'+cap)?.classList.toggle('hidden', tab!==t);
   });
   // compat old ids
   document.getElementById('tabLaporan')?.classList.toggle('active',tab==='laporan');
@@ -642,9 +916,11 @@ window.switchTab=(tab)=>{
   document.getElementById('panelGuru')?.classList.toggle('hidden',tab!=='guru');
   document.getElementById('panelLibur')?.classList.toggle('hidden',tab!=='libur');
   document.getElementById('panelPulang')?.classList.toggle('hidden',tab!=='pulang');
+  document.getElementById('panelIzin')?.classList.toggle('hidden',tab!=='izin');
   if(tab==='guru') setTimeout(()=>renderGurus(),100);
   if(tab==='libur') loadLibur();
   if(tab==='pulang') loadPulangCepat();
+  if(tab==='izin'){ loadIzin(); }
 };
 let mapAdmin, adminCircle, adminMarker, adminMarkerUser, adminLine;
 let roadLayer, satLayer, currentMapMode='road';
@@ -1296,7 +1572,6 @@ async function loadLocationFromFirestore(){
               if(typeof adminMarker!=='undefined' && adminMarker) adminMarker.setLatLng([nLat,nLng]);
               if(typeof adminCircle!=='undefined' && adminCircle) adminCircle.setLatLng([nLat,nLng]);
             }
-            if(typeof window.updateCoordDisplay==='function'){ window.updateCoordDisplay(nLat,nLng); }
           }catch(e){}
           console.log('✅ Lokasi load dari Firestore:', nLat, nLng);
         }
@@ -1304,6 +1579,9 @@ async function loadLocationFromFirestore(){
     }
   }catch(e){ console.log('loadLocation fail', e.message); }
 }
+
+loadLocationFromFirestore();
+setTimeout(loadLocationFromFirestore, 1500);
 
 async function startLocationLiveSync(){
   try{
@@ -1319,7 +1597,6 @@ async function startLocationLiveSync(){
       if(nLat && nLng){
         nLat=parseFloat(nLat); nLng=parseFloat(nLng);
         if(isNaN(nLat) || isNaN(nLng)) return;
-        // cegah loop saat drag sendiri
         if(typeof window.isSavingLocation!=='undefined' && window.isSavingLocation) return;
         if(Math.abs(nLat-LAT)<0.000001 && Math.abs(nLng-LNG)<0.000001) return;
         LAT=nLat; LNG=nLng;
@@ -1336,10 +1613,7 @@ async function startLocationLiveSync(){
             if(typeof adminCircle!=='undefined' && adminCircle) adminCircle.setLatLng([nLat,nLng]);
           }
           if(typeof window.updateCoordDisplay==='function'){ window.updateCoordDisplay(nLat,nLng); }
-          const info=document.getElementById('rekapInfo');
-          if(info) info.textContent='📍 Lokasi sync realtime: '+nLat.toFixed(5)+','+nLng.toFixed(5)+' • Auto update';
         }catch(e){}
-        console.log('📍 Lokasi live sync admin:', nLat, nLng);
       }
       if(data.radius!==undefined){
         try{
@@ -1352,17 +1626,14 @@ async function startLocationLiveSync(){
             if(radiusLabelEl) radiusLabelEl.textContent=r+'m';
             if(typeof adminCircle!=='undefined' && adminCircle) adminCircle.setRadius(r);
             localStorage.setItem('RADIUS_CUSTOM', String(r));
-            localStorage.setItem('RADIUS_METER', String(r));
           }
         }catch(e){}
       }
     });
-  }catch(e){ console.log('location live sync fail', e.message); }
+  }catch(e){}
 }
-
-loadLocationFromFirestore();
-setTimeout(loadLocationFromFirestore, 1500);
 setTimeout(startLocationLiveSync, 2000);
+
 
 // === LIBUR LOGIC ===
 function getKategoriAbsenV5(date){
@@ -1683,7 +1954,75 @@ function parseAbsenGTK(gid, tanggalStr){
   if(kMasuk) masuk=kMasuk;
   if(kPulang) pulang=kPulang;
 
-  // === FIX LIBUR: jika masih kosong, cek libur nasional & weekend ===
+  // === FIX LIBUR: prioritas libur di atas izin ===
+  // Cek libur nasional dulu
+  try{
+    const liburMap = window.kalenderLiburMap || {};
+    const namaLibur = liburMap[tanggalStr];
+    if(namaLibur){
+      const fake = {kategori_absen:'LIBUR_NASIONAL', label_absen:'Libur '+namaLibur, jenis_absen:'LIBUR', liburNama:namaLibur, tanggal:tanggalStr, is_libur:true, is_libur_nasional:true};
+      return {masuk:fake, pulang:fake};
+    }
+    const parts = tanggalStr.split('-');
+    let d=null;
+    if(parts.length===3) d=new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+    else d=new Date(tanggalStr);
+    if(d && !isNaN(d.getTime())){
+      const day=d.getDay();
+      if(day===6){
+        const fake = {kategori_absen:'LIBUR_SABTU', label_absen:'Libur Sabtu', jenis_absen:'LIBUR', tanggal:tanggalStr, is_libur:true};
+        return {masuk:fake, pulang:fake};
+      }
+      if(day===0){
+        const fake = {kategori_absen:'LIBUR_MINGGU', label_absen:'Libur Minggu', jenis_absen:'LIBUR', tanggal:tanggalStr, is_libur:true};
+        return {masuk:fake, pulang:fake};
+      }
+    }
+  }catch(e){}
+
+  // === FITUR IZIN FLEKSIBEL ===
+  try{
+    if(typeof getIzinForDate==='function'){
+      const izinArr = getIzinForDate(gid, tanggalStr);
+      if(izinArr && izinArr.length>0){
+        const fullIzin = izinArr.find(z=> (z.scope||'FULL')==='FULL');
+        const masukIzin = izinArr.find(z=> z.scope==='MASUK');
+        const pulangIzin = izinArr.find(z=> z.scope==='PULANG');
+        const jenisToBadge = (j)=>{ const u=(j||'').toUpperCase(); if(u==='SAKIT') return 'SAKIT'; if(u==='DINAS_LUAR') return 'DINAS_LUAR'; if(u==='URUSAN_KELUARGA') return 'URUSAN_KELUARGA'; return 'IZIN_LAIN'; };
+        // FULL blok total
+        if(fullIzin){
+          const jenis = jenisToBadge(fullIzin.jenis);
+          const fake = {kategori_absen:jenis, label_absen: fullIzin.jenis, jenis_absen:'IZIN', is_izin:true, is_izin_full:true, izinJenis:fullIzin.jenis, izinScope:'FULL', keterangan:fullIzin.keterangan||'', tanggal:tanggalStr, tanggal_mulai:fullIzin.tanggal_mulai, tanggal_selesai:fullIzin.tanggal_selesai};
+          return {masuk:fake, pulang:fake};
+        }
+        // MASUK scope: override masuk jika ada, atau buat fake jika belum absen
+        if(masukIzin){
+          const jenis = jenisToBadge(masukIzin.jenis);
+          if(masuk){
+            // keep waktu asli, override kategori jadi izin
+            const overridden = {...masuk, kategori_absen:jenis, label_absen: masukIzin.jenis, is_izin:true, is_izin_masuk:true, izinJenis:masukIzin.jenis, izinScope:'MASUK', keterangan:masukIzin.keterangan||masuk.keterangan||'', tanggal:tanggalStr};
+            masuk = overridden;
+          } else {
+            const fakeMasuk = {kategori_absen:jenis, label_absen: masukIzin.jenis, jenis_absen:'MASUK', is_izin:true, is_izin_masuk:true, izinJenis:masukIzin.jenis, izinScope:'MASUK', keterangan:masukIzin.keterangan||'', tanggal:tanggalStr, tanggal_mulai:masukIzin.tanggal_mulai, tanggal_selesai:masukIzin.tanggal_selesai};
+            masuk = fakeMasuk;
+          }
+        }
+        // PULANG scope
+        if(pulangIzin){
+          const jenis = jenisToBadge(pulangIzin.jenis);
+          if(pulang){
+            const overridden = {...pulang, kategori_absen:jenis, label_absen: pulangIzin.jenis, is_izin:true, is_izin_pulang:true, izinJenis:pulangIzin.jenis, izinScope:'PULANG', keterangan:pulangIzin.keterangan||pulang.keterangan||'', tanggal:tanggalStr};
+            pulang = overridden;
+          } else {
+            const fakePulang = {kategori_absen:jenis, label_absen: pulangIzin.jenis, jenis_absen:'PULANG', is_izin:true, is_izin_pulang:true, izinJenis:pulangIzin.jenis, izinScope:'PULANG', keterangan:pulangIzin.keterangan||'', tanggal:tanggalStr, tanggal_mulai:pulangIzin.tanggal_mulai, tanggal_selesai:pulangIzin.tanggal_selesai};
+            pulang = fakePulang;
+          }
+        }
+      }
+    }
+  }catch(e){ console.log('izin parse fail', e); }
+
+  // Jika masih kosong setelah cek libur dan izin, tetap return kosong
   if(!masuk && !pulang){
     try{
       const liburMap = window.kalenderLiburMap || {};
@@ -1691,21 +2030,6 @@ function parseAbsenGTK(gid, tanggalStr){
       if(namaLibur){
         const fake = {kategori_absen:'LIBUR_NASIONAL', label_absen:'Libur '+namaLibur, jenis_absen:'LIBUR', liburNama:namaLibur, tanggal:tanggalStr, is_libur:true, is_libur_nasional:true};
         return {masuk:fake, pulang:fake};
-      }
-      const parts = tanggalStr.split('-');
-      let d=null;
-      if(parts.length===3) d=new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
-      else d=new Date(tanggalStr);
-      if(d && !isNaN(d.getTime())){
-        const day=d.getDay();
-        if(day===6){
-          const fake = {kategori_absen:'LIBUR_SABTU', label_absen:'Libur Sabtu', jenis_absen:'LIBUR', tanggal:tanggalStr, is_libur:true};
-          return {masuk:fake, pulang:fake};
-        }
-        if(day===0){
-          const fake = {kategori_absen:'LIBUR_MINGGU', label_absen:'Libur Minggu', jenis_absen:'LIBUR', tanggal:tanggalStr, is_libur:true};
-          return {masuk:fake, pulang:fake};
-        }
       }
     }catch(e){}
   }
@@ -1716,39 +2040,24 @@ function badgeStatus(rec){
   if(!rec) return '<span class="badge badge-belum">⏳ Belum Absen</span>';
   const kat=(rec.kategori_absen||'').toUpperCase();
   const jenis=(rec.jenis_absen||'').toUpperCase();
-  const isKoreksi = !!rec.is_koreksi;
-  // Samain semua badge biar TELAT hasil koreksi = Terlambat Masuk kayak data QR asli
-  if(kat.includes('LIBUR')){
-    if(kat==='LIBUR_NASIONAL'){
-      return '<span class="badge badge-libur">🏖️ '+(rec.label_absen||'Libur '+(rec.liburNama||''))+(isKoreksi?' ✏️':'')+'</span>';
-    }
-    return '<span class="badge badge-libur">🏖️ '+(kat==='LIBUR_SABTU'?'Libur Sabtu':kat==='LIBUR_MINGGU'?'Libur Minggu':(rec.label_absen||'Libur'))+(isKoreksi?' ✏️':'')+'</span>';
+  const izinJenis=(rec.izinJenis||rec.kategori_absen||'').toUpperCase();
+  if(rec.is_koreksi) return '<span class="badge" style="background:#dbeafe;color:#1e40af;border-color:#bfdbfe">✏️ '+(rec.label_absen||rec.kategori_absen||'Koreksi')+'</span>';
+  if(kat.includes('LIBUR')) return '<span class="badge badge-libur">🏖️ '+(rec.label_absen||'Libur')+'</span>';
+  // === IZIN BADGES ===
+  if(rec.is_izin || kat==='SAKIT' || kat==='DINAS_LUAR' || kat==='URUSAN_KELUARGA' || kat==='IZIN_LAIN'){
+    if(kat==='SAKIT' || izinJenis==='SAKIT') return '<span class="badge badge-sakit">🩺 Sakit</span>';
+    if(kat==='DINAS_LUAR' || izinJenis==='DINAS_LUAR') return '<span class="badge badge-dinas">✈️ Dinas Luar</span>';
+    if(kat==='URUSAN_KELUARGA' || izinJenis==='URUSAN_KELUARGA') return '<span class="badge badge-keluarga">👨‍👩‍👧 Urusan Keluarga</span>';
+    return '<span class="badge badge-izin">📝 '+(rec.label_absen||'Izin')+'</span>';
   }
-  if(kat.includes('BELUM')){
-    return '<span class="badge badge-belum">⏳ Belum Waktunya Pulang'+(isKoreksi?' ✏️':'')+'</span>';
-  }
-  if(kat.includes('SEBELUM')){
-    return '<span class="badge badge-awal">⏳ Pulang Sebelum Waktunya'+(isKoreksi?' ✏️':'')+'</span>';
-  }
-  if(kat.includes('DILUAR')){
-    return '<span class="badge badge-diluar">⛔ Di Luar Jam Kerja'+(isKoreksi?' ✏️':'')+'</span>';
-  }
-  if(kat.includes('TEPAT') && jenis.includes('MASUK')){
-    return '<span class="badge badge-tepat">✅ Masuk Tepat Waktu'+(isKoreksi?' ✏️':'')+'</span>';
-  }
-  if(kat.includes('TELAT')){
-    return '<span class="badge badge-telat">⚠️ Terlambat Masuk'+(isKoreksi?' ✏️':'')+'</span>';
-  }
-  if(kat.includes('TEPAT') && jenis.includes('PULANG')){
-    return '<span class="badge badge-tepat">✅ Pulang'+(isKoreksi?' ✏️':'')+'</span>';
-  }
-  if(kat.includes('CEPAT') && jenis.includes('PULANG')){
-    return '<span class="badge" style="background:#e0f2fe;border-color:#bae6fd;color:#0c4a6e">⚡ Pulang Cepat'+(isKoreksi?' ✏️':'')+'</span>';
-  }
-  if(kat.includes('TEPAT')){
-    return '<span class="badge badge-tepat">✅ '+(rec.label_absen||'Tepat Waktu')+(isKoreksi?' ✏️':'')+'</span>';
-  }
-  return '<span class="badge" style="background:#f1f5f9;color:#334155">'+(rec.label_absen||rec.kategori_absen||'-')+(isKoreksi?' ✏️':'')+'</span>';
+  if(kat.includes('BELUM')) return '<span class="badge badge-belum">⏳ Belum Waktunya Pulang</span>';
+  if(kat.includes('SEBELUM')) return '<span class="badge badge-awal">⏳ Pulang Sebelum Waktunya</span>';
+  if(kat.includes('DILUAR')) return '<span class="badge badge-diluar">⛔ Di Luar Jam Kerja</span>';
+  if(kat.includes('TEPAT') && jenis.includes('MASUK')) return '<span class="badge badge-tepat">✅ Masuk Tepat Waktu</span>';
+  if(kat.includes('TELAT')) return '<span class="badge badge-telat">⚠️ Terlambat Masuk</span>';
+  if(kat.includes('TEPAT') && jenis.includes('PULANG')) return '<span class="badge badge-tepat">✅ Pulang</span>';
+  if(kat.includes('TEPAT')) return '<span class="badge badge-tepat">✅ '+(rec.label_absen||'Tepat Waktu')+'</span>';
+  return '<span class="badge" style="background:#f1f5f9;color:#334155">'+(rec.label_absen||rec.kategori_absen||'-')+'</span>';
 }
 window.renderLaporanBaru = function(){
   const body=document.getElementById('rekapBody'); if(!body) return;
@@ -1842,14 +2151,35 @@ window.renderLaporanBaru = function(){
     const masuk=item.masuk; const pulang=item.pulang;
     const telatMasuk = masuk ? (masuk.telat_menit||masuk.telat||0) : 0;
     const telatText = masuk ? formatTelat(telatMasuk) : '-';
-    const jamMasuk = masuk ? new Date(masuk.waktu).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}) : '-';
-    const jamPulang = pulang ? new Date(pulang.waktu).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}) : '-';
+    function safeJam(rec){
+      if(!rec || !rec.waktu) return '-';
+      try{
+        const d = new Date(rec.waktu);
+        if(isNaN(d.getTime())) return '-';
+        return d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+      }catch(e){ return '-'; }
+    }
+    const jamMasuk = safeJam(masuk);
+    const jamPulang = safeJam(pulang);
     let keterangan='-';
     const isLiburMasuk = masuk && ((masuk.kategori_absen||'').toUpperCase().includes('LIBUR') || masuk.is_libur);
     const isLiburPulang = pulang && ((pulang.kategori_absen||'').toUpperCase().includes('LIBUR') || pulang.is_libur);
+    const isIzinMasuk = masuk && (masuk.is_izin || ['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes((masuk.kategori_absen||'').toUpperCase()));
+    const isIzinPulang = pulang && (pulang.is_izin || ['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes((pulang.kategori_absen||'').toUpperCase()));
     if(isLiburMasuk || isLiburPulang){
       const nama = (masuk&&masuk.liburNama) || (pulang&&pulang.liburNama) || (masuk&&masuk.label_absen) || (pulang&&pulang.label_absen) || 'Libur';
       keterangan = nama;
+    } else if(isIzinMasuk || isIzinPulang){
+      const rec = isIzinMasuk ? masuk : pulang;
+      const ket = rec.keterangan || rec.izinKeterangan || rec.label_absen || rec.izinJenis || 'Izin';
+      const mulai = rec.tanggal_mulai || rec.tanggal || '';
+      const selesai = rec.tanggal_selesai || mulai;
+      let tglInfo = '';
+      if(mulai){
+        if(mulai===selesai) tglInfo = mulai;
+        else tglInfo = mulai + ' s/d ' + selesai;
+      }
+      keterangan = ket + (tglInfo ? ' • ' + tglInfo : '');
     } else if(!masuk && !pulang) keterangan='-';
     else if(masuk && masuk.is_koreksi) keterangan=masuk.keterangan||'Dikoreksi admin';
     else if(masuk && !pulang) keterangan='Sudah masuk '+jamMasuk+', belum pulang';
