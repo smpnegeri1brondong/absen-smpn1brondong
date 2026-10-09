@@ -66,52 +66,51 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
     </div>
   </div>
 </div>
+
 <div class="card" style="margin-top:0;padding:22px 18px;border-radius:24px;box-shadow:0 12px 32px rgba(15,53,92,.10);border:1px solid #e2e8f0;position:relative;overflow:hidden">
   <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#0f355c,#0ea5e9,#38bdf8)"></div>
   <div style="display:flex;justify-content:space-between;align-items:center">
     <div><div style="font-weight:800;color:#0f355c;font-size:16px">Login GTK</div><div style="font-size:11px;color:#64748b;margin-top:3px;line-height:1.4">Pakai ID privat & Password pribadi<br><span style="font-size:10px">Format: G-XXXXX • snebron####</span></div></div>
     <div style="width:42px;height:42px;border-radius:12px;background:#f0f9ff;border:1px solid #e0f2fe;display:flex;align-items:center;justify-content:center;font-size:20px">🔐</div>
   </div>
+
   <div style="margin-top:20px"><label style="font-size:11px;font-weight:800;color:#334155;letter-spacing:.5px">ID PRIVAT</label><input id="gidInput" class="input" placeholder="G-XXXXX" style="margin-top:6px;text-transform:uppercase;font-weight:700;letter-spacing:.6px;background:#f8fafc" oninput="this.value=this.value.toUpperCase()"/></div>
+
   <div style="margin-top:14px"><label style="font-size:11px;font-weight:800;color:#334155;letter-spacing:.5px">PASSWORD PRIBADI</label><div style="position:relative;margin-top:6px"><input id="passInput" class="input" type="password" placeholder="snebron####" style="padding-right:50px;font-weight:600;background:#f8fafc"/><button type="button" id="eyeBtn" onclick="togglePass()" style="position:absolute;right:6px;top:6px;height:36px;width:36px;border:none;background:white;border:1px solid #e2e8f0;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><div id="loginError" class="hidden" style="margin-top:8px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b;font-size:12px;padding:8px 12px;border-radius:10px"></div></div>
+
   <button id="btnLogin" class="btn btn-primary" style="margin-top:18px;height:52px;font-size:14px;box-shadow:0 6px 16px rgba(15,53,92,.25)" onclick="doLogin(); return false;">Masuk →</button>
+
   <div style="margin-top:14px;background:linear-gradient(180deg,#f8fafc,#f1f5f9);border:1px solid #e2e8f0;border-radius:14px;padding:12px 12px;display:flex;gap:10px;align-items:start">
     <div style="width:28px;height:28px;border-radius:8px;background:white;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;flex-shrink:0">💡</div><div style="font-size:11px;color:#475569;line-height:1.5"><b style="color:#0f355c">Lupa password?</b> Hubungi Admin. Default: <code style="background:white;border:1px solid #e2e8f0;padding:1px 6px;border-radius:6px;font-weight:700">snebron + 4 digit angka</code></div>
   </div>
 </div>
+
 <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
   <div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:10px 8px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)"><div style="font-size:16px">📍</div><div style="font-size:9px;font-weight:800;color:#0f355c;margin-top:3px">40m Radius</div><div style="font-size:8px;color:#64748b">Geofencing Aktif</div></div>
   <div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:10px 8px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)"><div style="font-size:16px">🔒</div><div style="font-size:9px;font-weight:800;color:#0f355c;margin-top:3px">ID Privat</div><div style="font-size:8px;color:#64748b">Terenkripsi</div></div>
   <div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:10px 8px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)"><div style="font-size:16px">⚡</div><div style="font-size:9px;font-weight:800;color:#0f355c;margin-top:3px">Auto Absen</div><div style="font-size:8px;color:#64748b">QR Ketat</div></div>
 </div>
+
 </div>
+
 <div id="absenScreen"
  class="hidden">
 <div class="card">
   <div style="display:flex;justify-content:space-between">
     <div><div style="font-size:11px;font-weight:800;color:#64748b">PROFIL GTK</div><div id="namaGuru" style="font-weight:800;color:#0f355c;margin-top:4px;font-size:16px"></div><div id="nipGuru" style="font-size:12px;color:#64748b"></div></div><div id="inisialGuru" style="width:44px;height:44px;border-radius:999px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800"></div></div><div id="jamInfo" style="margin-top:10px;display:none"></div><div id="firebaseInfo" style="display:none !important">Firebase: mengecek...</div></div>
-<div class="card" style="padding:12px 14px;border:2px solid #e0f2fe;background:#f0f9ff">
-  <div style="display:flex;justify-content:space-between;align-items:start;gap:12px">
-    <div style="flex:1">
-      <div style="font-size:9px;font-weight:800;letter-spacing:0.8px;color:#0369a1">🔐 KEAMANAN AKUN</div>
-      <div style="font-weight:800;color:#0f355c;margin-top:2px;font-size:12px">Password Pribadi</div>
-      <div id="currentPassInfo" style="margin-top:6px;font-size:10px;color:#64748b">Memuat...</div>
-    </div>
-    <button onclick="toggleGantiPass()" id="btnGantiPass" style="height:32px;padding:0 14px;font-size:11px;font-weight:800;border-radius:999px;border:1px solid #0f355c;background:#0f355c;color:white;cursor:pointer;flex-shrink:0">✏️ Ganti</button>
-  </div>
-  <div id="gantiPassForm" class="hidden" style="margin-top:12px;border-top:1px solid #bae6fd;padding-top:12px">
-    <div style="display:grid;gap:8px">
-      <div style="position:relative"><input id="newPassInput" class="input" type="password" placeholder="Password baru min 4" style="height:42px;font-size:13px;padding-right:44px"/><button type="button" onclick="toggleNewPass()" style="position:absolute;right:6px;top:6px;height:30px;width:30px;border:none;background:#f1f5f9;border-radius:8px;cursor:pointer"><svg id="eyeNew" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
-      <input id="confirmPassInput" class="input" type="password" placeholder="Ulangi password baru" style="height:42px;font-size:13px"/>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-primary" style="flex:1;height:42px;font-size:13px" onclick="simpanPasswordBaru()">Simpan →</button>
-        <button class="btn btn-outline" style="flex:1;height:42px;font-size:13px" onclick="toggleGantiPass()">Batal</button>
-      </div>
-      <div id="passChangeMsg" class="hidden" style="font-size:11px;padding:8px 10px;border-radius:10px"></div>
+
+<div class="card" style="padding:12px 14px;border:1px solid #e2e8f0;background:#f8fafc">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="width:36px;height:36px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:18px">🔒</div>
+    <div>
+      <div style="font-size:11px;font-weight:800;color:#0f355c">Akun dikelola Admin</div>
+      <div style="font-size:10px;color:#64748b;margin-top:2px">Ganti password hanya via admin. Hubungi admin jika lupa password.</div>
     </div>
   </div>
 </div>
+
 <div class="card" style="overflow:hidden"><div style="font-size:11px;font-weight:800;color:#64748b">GPS • </div><div id="statusLokasi" style="font-weight:800;color:#0f355c;margin-top:6px">Belum cek</div><div id="locText" style="font-size:12px;color:#64748b">Klik Cek Lokasi</div><div id="radiusBadge" style="margin-top:8px;display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:5px 10px;font-size:11px">Menunggu GPS</div><div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;position:relative;z-index:1"><div id="miniMap"></div></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="flex:1" onclick="cekLokasi()">📍 Cek Lokasi</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('peta')">Peta</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('satelit')">Sat</button></div></div>
+
 <div class="card"><div style="font-size:11px;font-weight:800;color:#64748b">KAMERA QR • MODE AUTO</div>
 <div style="margin-top:10px"><div id="reader"></div><div id="qrResult" style="display:none;margin-top:8px;font-size:11px;padding:10px 12px;border-radius:10px;background:#f8fafc;border:1px dashed #e2e8f0;font-weight:600"></div></div>
 <div style="display:flex;gap:8px;margin-top:10px"><button id="btnStartCam" class="btn btn-primary" style="flex:1" onclick="startCamera()">📷 NYALAKAN KAMERA</button><button id="btnStopCam" class="btn btn-outline hidden" style="flex:1" onclick="stopCamera()">✕ Matikan Kamera</button></div>
@@ -133,11 +132,14 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
   </div>
 </footer>
 </div>
+
 <!-- MODAL CUSTOM GANTI ALERT - FIX BUG github.io -->
 <div id="customAlert"><div class="modal"><div class="modal-header"><div id="customAlertTitle" style="font-weight:800">ABSEN TUTUP</div><button onclick="closeCustomAlert()" style="background:none;border:none;color:white;font-size:20px;cursor:pointer">×</button></div><div class="modal-body" id="customAlertMsg"></div><div class="modal-footer"><button onclick="closeCustomAlert()" style="background:#0f355c;color:white;border:none;padding:8px 20px;border-radius:10px;font-weight:700;cursor:pointer">Oke</button></div></div></div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyCSi5QKL-MapUUdGLV4OuiXupXa3XmRKvg",
   authDomain: "smpn1-brondong-absen.firebaseapp.com",
@@ -152,6 +154,7 @@ try{
   db=getFirestore(app); window.db=db;
   document.getElementById('firebaseInfo').textContent='✅ Firebase: '+firebaseConfig.projectId+'';
   window.db=db;
+
   // === SYNC GURU DINAMIS DARI ADMIN ===
   window.loadGurusFromFirestore = async () => {
     try{
@@ -179,6 +182,7 @@ try{
   };
   // Panggil setelah init
   setTimeout(()=>{ window.loadGurusFromFirestore(); }, 800);
+
   // === FITUR BARU: KALENDER LIBUR & JAM KHUSUS ===
   window.kalenderLiburMap = {}; // { '2025-12-25': 'Hari Raya Natal' }
   window.jamKhususMap = {}; // { '2025-10-20': {mulai:660, selesai:930, keterangan:'Rapat Dinas'} }
@@ -188,6 +192,7 @@ try{
   window.izinHariIni = null; // izin FULL/MASUK/PULANG yang aktif hari ini
   window.izinMasukHariIni = null;
   window.izinPulangHariIni = null;
+
   window.loadKalenderLibur = async () => {
     try{
       if(!db) return;
@@ -239,6 +244,7 @@ try{
     }catch(e){ console.log('jam_khusus load fail', e); }
   };
   setTimeout(()=>{ window.loadKalenderLibur(); window.loadJamKhusus(); }, 1000);
+
   // === FITUR IZIN FLEKSIBEL ===
   window.isTanggalInRangeIzin = function(tgl, mulai, selesai){
     if(!tgl || !mulai) return false;
@@ -338,6 +344,7 @@ try{
       setTimeout(()=> showCustomAlert(title, body), delay);
     }
   };
+
   // Realtime sync kalender_libur & jam_khusus
   setTimeout(async()=>{
     try{
@@ -404,16 +411,22 @@ try{
       } 
     }, 60000);
   }catch(e){}
+
+
   document.getElementById('firebaseInfo').style.background='#dcfce7';
 }catch(e){ document.getElementById('firebaseInfo').textContent='❌ Firebase gagal: '+e.message; }
+
 const LAT=-6.9075625, LNG=112.2108125, PLUS="36R5+VX Tlogoretno"; // SMPN 1 Brondong sync dengan admin Adminnn-LOGIN-MATA-ENTER-FORGOT.html
 let CURRENT_LAT=-6.9075625, CURRENT_LNG=112.2108125, RADIUS=40;
 const MIN_R=20, MAX_R=70, DEF_R=40;
 function clampR(v){ let n=parseInt(v); if(isNaN(n)) return DEF_R; if(n<MIN_R) return MIN_R; if(n>MAX_R) return MAX_R; return n; }
+
 // RADIUS already defined above
 let map, markerUser, circle, roadLayer, satLayer, MODE_MINI=localStorage.getItem('MAP_MODE')||'peta';
 let currentGuru=null, lastDistance=9999, lastPos=null, html5QrCode=null, qrScanned=false, qrValue=null, schoolMarker, lineToDevice;
 let isProcessing=false;
+
+
 const GURUS=[];
 function initMap(){
   // Load saved school location from admin
@@ -425,8 +438,8 @@ function initMap(){
     if(lr){ RADIUS=clampR(lr); }
   }catch(e){}
   map=L.map('miniMap',{zoomControl:false}).setView([CURRENT_LAT,CURRENT_LNG],17);
-  roadLayer=L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20, subdomains:['0','1','2','3'], attribution:'&copy; Google'});
-  satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19, attribution:'&copy; Esri'});
+  roadLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20});
+  satLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20});
   if(MODE_MINI==='satelit') satLayer.addTo(map); else roadLayer.addTo(map);
   circle=L.circle([CURRENT_LAT,CURRENT_LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f355c',fillOpacity:0.12}).addTo(map);
   const ic=L.divIcon({html:'<div style="width:28px;height:28px;background:#0f355c;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white">🏫</div>',iconSize:[28,28],className:''});
@@ -437,6 +450,7 @@ function initMap(){
 window.setModeMini=(mode)=>{ MODE_MINI=mode; localStorage.setItem('MAP_MODE',mode); if(mode==='satelit'){ if(map.hasLayer(roadLayer)) map.removeLayer(roadLayer); satLayer.addTo(map); } else { if(map.hasLayer(satLayer)) map.removeLayer(satLayer); roadLayer.addTo(map); } };
 window.getInisial=(nama)=>{ const p=nama.trim().split(/\s+/); if(p.length>=2) return (p[0][0]+p[1][0]).toUpperCase(); return nama.substring(0,2).toUpperCase(); };
 window.formatJarak=(meter)=>{ const m=Math.round(meter||0); if(m>=1000){ const km=(m/1000).toFixed(m%1000===0?0:1); return km.replace('.0','')+' KM'; } return m+'m'; };
+
 function formatTelat(menit){
   menit = parseInt(menit)||0;
   if(menit<=0) return '0 menit';
@@ -446,6 +460,7 @@ function formatTelat(menit){
   if(sisa===0) return jam+' jam';
   return jam+' jam '+sisa+' menit';
 }
+
 window.getJenisAbsen=(d)=>{
   const n=d||new Date(); const day=n.getDay(); const h=n.getHours(); const m=n.getMinutes(); const menit=h*60+m;
   const tglStr = n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
@@ -508,6 +523,7 @@ window.getJenisAbsen=(d)=>{
     return {jenis:'PULANG', kategori:'DILUAR_JAM_KERJA', label:'Pulang Di Luar Jam Kerja', color:'diluar', valid:true, telatMenit:0, pesan:'Pulang di luar jam kerja 15:31-23:59'};
   }
 };
+
 window.cekJamAbsen=()=>{ 
   const el=document.getElementById('jamInfo'); 
   if(!el) return; 
@@ -532,6 +548,7 @@ window.cekJamAbsen=()=>{
   else { bg='#fee2e2'; border='#fecaca'; color='#991b1b'; }
   el.innerHTML=`<span style="background:${bg};border:1px solid ${border};color:${color};padding:6px 12px;border-radius:12px;font-size:10px;font-weight:800;display:inline-block;white-space:normal;line-height:1.4;max-width:100%;word-break:break-word">● ${info.label} • ${jamStr}</span>`;
 };
+
 // === FIX 1: ICON MATA PAKAI SVG, BUKAN EMOJI ===
 const eyeOpenSVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 const eyeClosedSVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.53 9.53a3 3 0 1 0 4.24 4.24"/><path d="M3 3l18 18"/></svg>';
@@ -549,6 +566,7 @@ window.toggleNewPass=()=>{
   if(inp.type==='password'){ inp.type='text'; if(btn) btn.innerHTML=eyeClosedSVG; }
   else { inp.type='password'; if(btn) btn.innerHTML=eyeOpenSVG; }
 };
+
 // === FIX 2: CUSTOM ALERT GANTI NATIVE ALERT BIAR GAK MUNCUL github.io ===
 window.showCustomAlert=(title, msg)=>{
   document.getElementById('customAlertTitle').textContent=title;
@@ -556,6 +574,7 @@ window.showCustomAlert=(title, msg)=>{
   document.getElementById('customAlert').classList.add('show');
 };
 window.closeCustomAlert=()=>{ document.getElementById('customAlert').classList.remove('show'); };
+
 window.cekLokasi=()=>{
   const t=document.getElementById('locText'), b=document.getElementById('radiusBadge'), s=document.getElementById('statusLokasi');
   s.textContent='Mencari GPS...'; t.textContent='Mencari GPS...';
@@ -572,6 +591,7 @@ window.cekLokasi=()=>{
     document.getElementById('c2').innerHTML=`${jarakText} <div>${d<=RADIUS?'✅':'❌'}</div>`;
   }, e=>{ t.textContent='GPS gagal: '+e.message; }, {enableHighAccuracy:true, timeout:15000});
 };
+
 window.startCamera=async()=>{
   const el=document.getElementById('qrResult'); el.style.display='block'; el.textContent='Meminta izin kamera...'; el.style.background='#fffbeb';
   try{
@@ -586,6 +606,7 @@ function findGuruByQR(idQR){
   g = GURUS.find(x=> (x.old_gids||[]).map(v=>String(v).toUpperCase()).includes(up));
   return g||null;
 }
+
   const idQR=decoded.split('|')[0]?.trim().toUpperCase();
       const namaQR = findGuruByQR(idQR)?.nama || idQR;
       // === FIX 3: MODE KETAT TAMPIL NAMA, BUKAN ID ===
@@ -616,6 +637,7 @@ function findGuruByQR(idQR){
   }
 };
 window.stopCamera=async()=>{ try{ if(html5QrCode){ await html5QrCode.stop(); html5QrCode.clear(); } }catch(e){} document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStopCam').classList.add('hidden'); document.getElementById('btnStartCam').disabled=false; isProcessing=false; };
+
 window.customPassMap = window.customPassMap || {};
 window.doLogin=()=>{
   try{
@@ -654,7 +676,7 @@ window.doLogin=()=>{
       stored=migrated;
     }
     const eff=stored||g.password||'';
-    if(eff!==p){ er.textContent='Password salah. Coba: '+g.password; er.classList.remove('hidden'); return; }
+    if(eff!==p){ er.textContent='Password salah. Silakan cek lagi atau hubungi admin.'; er.classList.remove('hidden'); return; }
     currentGuru=g; 
     try{ localStorage.setItem('SI-ABSEN_GID',g.gid); }catch(e){}
     showAbsenScreen();
@@ -664,6 +686,7 @@ window.doLogin=()=>{
     if(er){ er.textContent='Error login: '+e.message; er.classList.remove('hidden'); }
   }
 };
+
 function showAbsenScreen(){
   if(!currentGuru){ const s=localStorage.getItem('SI-ABSEN_GID'); if(s) currentGuru=GURUS.find(g=>g.gid===s); }
   if(!currentGuru) return;
@@ -674,12 +697,21 @@ function showAbsenScreen(){
   document.getElementById('inisialGuru').textContent=getInisial(currentGuru.nama);
   cekJamAbsen(); setInterval(cekJamAbsen,60000);
   const isCustom=localStorage.getItem('SI-ABSEN_PASS_'+currentGuru.gid);
-  document.getElementById('currentPassInfo').innerHTML='<div style="display:flex;justify-content:space-between"><div style="font-size:10px;color:#64748b"><span style="font-weight:700;color:#0f355c">'+(isCustom?'Custom':'Default')+'</span> • ••••••••</div><button onclick="lihatPass()" style="font-size:9px;background:white;border:1px solid #e2e8f0;border-radius:999px;padding:3px 8px;font-weight:700;color:#0f355c">Lihat</button></div>';
+  // currentPassInfo removed - admin only
   setTimeout(()=>{ initMap(); cekLokasi(); setTimeout(()=>{ if(map) map.invalidateSize(); },1000); },500);
   // === CEK IZIN HARI INI (FULL blok sebelum kamera + MASUK/PULANG info sebelum absen) ===
   setTimeout(()=>{ if(typeof window.checkIzinDanTampilkanAlert==='function') window.checkIzinDanTampilkanAlert(); }, 1200);
 }
+
+// === OVERRIDE FINAL - HILANGKAN FITUR UBAH PASSWORD, TAPI JANGAN RUSAK TOMBOL MASUK ===
+window.toggleGantiPass = function(){ console.log('disabled - admin only'); };
+window.simpanPasswordBaru = async function(){ alert('Fitur ganti password dinonaktifkan. Hanya admin yang bisa ganti password.'); return; };
+window.lihatPass = function(){ return; };
+window.sembunyiPass = function(){ return; };
+window.toggleNewPass = function(){ return; };
+
 window.logout=()=>{ localStorage.removeItem('SI-ABSEN_GID'); location.reload(); };
+
 async function prosesAbsenOtomatis(){
   const now=new Date();
   let jamInfo=getJenisAbsen(now);
@@ -738,6 +770,7 @@ async function prosesAbsenOtomatis(){
       }
     }
   }catch(e){ console.log('izin override fail', e); }
+
   document.getElementById('hasil').style.display='block';
   document.getElementById('jamWaktu').textContent=jamStr+' • '+jamInfo.jenis+'';
   const jarakText=formatJarak(lastDistance);
@@ -761,6 +794,7 @@ async function prosesAbsenOtomatis(){
     original_kategori: jamInfo.original_kategori||null
   };
   document.getElementById('lokasiStatus').textContent=`Jarak ${jarakText} • ${data.status} • ${jamInfo.jenis}`;
+
   // === CEK BELUM WAKTUNYA PULANG - GAK TERCATAT ===
   if(jamInfo.kategori==='BELUM_BUKA'){
     document.getElementById('c3').innerHTML=`Belum Buka <div>⏰</div>`; document.getElementById('c3').style.background='#ffedd5';
@@ -802,6 +836,7 @@ async function prosesAbsenOtomatis(){
     setTimeout(()=>{ document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 SCAN LAGI'; },2000);
     return;
   }
+
   // === CEK DOUBLE ABSEN - TANPA orderBy BIAR TIDAK BUTUH INDEX ===
   try{
     if(db){
@@ -843,6 +878,7 @@ async function prosesAbsenOtomatis(){
         setTimeout(()=>{ document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 SCAN LAGI'; },2000);
         return;
       }
+
       if(jamInfo.jenis==='MASUK' && hasMasukToday){
         document.getElementById('c3').innerHTML=`Sudah Masuk <div>⏳</div>`; document.getElementById('c3').style.background='#fef3c7';
         document.getElementById('firebaseStatus').textContent=`⏳ Sudah absen masuk hari ini`;
@@ -865,6 +901,7 @@ async function prosesAbsenOtomatis(){
   }catch(e){
     console.log('cek double absen error (lanjut simpan)', e);
   }
+
   let saveOk=false;
   try{
     if(!db) throw new Error('Firestore belum konek');
@@ -878,12 +915,14 @@ async function prosesAbsenOtomatis(){
     document.getElementById('firebaseStatus').textContent="❌ Gagal: "+e.message;
     document.getElementById('c3').innerHTML='Gagal <div>❌</div>'; document.getElementById('c3').style.background='#fee2e2';
   }
+
   // === ALERT SETELAH SCAN QR - SEMUA STATUS MUNCUL MODAL TENGAH TANPA GITHUB.IO ===
   setTimeout(()=>{
     const jarakInfo = `${jarakText} • ${data.status}`;
     let title='', msg='';
     const kat = jamInfo.kategori;
     const jenis = jamInfo.jenis;
+
     // === IZIN AFTER ALERTS (sesuai 5 alert final) ===
     if(jamInfo.is_izin_masuk){
       const badge = window.getIzinBadgeInfo(jamInfo.izinJenis||'DINAS_LUAR');
@@ -947,15 +986,18 @@ async function prosesAbsenOtomatis(){
     }
     showCustomAlert(title, msg);
   }, 400);
+
   setTimeout(()=>{
     document.getElementById('btnStartCam').classList.remove('hidden');
     document.getElementById('btnStartCam').disabled=false;
     document.getElementById('btnStartCam').textContent='📷 SCAN LAGI';
   },2000);
 }
+
+
 window.mulaiScan=async()=>{ await prosesAbsenOtomatis(); };
 window.hitungJarak=(lat1,lon1,lat2,lon2)=>{ const R=6371000; const toRad=x=>x*Math.PI/180; const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1); const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); };
-window.toggleGantiPass=()=>{ const f=document.getElementById('gantiPassForm'); f.classList.toggle('hidden'); const btn=document.getElementById('btnGantiPass'); btn.textContent = f.classList.contains('hidden') ? '✏️ Ganti' : '✕ Tutup'; };
+// old toggleGantiPass removed - admin only
 window.lihatPass=()=>{ 
   const cur = localStorage.getItem('SI-ABSEN_PASS_'+currentGuru.gid) || currentGuru.password; 
   document.getElementById('currentPassInfo').innerHTML = '<div style="font-size:10px"><div style="font-weight:700;color:#0f355c">Aktif: <span style="font-family:monospace;background:white;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;word-break:break-all">'+cur+'</span></div><div style="margin-top:6px"><button onclick="sembunyiPass()" style="font-size:9px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:4px 10px;cursor:pointer;font-weight:700">🙈 Tutup</button></div></div>'; 
@@ -965,9 +1007,11 @@ window.sembunyiPass=()=>{
   document.getElementById('currentPassInfo').innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-size:10px;color:#64748b"><span style="font-weight:700;color:#0f355c">'+(isCustom?'Custom':'Default')+'</span> • ••••••••</div><button onclick="lihatPass()" style="font-size:9px;background:white;border:1px solid #e2e8f0;border-radius:999px;padding:3px 8px;font-weight:700;color:#0f355c;cursor:pointer">Lihat</button></div>';
 };
 window.simpanPasswordBaru=async()=>{ const newP=document.getElementById('newPassInput').value.trim(); const confP=document.getElementById('confirmPassInput').value.trim(); const msg=document.getElementById('passChangeMsg'); msg.classList.remove('hidden'); if(!newP || newP.length<4){ msg.textContent='Password minimal 4'; msg.style.background='#fee2e2'; msg.style.color='#991b1b'; return; } if(newP!==confP){ msg.textContent='Ulangi tidak sama'; msg.style.background='#fee2e2'; msg.style.color='#991b1b'; return; } localStorage.setItem('SI-ABSEN_PASS_'+currentGuru.gid, newP); msg.textContent='✅ Disimpan!'; msg.style.background='#dcfce7'; msg.style.color='#166534'; try{ if(db){ await setDoc(doc(db,"users", currentGuru.gid), { password_custom: newP, updated_at: new Date().toISOString(), nama: currentGuru.nama }, {merge:true}); msg.textContent='✅ Disimpan di HP & Firestore!'; } }catch(e){ msg.textContent='✅ Lokal. Firestore: '+e.message; } };
+
 document.addEventListener('DOMContentLoaded', ()=>{
   const s=localStorage.getItem('SI-ABSEN_GID'); if(s){ currentGuru=GURUS.find(g=>g.gid===s); if(currentGuru) showAbsenScreen(); }
 });
+
 // === PATCH KONEK ADMIN TERBARU - MAP + RADIUS + GURU + PASSWORD ===
 async function startAdminSync(){
   try{
@@ -1083,6 +1127,7 @@ async function startAdminSync(){
   }catch(e){ console.log("startAdminSync fail", e); }
 }
 setTimeout(startAdminSync, 1000);
+
 // Merge CUSTOM_GURUS_V5 from localStorage (admin)
 function mergeCustomGurus(){
   try{
@@ -1110,6 +1155,7 @@ function mergeCustomGurus(){
 mergeCustomGurus();
 window.addEventListener('focus', ()=>{ mergeCustomGurus(); });
 window.addEventListener('storage', (e)=>{ if(e.key==='CUSTOM_GURUS_V5') mergeCustomGurus(); });
+
 // Enter bisa login di laptop
 document.addEventListener('DOMContentLoaded', ()=>{
   const gidInput=document.getElementById('gidInput');
@@ -1123,6 +1169,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 // === END PATCH KONEK ADMIN ===
 </script>
+
 <script>
 // PWA Install + iOS support
 let deferredPrompt;
@@ -1144,6 +1191,10 @@ btn.onclick=async()=>{
 window.addEventListener('appinstalled', ()=>btn.style.display='none');
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
 </script>
+
+
+
+
 <script>
 // Fallback login - pastikan tombol bisa diklik walau ada error lain
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -1177,5 +1228,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
   console.log('Login fallback attached');
 });
 </script>
+
+
+
 </body>
 </html>
