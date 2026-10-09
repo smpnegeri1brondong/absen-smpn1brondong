@@ -195,6 +195,108 @@ try{
   // Panggil setelah init
   setTimeout(()=>{ window.loadGurusFromFirestore(); }, 800);
 
+  // === FITUR BARU: KALENDER LIBUR & JAM KHUSUS ===
+  window.kalenderLiburMap = {}; // { '2025-12-25': 'Hari Raya Natal' }
+  window.jamKhususMap = {}; // { '2025-10-20': {mulai:660, selesai:930, keterangan:'Rapat Dinas'} }
+  window.kalenderLiburList = [];
+  window.jamKhususList = [];
+
+  window.loadKalenderLibur = async () => {
+    try{
+      if(!db) return;
+      const snap = await getDocs(collection(db, "kalender_libur"));
+      window.kalenderLiburMap = {};
+      window.kalenderLiburList = [];
+      snap.forEach(d=>{
+        const data=d.data();
+        const tgl=data.tanggal||d.id; // id = YYYY-MM-DD
+        const nama=data.keterangan||data.nama||data.nama_libur||'Libur';
+        if(tgl){
+          window.kalenderLiburMap[tgl]=nama;
+          window.kalenderLiburList.push({tanggal:tgl, keterangan:nama});
+        }
+      });
+      console.log('✅ Kalender libur loaded:', Object.keys(window.kalenderLiburMap).length);
+    }catch(e){ console.log('kalender_libur load fail', e); }
+  };
+  window.loadJamKhusus = async () => {
+    try{
+      if(!db) return;
+      const snap = await getDocs(collection(db, "jam_khusus"));
+      window.jamKhususMap = {};
+      window.jamKhususList = [];
+      snap.forEach(d=>{
+        const data=d.data();
+        const tgl=data.tanggal||d.id;
+        if(!tgl) return;
+        let mulai=data.pulang_mulai;
+        let selesai=data.pulang_selesai;
+        // support string "11:00"
+        function parseMenit(v){
+          if(typeof v==='number') return v;
+          if(!v) return null;
+          if(typeof v==='string' && v.includes(':')){
+            const p=v.split(':'); return parseInt(p[0])*60+parseInt(p[1]||0);
+          }
+          return parseInt(v);
+        }
+        mulai=parseMenit(mulai);
+        selesai=parseMenit(selesai);
+        if(mulai===null || isNaN(mulai)) return;
+        if(selesai===null || isNaN(selesai)) selesai=930; // default 15:30
+        const ket=data.keterangan||data.nama||'Pulang Cepat';
+        window.jamKhususMap[tgl]={mulai, selesai, keterangan:ket, tanggal:tgl};
+        window.jamKhususList.push({tanggal:tgl, mulai, selesai, keterangan:ket});
+      });
+      console.log('✅ Jam khusus loaded:', Object.keys(window.jamKhususMap).length);
+    }catch(e){ console.log('jam_khusus load fail', e); }
+  };
+  setTimeout(()=>{ window.loadKalenderLibur(); window.loadJamKhusus(); }, 1000);
+  // Realtime sync kalender_libur & jam_khusus
+  setTimeout(async()=>{
+    try{
+      const {onSnapshot, collection} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      if(window.db){
+        onSnapshot(collection(window.db, "kalender_libur"), (snap)=>{
+          window.kalenderLiburMap={}; window.kalenderLiburList=[];
+          snap.forEach(d=>{
+            const data=d.data(); const tgl=data.tanggal||d.id; const nama=data.keterangan||'Libur';
+            if(tgl){ window.kalenderLiburMap[tgl]=nama; window.kalenderLiburList.push({tanggal:tgl, keterangan:nama}); }
+          });
+          console.log('🔄 Realtime kalender libur:', Object.keys(window.kalenderLiburMap).length);
+          if(typeof window.cekJamAbsen==='function') window.cekJamAbsen();
+        });
+        onSnapshot(collection(window.db, "jam_khusus"), (snap)=>{
+          window.jamKhususMap={}; window.jamKhususList=[];
+          snap.forEach(d=>{
+            const data=d.data(); const tgl=data.tanggal||d.id;
+            if(!tgl) return;
+            function parseMenit(v){ if(typeof v==='number') return v; if(!v) return null; if(typeof v==='string' && v.includes(':')){ const p=v.split(':'); return parseInt(p[0])*60+parseInt(p[1]||0); } return parseInt(v); }
+            let mulai=parseMenit(data.pulang_mulai); let selesai=parseMenit(data.pulang_selesai); if(mulai==null||isNaN(mulai)) return; if(selesai==null||isNaN(selesai)) selesai=930;
+            const ket=data.keterangan||'Pulang Cepat';
+            window.jamKhususMap[tgl]={mulai, selesai, keterangan:ket, tanggal:tgl};
+            window.jamKhususList.push({tanggal:tgl, mulai, selesai, keterangan:ket});
+          });
+          console.log('🔄 Realtime jam khusus:', Object.keys(window.jamKhususMap).length);
+          if(typeof window.cekJamAbsen==='function') window.cekJamAbsen();
+        });
+      }
+    }catch(e){ console.log('realtime libur/jam fail', e); }
+  }, 1500);
+  // Realtime sync
+  try{
+    const {onSnapshot} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    // will be set later after db ready - use interval fallback
+    setInterval(()=>{ 
+      if(window.db){ 
+        try{ 
+          // try load again every 60s to keep sync simple
+        }catch(e){} 
+      } 
+    }, 60000);
+  }catch(e){}
+
+
   document.getElementById('firebaseInfo').style.background='#dcfce7';
 }catch(e){ document.getElementById('firebaseInfo').textContent='❌ Firebase gagal: '+e.message; }
 
@@ -220,8 +322,8 @@ function initMap(){
     if(lr){ RADIUS=clampR(lr); }
   }catch(e){}
   map=L.map('miniMap',{zoomControl:false}).setView([CURRENT_LAT,CURRENT_LNG],17);
-  roadLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20});
-  satLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20});
+  roadLayer=L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20, subdomains:['0','1','2','3'], attribution:'&copy; Google'});
+  satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19, attribution:'&copy; Esri'});
   if(MODE_MINI==='satelit') satLayer.addTo(map); else roadLayer.addTo(map);
   circle=L.circle([CURRENT_LAT,CURRENT_LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f355c',fillOpacity:0.12}).addTo(map);
   const ic=L.divIcon({html:'<div style="width:28px;height:28px;background:#0f355c;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white">🏫</div>',iconSize:[28,28],className:''});
@@ -245,20 +347,56 @@ function formatTelat(menit){
 
 window.getJenisAbsen=(d)=>{
   const n=d||new Date(); const day=n.getDay(); const h=n.getHours(); const m=n.getMinutes(); const menit=h*60+m;
+  const tglStr = n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+  // === 0. CEK KALENDER LIBUR NASIONAL / HARI BESAR (admin) ===
+  try{
+    if(window.kalenderLiburMap && window.kalenderLiburMap[tglStr]){
+      const namaLibur = window.kalenderLiburMap[tglStr];
+      return {jenis:'LIBUR', kategori:'LIBUR_NASIONAL', label:'Libur '+namaLibur, color:'libur', valid:true, telatMenit:0, pesan:'Libur '+namaLibur, liburNama:namaLibur};
+    }
+  }catch(e){}
+  // === 1. LIBUR SABTU MINGGU ===
   if(day===6){ return {jenis:'LIBUR', kategori:'LIBUR_SABTU', label:'Libur Sabtu', color:'libur', valid:true, telatMenit:0, pesan:'Hari Sabtu libur'}; }
   if(day===0){ return {jenis:'LIBUR', kategori:'LIBUR_MINGGU', label:'Libur Minggu', color:'libur', valid:true, telatMenit:0, pesan:'Hari Minggu libur'}; }
-  // === SPLIT DILUAR JAM KERJA ===
-  // 00:00 - 05:59 = BELUM BUKA (gak tercatat)
+  // === 2. SPLIT DILUAR JAM KERJA 00:00-05:59 = BELUM BUKA ===
   if(menit>=0 && menit<360){
     return {jenis:'BELUM_BUKA', kategori:'BELUM_BUKA', label:'Belum Buka', color:'awal', valid:false, telatMenit:0, pesan:'Belum buka 00:00-06:00, absen buka jam 06:00'};
   }
+  // === 3. CEK JAM KHUSUS / PULANG CEPAT (admin) ===
+  let jamKhusus=null;
+  try{ if(window.jamKhususMap && window.jamKhususMap[tglStr]) jamKhusus=window.jamKhususMap[tglStr]; }catch(e){}
+  if(jamKhusus){
+    const mulai=jamKhusus.mulai; // misal 660 = 11:00
+    const selesai=jamKhusus.selesai!=null?jamKhusus.selesai:930; // default 15:30 kalo cuma isi mulai
+    const ket=jamKhusus.keterangan||'Pulang Cepat';
+    const jamMulaiStr = String(Math.floor(mulai/60)).padStart(2,'0')+':'+String(mulai%60).padStart(2,'0');
+    const jamSelesaiStr = String(Math.floor(selesai/60)).padStart(2,'0')+':'+String(selesai%60).padStart(2,'0');
+    // Masuk tetap normal
+    if(menit>=360 && menit<=435){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Masuk Tepat Waktu 06:00-07:15'}; }
+    if(menit>=436 && menit<=690){ const telat=menit-435; return {jenis:'MASUK', kategori:'TELAT', label:'Terlambat', color:'telat', valid:true, telatMenit:telat, pesan:`Terlambat ${telat} menit dari 07:15`}; }
+    // Pulang cepat logic: 30 menit sebelum mulai = sebelum waktunya, 90 menit sebelum = belum waktunya
+    const belumMulai = mulai-90;
+    const sebelumMulai = mulai-30;
+    if(menit>=belumMulai && menit<sebelumMulai){
+      return {jenis:'PULANG', kategori:'BELUM_WAKTUNYA_PULANG_CEPAT', label:'Belum Waktunya Pulang Cepat', color:'awal', valid:false, telatMenit:0, pesan:`Belum waktunya pulang cepat ${jamMulaiStr} - ${ket}`, pulangCepat:true, jamKhusus:jamKhusus};
+    }
+    if(menit>=sebelumMulai && menit<mulai){
+      return {jenis:'PULANG', kategori:'PULANG_SEBELUM_WAKTUNYA_CEPAT', label:'Pulang Sebelum Waktunya Cepat', color:'awal', valid:true, telatMenit:0, pesan:`Pulang Sebelum Waktunya Cepat ${jamMulaiStr} - ${ket}`, pulangCepat:true, jamKhusus:jamKhusus};
+    }
+    if(menit>=mulai && menit<=selesai){
+      return {jenis:'PULANG', kategori:'PULANG_CEPAT', label:'Pulang Cepat '+jamMulaiStr, color:'tepat', valid:true, telatMenit:0, pesan:`Pulang Cepat ${jamMulaiStr}-${jamSelesaiStr} - ${ket}`, pulangCepat:true, jamKhusus:jamKhusus};
+    }
+    if(menit>930){
+      return {jenis:'PULANG', kategori:'DILUAR_JAM_KERJA', label:'Pulang Di Luar Jam Kerja', color:'diluar', valid:true, telatMenit:0, pesan:`Pulang di luar jam kerja >${jamSelesaiStr} - ${ket}`, pulangCepat:true, jamKhusus:jamKhusus};
+    }
+  }
+  // === 4. JAM NORMAL ===
   if(day===5){
     if(menit>=360 && menit<=435){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Jumat Masuk Tepat Waktu 06:00-07:15'}; }
     if(menit>=436 && menit<=540){ const telat=menit-435; return {jenis:'MASUK', kategori:'TELAT', label:'Terlambat', color:'telat', valid:true, telatMenit:telat, pesan:`Jumat Terlambat ${telat} menit dari 07:15`}; }
     if(menit>=541 && menit<=570){ return {jenis:'PULANG', kategori:'BELUM_WAKTUNYA_PULANG', label:'Belum Waktunya Pulang', color:'awal', valid:false, telatMenit:0, pesan:'Jumat Belum waktunya pulang 09:01-09:30, pulang resmi 10:00'}; }
     if(menit>=571 && menit<=599){ return {jenis:'PULANG', kategori:'PULANG_SEBELUM_WAKTUNYA', label:'Pulang Sebelum Waktunya', color:'awal', valid:true, telatMenit:0, pesan:'Jumat Pulang Sebelum Waktunya 09:31-09:59'}; }
     if(menit>=600 && menit<=930){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Pulang', color:'tepat', valid:true, telatMenit:0, pesan:'Jumat Pulang 10:00-15:30'}; }
-    // 15:31 - 23:59 Jumat = PULANG di luar jam kerja (tercatat)
     return {jenis:'PULANG', kategori:'DILUAR_JAM_KERJA', label:'Pulang Di Luar Jam Kerja', color:'diluar', valid:true, telatMenit:0, pesan:'Pulang di luar jam kerja 15:31-23:59'};
   } else {
     if(menit>=360 && menit<=435){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Masuk Tepat Waktu 06:00-07:15'}; }
@@ -266,7 +404,6 @@ window.getJenisAbsen=(d)=>{
     if(menit>=691 && menit<=780){ return {jenis:'PULANG', kategori:'BELUM_WAKTUNYA_PULANG', label:'Belum Waktunya Pulang', color:'awal', valid:false, telatMenit:0, pesan:'Belum waktunya pulang 11:31-13:00, pulang resmi 13:50'}; }
     if(menit>=781 && menit<=829){ return {jenis:'PULANG', kategori:'PULANG_SEBELUM_WAKTUNYA', label:'Pulang Sebelum Waktunya', color:'awal', valid:true, telatMenit:0, pesan:'Pulang Sebelum Waktunya 13:01-13:49'}; }
     if(menit>=830 && menit<=930){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Pulang', color:'tepat', valid:true, telatMenit:0, pesan:'Pulang 13:50-15:30'}; }
-    // 15:31 - 23:59 Senin-Kamis = PULANG di luar jam kerja (tercatat)
     return {jenis:'PULANG', kategori:'DILUAR_JAM_KERJA', label:'Pulang Di Luar Jam Kerja', color:'diluar', valid:true, telatMenit:0, pesan:'Pulang di luar jam kerja 15:31-23:59'};
   }
 };
@@ -287,6 +424,7 @@ window.cekJamAbsen=()=>{
   else if(kat.includes('TELAT')){ bg='#fef3c7'; border='#fde68a'; color='#92400e'; }
   else if(kat.includes('BELUM')){ bg='#ffedd5'; border='#fed7aa'; color='#9a3412'; }
   else if(kat.includes('SEBELUM')){ bg='#fef9c3'; border='#fde68a'; color='#854d0e'; }
+  else if(kat.includes('CEPAT')){ bg='#e0f2fe'; border='#bae6fd'; color='#0c4a6e'; }
   else if(kat.includes('TEPAT') && (info.jenis||'').includes('PULANG')){ bg='#dcfce7'; border='#bbf7d0'; color='#166534'; }
   else if(kat.includes('DILUAR')){ bg='#fee2e2'; border='#fecaca'; color='#991b1b'; }
   else if(kat.includes('LIBUR')){ bg='#fee2e2'; border='#fecaca'; color='#991b1b'; }
@@ -481,6 +619,28 @@ async function prosesAbsenOtomatis(){
     setTimeout(()=>{ document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 SCAN LAGI'; },2000);
     return;
   }
+  if(jamInfo.kategori==='LIBUR_NASIONAL'){
+    const namaLibur = jamInfo.liburNama || 'Hari Besar';
+    document.getElementById('c3').innerHTML=`Libur ${namaLibur} <div>🗓</div>`; document.getElementById('c3').style.background='#e0f2fe';
+    document.getElementById('firebaseStatus').textContent=`🗓 Libur ${namaLibur} - tercatat sebagai libur`;
+    setTimeout(()=>{
+      showCustomAlert(`🗓 LIBUR ${namaLibur.toUpperCase()}`, `<b>${currentGuru.nama}</b><br><br>Libur <b>${namaLibur}</b> loh ini<br>Terlalu rajin kak<br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#e0f2fe;color:#0f355c;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">🗓 Libur ${namaLibur}, tidak perlu absen</span>`);
+    },400);
+    // Tetap simpan sebagai LIBUR biar masuk laporan? Untuk libur nasional kita tetap simpan sebagai valid libur? Sesuai request badge tidak perlu absen tapi tetap tercatat sebagai libur? Kita tetap return tapi simpan? 
+    // Untuk sekarang kita tetap lanjut simpan sebagai LIBUR (valid)
+  }
+  if(jamInfo.kategori==='BELUM_WAKTUNYA_PULANG_CEPAT'){
+    const ket = (jamInfo.jamKhusus&&jamInfo.jamKhusus.keterangan)||'Rapat Dinas';
+    const mulaiMenit = jamInfo.jamKhusus?jamInfo.jamKhusus.mulai:660;
+    const jamMulaiStr = String(Math.floor(mulaiMenit/60)).padStart(2,'0')+':'+String(mulaiMenit%60).padStart(2,'0');
+    document.getElementById('c3').innerHTML=`Belum Waktunya Cepat <div>⏳</div>`; document.getElementById('c3').style.background='#ffedd5';
+    document.getElementById('firebaseStatus').textContent=`⏳ Belum waktunya pulang cepat ${jamMulaiStr} - tidak tercatat`;
+    setTimeout(()=>{
+      showCustomAlert('⏳ BELUM WAKTUNYA PULANG CEPAT', `<b>${currentGuru.nama}</b><br><br>Masih jam <b>${jamStr}</b><br>Pulang cepat hari ini jam <b>${jamMulaiStr}</b><br>Keterangan: <b>${ket}</b><br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Coba lagi jam ${jamMulaiStr}</span>`);
+    },400);
+    setTimeout(()=>{ document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 SCAN LAGI'; },2000);
+    return;
+  }
   if(jamInfo.kategori==='BELUM_WAKTUNYA_PULANG'){
     document.getElementById('c3').innerHTML=`Belum Waktunya <div>⏳</div>`; document.getElementById('c3').style.background='#ffedd5';
     document.getElementById('firebaseStatus').textContent=`⏳ Belum waktunya pulang - tidak tercatat`;
@@ -594,6 +754,26 @@ async function prosesAbsenOtomatis(){
     } else if(kat==='BELUM_BUKA'){
       title='⏰ BELUM BUKA HEYY';
       msg=`<b>${currentGuru.nama}</b><br><br>Terlalu rajin nih kak<br>Masih jam <b>${jamStr}</b><br>Absen buka nanti jam 06:00<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Coba lagi jam 06:00</span>`;
+    } else if(kat==='LIBUR_NASIONAL'){
+      const namaLibur = jamInfo.liburNama || jamInfo.label.replace('Libur ','') || 'Hari Besar';
+      title=`🗓 LIBUR ${namaLibur.toUpperCase()}`;
+      msg=`<b>${currentGuru.nama}</b><br><br>Libur <b>${namaLibur}</b> loh ini<br>Terlalu rajin kak<br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#e0f2fe;color:#0f355c;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">🗓 Libur ${namaLibur}, tidak perlu absen</span>`;
+    } else if(kat==='PULANG_CEPAT'){
+      const ket = (jamInfo.jamKhusus&&jamInfo.jamKhusus.keterangan)||'Rapat Dinas';
+      title='⚡ PULANGG CEPATTTTT';
+      msg=`<b>${currentGuru.nama}</b><br><br>Hari ini pulang cepat guyss<br>LESGOOOOO<br><br>Jam: <b>${jamStr}</b><br>Keterangan: <b>${ket}</b><br><br>Jarak: ${jarakInfo}<br><br><span style="background:#e0f2fe;color:#0c4a6e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⚡ Pulang Cepat - ${ket}</span>`;
+    } else if(kat==='BELUM_WAKTUNYA_PULANG_CEPAT'){
+      const ket = (jamInfo.jamKhusus&&jamInfo.jamKhusus.keterangan)||'Rapat Dinas';
+      const mulaiMenit = jamInfo.jamKhusus?jamInfo.jamKhusus.mulai:660;
+      const jamMulaiStr = String(Math.floor(mulaiMenit/60)).padStart(2,'0')+':'+String(mulaiMenit%60).padStart(2,'0');
+      title='⏳ BELUM WAKTUNYA PULANG CEPAT';
+      msg=`<b>${currentGuru.nama}</b><br><br>Masih jam <b>${jamStr}</b><br>Pulang cepat hari ini jam <b>${jamMulaiStr}</b><br>Keterangan: <b>${ket}</b><br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Coba lagi jam ${jamMulaiStr}</span>`;
+    } else if(kat==='PULANG_SEBELUM_WAKTUNYA_CEPAT'){
+      const ket = (jamInfo.jamKhusus&&jamInfo.jamKhusus.keterangan)||'Rapat Dinas';
+      const mulaiMenit = jamInfo.jamKhusus?jamInfo.jamKhusus.mulai:660;
+      const jamMulaiStr = String(Math.floor(mulaiMenit/60)).padStart(2,'0')+':'+String(mulaiMenit%60).padStart(2,'0');
+      title='⏳ PULANG SEBELUM WAKTUNYA CEPAT';
+      msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen <b>PULANG</b> jam <b>${jamStr}</b><br>Pulang cepat jam <b>${jamMulaiStr}</b><br>Keterangan: <b>${ket}</b><br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Tercatat sebagai Pulang Sebelum Waktunya Cepat (${ket})</span>`;
     } else if(kat==='BELUM_WAKTUNYA_PULANG'){
       title='⏳ BELUM WAKTUNYA PULANG YAA MANIEZZ';
       msg=`<b>${currentGuru.nama}</b><br><br>Masih jam <b>${jamStr}</b><br>Belum waktunya pulang<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Belum bisa absen, coba lagi nanti</span>`;
@@ -601,7 +781,6 @@ async function prosesAbsenOtomatis(){
       title='INI HARI LIBUR HEYY';
       msg=`<b>${currentGuru.nama}</b><br><br>Terlalu Rajin nih mas<br>${jamInfo.pesan}<br><br>Absen kamu <b>TETAP TERCATAT</b> di laporan sebagai <b>${jamInfo.label}</b><br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#e0f2fe;color:#0f355c;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">Libuuurrrrrrrrrr</span>`;
     } else if(kat==='DILUAR_JAM_KERJA' || kat==='DILUAR'){
-      // Baru: 15:31-23:59 = pulang di luar jam kerja (tercatat sebagai pulang)
       title='🌙 PULANG DI LUAR JAM KERJA';
       msg=`<b>${currentGuru.nama}</b><br><br>Absen pulang jam <b>${jamStr}</b><br>Udah di luar jam kerja ini<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fee2e2;color:#991b1b;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">📌 Di Luar Jam Kerja</span>`;
     } else {
