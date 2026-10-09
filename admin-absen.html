@@ -210,8 +210,10 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 </div>
 
 <nav id="headerTabs" class="header-tabs hidden" style="display:flex;gap:8px;align-items:center">
-  <button id="tabLaporanHeader" class="btn-tab active" onclick="switchTab('laporan')">📊 Laporan GTK</button>
-  <button id="tabGuruHeader" class="btn-tab" onclick="switchTab('guru')">👥 Data GTK + QR</button>
+  <button id="tabLaporanHeader" class="btn-tab active" onclick="switchTab('laporan')">📊 Laporan</button>
+  <button id="tabGuruHeader" class="btn-tab" onclick="switchTab('guru')">👥 GTK</button>
+  <button id="tabLiburHeader" class="btn-tab" onclick="switchTab('libur')">🗓 Libur</button>
+  <button id="tabPulangHeader" class="btn-tab" onclick="switchTab('pulang')">⚡ Pulang Cepat</button>
 </nav>
 
 <div style="display:flex;gap:8px;align-items:center;margin-left:auto">
@@ -222,10 +224,11 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 
 <!-- MOBILE BURGER MENU -->
 <div id="mobileMenu" class="mobile-menu hidden" style="position:sticky;top:64px;z-index:9998;background:white;border-bottom:1px solid #e2e8f0;padding:12px 16px;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,.06)">
-  <button id="tabLaporanMobile" class="btn-tab active" style="width:100%;justify-content:flex-start" onclick="switchTab('laporan'); toggleMobileMenu(false)">📊 Laporan GTK</button>
-  <button id="tabGuruMobile" class="btn-tab" style="width:100%;justify-content:flex-start" onclick="switchTab('guru'); toggleMobileMenu(false)">👥 Data GTK + QR</button>
-  <div style="height:1px;background:#e2e8f0;margin:4px 0"></div>
-  <button class="btn btn-outline" style="height:40px" onclick="doLogout(); toggleMobileMenu(false)">Logout</button>
+  <button id="tabLaporanMobile" class="btn-tab active" style="width:100%;justify-content:flex-start" onclick="switchTab('laporan');toggleMobileMenu(false)">📊 Laporan GTK</button>
+  <button id="tabGuruMobile" class="btn-tab" style="width:100%;justify-content:flex-start" onclick="switchTab('guru');toggleMobileMenu(false)">👥 Data GTK + QR</button>
+  <button id="tabLiburMobile" class="btn-tab" style="width:100%;justify-content:flex-start" onclick="switchTab('libur');toggleMobileMenu(false)">🗓 Atur Libur</button>
+  <button id="tabPulangMobile" class="btn-tab" style="width:100%;justify-content:flex-start" onclick="switchTab('pulang');toggleMobileMenu(false)">⚡ Pulang Cepat</button>
+  <button style="width:100%;height:36px;border-radius:10px;border:1px solid #e2e8f0;background:white;font-weight:700" onclick="doLogout()">Logout</button>
 </div>
 
 
@@ -287,7 +290,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="font-weight:800;color:#0f355c">📊 Laporan Absen GTK <span id="liveBadge">🟢 Live - auto refresh aktif</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" style="height:36px;width:auto;padding:0 16px" onclick="exportExcel()">📥 Excel</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="exportCSV()">CSV</button><button class="btn" style="height:36px;width:auto;padding:0 16px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b" onclick="clearTest()">🗑️ Hapus Test</button></div></div>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:12px">
 <input id="filterTanggal" type="date" class="input" style="height:36px"/><select id="filterGuruSelect" class="input" style="height:36px"><option value="">Semua GTK</option></select>
-<select id="filterKategori" class="input" style="height:36px"><option value="">Semua Kategori</option><option value="TEPAT_WAKTU">TEPAT_WAKTU</option><option value="TELAT">TELAT</option><option value="PULANG_SEBELUM_WAKTUNYA">PULANG_SEBELUM_WAKTUNYA</option><option value="BELUM_WAKTUNYA_PULANG">BELUM_WAKTUNYA_PULANG</option><option value="LIBUR_SABTU">LIBUR_SABTU</option><option value="LIBUR_MINGGU">LIBUR_MINGGU</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
+<select id="filterKategori" class="input" style="height:36px"><option value="">Semua Kategori</option><option value="TEPAT_WAKTU">TEPAT_WAKTU</option><option value="TELAT">TELAT</option><option value="PULANG_SEBELUM_WAKTUNYA">PULANG_SEBELUM_WAKTUNYA</option><option value="BELUM_WAKTUNYA_PULANG">BELUM_WAKTUNYA_PULANG</option><option value="LIBUR_SABTU">LIBUR_SABTU</option><option value="LIBUR_MINGGU">LIBUR_MINGGU</option><option value="LIBUR_NASIONAL">LIBUR_NASIONAL</option><option value="PULANG_CEPAT">PULANG_CEPAT</option><option value="BELUM_WAKTUNYA_PULANG_CEPAT">BELUM_WAKTUNYA_PULANG_CEPAT</option><option value="PULANG_SEBELUM_WAKTUNYA_CEPAT">PULANG_SEBELUM_CEPAT</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
 <select id="filterJenis" class="input" style="height:36px"><option value="">Semua Jenis</option><option value="MASUK">MASUK</option><option value="PULANG">PULANG</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
 <select id="filterStatus" class="input" style="height:36px"><option value="">VALID+LUAR_RADIUS</option><option value="VALID">VALID</option><option value="LUAR_RADIUS">LUAR_RADIUS</option></select>
 <input id="searchLaporan" class="input" placeholder="Cari nama..." style="height:36px"/>
@@ -352,6 +355,79 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 
 <div id="guruGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px"></div>
 </div>
+
+<!-- PANEL LIBUR NASIONAL / HARI BESAR -->
+<div id="panelLibur" class="hidden">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div style="font-weight:800;color:#0f355c">🗓 Atur Libur Hari Besar</div>
+      <div style="font-size:10px;color:#64748b">Selain Sabtu-Minggu • Alert: 🗓 LIBUR (nama libur)</div>
+    </div>
+    <div style="margin-top:14px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:14px;padding:14px">
+      <div style="font-size:11px;font-weight:800;color:#0f355c;margin-bottom:8px">➕ Tambah Libur Baru</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <div style="font-size:11px;font-weight:700;margin-bottom:4px">Tanggal Libur</div>
+          <input id="liburTanggal" type="date" class="input" style="height:40px"/>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;margin-bottom:4px">Nama Libur / Keterangan</div>
+          <input id="liburKeterangan" class="input" placeholder="Contoh: Maulid Nabi, Idul Fitri" style="height:40px"/>
+        </div>
+      </div>
+      <button onclick="simpanLibur()" style="margin-top:10px;width:100%;height:44px;border-radius:12px;border:none;background:#0f355c;color:white;font-weight:800;cursor:pointer">💾 Simpan Libur</button>
+      <div style="font-size:9px;color:#64748b;margin-top:6px;line-height:1.3">Alert GTK: header 🗓 LIBUR (nama libur) | isi: (nama gtk) Libur (nama libur) loh ini Terlalu rajin kak | badge: 🗓 Libur (nama libur), tidak perlu absen</div>
+    </div>
+    <div style="margin-top:14px">
+      <div style="font-weight:700;font-size:12px;color:#0f355c;margin-bottom:8px">📋 Daftar Libur Tersimpan</div>
+      <div id="liburList" style="display:grid;gap:8px"><div style="text-align:center;color:#94a3b8;padding:12px">Memuat...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL PULANG CEPAT -->
+<div id="panelPulang" class="hidden">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div style="font-weight:800;color:#0f355c">⚡ Atur Pulang Cepat</div>
+      <div style="font-size:10px;color:#64748b">Rapat / Kegiatan • Auto selesai default 15:30</div>
+    </div>
+    <div style="margin-top:14px;background:#f0f9ff;border:1px dashed #bae6fd;border-radius:14px;padding:14px">
+      <div style="font-size:11px;font-weight:800;color:#0f355c;margin-bottom:8px">➕ Tambah Pulang Cepat</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <div style="font-size:11px;font-weight:700;margin-bottom:4px">Tanggal Pulang Cepat</div>
+          <input id="pulangTanggal" type="date" class="input" style="height:40px"/>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;margin-bottom:4px">Keterangan (Rapat/Kegiatan)</div>
+          <input id="pulangKeterangan" class="input" placeholder="Contoh: Rapat Dinas" style="height:40px"/>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+        <div>
+          <div style="font-size:11px;font-weight:700;margin-bottom:4px">Pulang Mulai (Wajib)</div>
+          <input id="pulangMulai" type="time" class="input" style="height:40px"/>
+          <div style="font-size:9px;color:#64748b;margin-top:3px">Mis: 11:00</div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;margin-bottom:4px">Pulang Selesai (Opsional)</div>
+          <input id="pulangSelesai" type="time" class="input" style="height:40px"/>
+          <div style="font-size:9px;color:#64748b;margin-top:3px">Kosong = auto 15:30</div>
+        </div>
+      </div>
+      <button onclick="simpanPulangCepat()" style="margin-top:10px;width:100%;height:44px;border-radius:12px;border:none;background:#0f172a;color:white;font-weight:800;cursor:pointer">💾 Simpan Pulang Cepat</button>
+      <div style="font-size:9px;color:#64748b;margin-top:6px;line-height:1.3">
+        Logic: pulang_mulai wajib, pulang_selesai kosong = auto 15:30. Alert GTK: header ⚡ PULANGG CEPATTTTT | isi: (nama gtk) Hari ini pulang cepat guyss LESGOOOOO | badge: ⚡ Pulang Cepat - (keterangan)
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <div style="font-weight:700;font-size:12px;color:#0f355c;margin-bottom:8px">📋 Daftar Pulang Cepat Tersimpan</div>
+      <div id="pulangList" style="display:grid;gap:8px"><div style="text-align:center;color:#94a3b8;padding:12px">Memuat...</div></div>
+    </div>
+  </div>
+</div>
+
 </div>
 </div>
 </div>
@@ -398,8 +474,131 @@ document.getElementById('forgotBtn').onclick=async()=>{
   btn.textContent='Lupa Password? Reset via Email';
   btn.disabled=false;
 };
+
+// === FITUR BARU: LIBUR & PULANG CEPAT CRUD ===
+async function loadLibur(){
+  try{
+    const listEl=document.getElementById('liburList');
+    if(listEl) listEl.innerHTML='<div style="text-align:center;color:#94a3b8;padding:12px">Memuat libur...</div>';
+    const snap = await getDocs(collection(db, "kalender_libur"));
+    const arr=[];
+    snap.forEach(d=>{ const data=d.data(); arr.push({id:d.id, tanggal:data.tanggal||d.id, keterangan:data.keterangan||data.nama||'Libur'}); });
+    arr.sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
+    if(listEl){
+      if(arr.length===0) listEl.innerHTML='<div style="text-align:center;color:#94a3b8;padding:12px">Belum ada libur. Tambah di atas.</div>';
+      else listEl.innerHTML=arr.map(x=>`
+        <div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div><div style="font-weight:800;font-size:12px">🗓 ${x.tanggal}</div><div style="font-size:11px;color:#334155">${x.keterangan}</div></div>
+          <button onclick="hapusLibur('${x.id}')" style="height:32px;padding:0 12px;border-radius:8px;border:1px solid #fecaca;background:#fee2e2;color:#991b1b;font-weight:700;font-size:11px;cursor:pointer">Hapus</button>
+        </div>`).join('');
+    }
+  }catch(e){ console.log('loadLibur fail', e); const el=document.getElementById('liburList'); if(el) el.innerHTML='❌ '+e.message; }
+}
+window.loadLibur=loadLibur;
+
+window.simpanLibur=async()=>{
+  const tgl=document.getElementById('liburTanggal')?.value;
+  const ket=document.getElementById('liburKeterangan')?.value?.trim();
+  if(!tgl||!ket){ alert('Isi tanggal & keterangan libur!'); return; }
+  try{
+    const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    await setDoc(doc(db, "kalender_libur", tgl), {tanggal:tgl, keterangan:ket, created_at:new Date().toISOString()}, {merge:true});
+    alert('✅ Libur '+ket+' tanggal '+tgl+' tersimpan!\nAlert GTK: 🗓 LIBUR '+ket.toUpperCase());
+    document.getElementById('liburKeterangan').value='';
+    loadLibur();
+  }catch(e){ alert('Gagal: '+e.message); }
+};
+
+window.hapusLibur=async(id)=>{
+  if(!confirm('Hapus libur '+id+'?')) return;
+  try{
+    const {doc, deleteDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    await deleteDoc(doc(db, "kalender_libur", id));
+    loadLibur();
+  }catch(e){ alert('Gagal hapus: '+e.message); }
+};
+
+async function loadPulangCepat(){
+  try{
+    const listEl=document.getElementById('pulangList');
+    if(listEl) listEl.innerHTML='<div style="text-align:center;color:#94a3b8;padding:12px">Memuat pulang cepat...</div>';
+    const snap = await getDocs(collection(db, "jam_khusus"));
+    const arr=[];
+    snap.forEach(d=>{ const data=d.data(); arr.push({id:d.id, tanggal:data.tanggal||d.id, keterangan:data.keterangan||'Rapat Dinas', mulai:data.pulang_mulai, selesai:data.pulang_selesai}); });
+    arr.sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
+    function fmtMenit(v){
+      if(v==null) return '-';
+      if(typeof v==='string' && v.includes(':')) return v;
+      if(typeof v==='number'){ const h=Math.floor(v/60); const m=v%60; return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); }
+      return String(v);
+    }
+    if(listEl){
+      if(arr.length===0) listEl.innerHTML='<div style="text-align:center;color:#94a3b8;padding:12px">Belum ada pulang cepat. Tambah di atas.</div>';
+      else listEl.innerHTML=arr.map(x=>`
+        <div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div><div style="font-weight:800;font-size:12px">⚡ ${x.tanggal} • ${fmtMenit(x.mulai)}${x.selesai?' - '+fmtMenit(x.selesai):' - 15:30 (auto)'}</div><div style="font-size:11px;color:#334155">${x.keterangan}</div></div>
+          <button onclick="hapusPulangCepat('${x.id}')" style="height:32px;padding:0 12px;border-radius:8px;border:1px solid #fecaca;background:#fee2e2;color:#991b1b;font-weight:700;font-size:11px;cursor:pointer">Hapus</button>
+        </div>`).join('');
+    }
+  }catch(e){ console.log('loadPulang fail', e); const el=document.getElementById('pulangList'); if(el) el.innerHTML='❌ '+e.message; }
+}
+window.loadPulangCepat=loadPulangCepat;
+
+window.simpanPulangCepat=async()=>{
+  const tgl=document.getElementById('pulangTanggal')?.value;
+  const ket=document.getElementById('pulangKeterangan')?.value?.trim()||'Rapat Dinas';
+  const mulaiStr=document.getElementById('pulangMulai')?.value;
+  const selesaiStr=document.getElementById('pulangSelesai')?.value;
+  if(!tgl||!mulaiStr){ alert('Isi tanggal & pulang mulai (wajib)!'); return; }
+  function toMenit(s){
+    if(!s) return null;
+    if(s.includes(':')){ const p=s.split(':'); return parseInt(p[0])*60+parseInt(p[1]); }
+    return parseInt(s);
+  }
+  const mulai=toMenit(mulaiStr);
+  let selesai=selesaiStr?toMenit(selesaiStr):null;
+  if(selesai===null) selesai=930; // auto default 15:30
+  try{
+    const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    await setDoc(doc(db, "jam_khusus", tgl), {tanggal:tgl, keterangan:ket, pulang_mulai:mulai, pulang_selesai:selesai, pulang_mulai_str:mulaiStr, pulang_selesai_str:selesaiStr||'15:30', created_at:new Date().toISOString()}, {merge:true});
+    alert('✅ Pulang cepat '+tgl+' jam '+mulaiStr+' - '+(selesaiStr||'15:30 auto')+' tersimpan!\nAlert GTK: ⚡ PULANGG CEPATTTTT\nBadge: ⚡ Pulang Cepat - '+ket);
+    document.getElementById('pulangKeterangan').value='';
+    loadPulangCepat();
+  }catch(e){ alert('Gagal: '+e.message); }
+};
+
+window.hapusPulangCepat=async(id)=>{
+  if(!confirm('Hapus pulang cepat '+id+'?')) return;
+  try{
+    const {doc, deleteDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    await deleteDoc(doc(db, "jam_khusus", id));
+    loadPulangCepat();
+  }catch(e){ alert('Gagal hapus: '+e.message); }
+};
+
+// Auto load libur & pulang saat admin login
+setTimeout(()=>{ if(typeof db!=='undefined' && db){ loadLibur(); loadPulangCepat(); } }, 2000);
+
 window.doLogout=async()=>{await signOut(auth);};
-window.switchTab=(tab)=>{document.getElementById('tabLaporan').classList.toggle('active',tab==='laporan');document.getElementById('tabGuru').classList.toggle('active',tab==='guru');document.getElementById('panelLaporan').classList.toggle('hidden',tab!=='laporan');document.getElementById('panelGuru').classList.toggle('hidden',tab!=='guru');if(tab==='guru') setTimeout(()=>renderGurus(),100);};
+window.switchTab=(tab)=>{
+  const tabs=['laporan','guru','libur','pulang'];
+  tabs.forEach(t=>{
+    document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1))?.classList.toggle('active', tab===t);
+    document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)+'Header')?.classList.toggle('active', tab===t);
+    document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)+'Mobile')?.classList.toggle('active', tab===t);
+    document.getElementById('panel'+t.charAt(0).toUpperCase()+t.slice(1))?.classList.toggle('hidden', tab!==t);
+  });
+  // compat old ids
+  document.getElementById('tabLaporan')?.classList.toggle('active',tab==='laporan');
+  document.getElementById('tabGuru')?.classList.toggle('active',tab==='guru');
+  document.getElementById('panelLaporan')?.classList.toggle('hidden',tab!=='laporan');
+  document.getElementById('panelGuru')?.classList.toggle('hidden',tab!=='guru');
+  document.getElementById('panelLibur')?.classList.toggle('hidden',tab!=='libur');
+  document.getElementById('panelPulang')?.classList.toggle('hidden',tab!=='pulang');
+  if(tab==='guru') setTimeout(()=>renderGurus(),100);
+  if(tab==='libur') loadLibur();
+  if(tab==='pulang') loadPulangCepat();
+};
 let mapAdmin, adminCircle, adminMarker, adminMarkerUser, adminLine;
 let roadLayer, satLayer, currentMapMode='road';
 let isSavingLocation=false;
@@ -1811,15 +2010,20 @@ function toggleMobileMenu(force){
         document.getElementById('panelGuru')?.classList.toggle('hidden', tab!=='guru');
       }catch(e){}
     }
-    const isLaporan = tab==='laporan';
+    const tabMap = {
+      'laporan': 0,
+      'guru': 1,
+      'libur': 2,
+      'pulang': 3
+    };
     const ids = [
       ['tabLaporan','tabLaporanHeader','tabLaporanMobile'],
-      ['tabGuru','tabGuruHeader','tabGuruMobile']
+      ['tabGuru','tabGuruHeader','tabGuruMobile'],
+      ['tabLibur','tabLiburHeader','tabLiburMobile'],
+      ['tabPulang','tabPulangHeader','tabPulangMobile']
     ];
-    // remove active from all
     document.querySelectorAll('.btn-tab').forEach(b=>b.classList.remove('active'));
-    // add active to correct group
-    const activeGroup = isLaporan ? 0 : 1;
+    const activeGroup = tabMap[tab]!==undefined?tabMap[tab]:0;
     ids[activeGroup].forEach(id=>{
       const el=document.getElementById(id);
       if(el) el.classList.add('active');
