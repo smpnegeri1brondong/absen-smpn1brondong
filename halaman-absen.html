@@ -247,20 +247,27 @@ window.getJenisAbsen=(d)=>{
   const n=d||new Date(); const day=n.getDay(); const h=n.getHours(); const m=n.getMinutes(); const menit=h*60+m;
   if(day===6){ return {jenis:'LIBUR', kategori:'LIBUR_SABTU', label:'Libur Sabtu', color:'libur', valid:true, telatMenit:0, pesan:'Hari Sabtu libur'}; }
   if(day===0){ return {jenis:'LIBUR', kategori:'LIBUR_MINGGU', label:'Libur Minggu', color:'libur', valid:true, telatMenit:0, pesan:'Hari Minggu libur'}; }
+  // === SPLIT DILUAR JAM KERJA ===
+  // 00:00 - 05:59 = BELUM BUKA (gak tercatat)
+  if(menit>=0 && menit<360){
+    return {jenis:'BELUM_BUKA', kategori:'BELUM_BUKA', label:'Belum Buka', color:'awal', valid:false, telatMenit:0, pesan:'Belum buka 00:00-06:00, absen buka jam 06:00'};
+  }
   if(day===5){
     if(menit>=360 && menit<=435){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Jumat Masuk Tepat Waktu 06:00-07:15'}; }
     if(menit>=436 && menit<=540){ const telat=menit-435; return {jenis:'MASUK', kategori:'TELAT', label:'Terlambat', color:'telat', valid:true, telatMenit:telat, pesan:`Jumat Terlambat ${telat} menit dari 07:15`}; }
     if(menit>=541 && menit<=570){ return {jenis:'PULANG', kategori:'BELUM_WAKTUNYA_PULANG', label:'Belum Waktunya Pulang', color:'awal', valid:false, telatMenit:0, pesan:'Jumat Belum waktunya pulang 09:01-09:30, pulang resmi 10:00'}; }
     if(menit>=571 && menit<=599){ return {jenis:'PULANG', kategori:'PULANG_SEBELUM_WAKTUNYA', label:'Pulang Sebelum Waktunya', color:'awal', valid:true, telatMenit:0, pesan:'Jumat Pulang Sebelum Waktunya 09:31-09:59'}; }
     if(menit>=600 && menit<=930){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Pulang', color:'tepat', valid:true, telatMenit:0, pesan:'Jumat Pulang 10:00-15:30'}; }
-    return {jenis:'DILUAR_JAM_KERJA', kategori:'DILUAR_JAM_KERJA', label:'Di Luar Jam Kerja', color:'diluar', valid:false, telatMenit:0, pesan:'Di luar jam kerja >15:30 - <06:00'};
+    // 15:31 - 23:59 Jumat = PULANG di luar jam kerja (tercatat)
+    return {jenis:'PULANG', kategori:'DILUAR_JAM_KERJA', label:'Pulang Di Luar Jam Kerja', color:'diluar', valid:true, telatMenit:0, pesan:'Pulang di luar jam kerja 15:31-23:59'};
   } else {
     if(menit>=360 && menit<=435){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Masuk Tepat Waktu 06:00-07:15'}; }
     if(menit>=436 && menit<=690){ const telat=menit-435; return {jenis:'MASUK', kategori:'TELAT', label:'Terlambat', color:'telat', valid:true, telatMenit:telat, pesan:`Terlambat ${telat} menit dari 07:15`}; }
     if(menit>=691 && menit<=780){ return {jenis:'PULANG', kategori:'BELUM_WAKTUNYA_PULANG', label:'Belum Waktunya Pulang', color:'awal', valid:false, telatMenit:0, pesan:'Belum waktunya pulang 11:31-13:00, pulang resmi 13:50'}; }
     if(menit>=781 && menit<=829){ return {jenis:'PULANG', kategori:'PULANG_SEBELUM_WAKTUNYA', label:'Pulang Sebelum Waktunya', color:'awal', valid:true, telatMenit:0, pesan:'Pulang Sebelum Waktunya 13:01-13:49'}; }
     if(menit>=830 && menit<=930){ return {jenis:'PULANG', kategori:'TEPAT_WAKTU', label:'Pulang', color:'tepat', valid:true, telatMenit:0, pesan:'Pulang 13:50-15:30'}; }
-    return {jenis:'DILUAR_JAM_KERJA', kategori:'DILUAR_JAM_KERJA', label:'Di Luar Jam Kerja', color:'diluar', valid:false, telatMenit:0, pesan:'Di luar jam kerja >15:30 - <06:00'};
+    // 15:31 - 23:59 Senin-Kamis = PULANG di luar jam kerja (tercatat)
+    return {jenis:'PULANG', kategori:'DILUAR_JAM_KERJA', label:'Pulang Di Luar Jam Kerja', color:'diluar', valid:true, telatMenit:0, pesan:'Pulang di luar jam kerja 15:31-23:59'};
   }
 };
 
@@ -465,6 +472,15 @@ async function prosesAbsenOtomatis(){
   document.getElementById('lokasiStatus').textContent=`Jarak ${jarakText} • ${data.status} • ${jamInfo.jenis}`;
 
   // === CEK BELUM WAKTUNYA PULANG - GAK TERCATAT ===
+  if(jamInfo.kategori==='BELUM_BUKA'){
+    document.getElementById('c3').innerHTML=`Belum Buka <div>⏰</div>`; document.getElementById('c3').style.background='#ffedd5';
+    document.getElementById('firebaseStatus').textContent=`⏰ Belum buka - tidak tercatat`;
+    setTimeout(()=>{
+      showCustomAlert('⏰ BELUM BUKA HEYY', `<b>${currentGuru.nama}</b><br><br>Terlalu rajin nih kak<br>Masih jam <b>${jamStr}</b><br>Absen buka nanti jam 06:00<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Coba lagi jam 06:00</span>`);
+    },400);
+    setTimeout(()=>{ document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 SCAN LAGI'; },2000);
+    return;
+  }
   if(jamInfo.kategori==='BELUM_WAKTUNYA_PULANG'){
     document.getElementById('c3').innerHTML=`Belum Waktunya <div>⏳</div>`; document.getElementById('c3').style.background='#ffedd5';
     document.getElementById('firebaseStatus').textContent=`⏳ Belum waktunya pulang - tidak tercatat`;
@@ -575,6 +591,9 @@ async function prosesAbsenOtomatis(){
     } else if(kat==='PULANG_SEBELUM_WAKTUNYA'){
       title='⏳ PULANG SEBELUM WAKTUNYA';
       msg=`<b>${currentGuru.nama}</b><br><br>Kamu absen <b>PULANG</b> jam <b>${jamStr}</b><br>${jamInfo.pesan}<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Tercatat sebagai Pulang Sebelum Waktunya (final, tidak bisa pulang lagi)</span><br><br><span style="font-size:10px;color:#64748b">Jika ada kasus khusus, hubungi admin untuk koreksi</span>`;
+    } else if(kat==='BELUM_BUKA'){
+      title='⏰ BELUM BUKA HEYY';
+      msg=`<b>${currentGuru.nama}</b><br><br>Terlalu rajin nih kak<br>Masih jam <b>${jamStr}</b><br>Absen buka nanti jam 06:00<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Coba lagi jam 06:00</span>`;
     } else if(kat==='BELUM_WAKTUNYA_PULANG'){
       title='⏳ BELUM WAKTUNYA PULANG YAA MANIEZZ';
       msg=`<b>${currentGuru.nama}</b><br><br>Masih jam <b>${jamStr}</b><br>Belum waktunya pulang<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Belum bisa absen, coba lagi nanti</span>`;
@@ -582,8 +601,9 @@ async function prosesAbsenOtomatis(){
       title='INI HARI LIBUR HEYY';
       msg=`<b>${currentGuru.nama}</b><br><br>Terlalu Rajin nih mas<br>${jamInfo.pesan}<br><br>Absen kamu <b>TETAP TERCATAT</b> di laporan sebagai <b>${jamInfo.label}</b><br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#e0f2fe;color:#0f355c;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">Libuuurrrrrrrrrr</span>`;
     } else if(kat==='DILUAR_JAM_KERJA' || kat==='DILUAR'){
-      title='⛔ DI LUAR JAM KERJA';
-      msg=`<b>${currentGuru.nama}</b><br><br>Jam <b>${jamStr}</b> di luar jam kerja<br>${jamInfo.pesan}<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fee2e2;color:#991b1b;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⛔ Tercatat sebagai ${jamInfo.label}</span>`;
+      // Baru: 15:31-23:59 = pulang di luar jam kerja (tercatat sebagai pulang)
+      title='🌙 PULANG DI LUAR JAM KERJA';
+      msg=`<b>${currentGuru.nama}</b><br><br>Absen pulang jam <b>${jamStr}</b><br>Udah di luar jam kerja ini<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fee2e2;color:#991b1b;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">📌 Di Luar Jam Kerja</span>`;
     } else {
       title=`${jamInfo.jenis} - ${jamInfo.label}`;
       msg=`<b>${currentGuru.nama}</b><br><br>Absen <b>${jamInfo.jenis}</b> jam <b>${jamStr}</b><br>Status: <b>${jamInfo.label}</b><br><br>${jamInfo.pesan}<br><br>Jarak: ${jarakInfo}<br><br>${saveOk?'<span style="background:#dcfce7;color:#166534;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">✅ Tersimpan</span>':'<span style="background:#fee2e2;color:#991b1b;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">❌ Gagal simpan</span>'}`;
