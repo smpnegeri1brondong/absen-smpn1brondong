@@ -1594,16 +1594,36 @@ function badgeStatus(rec){
   if(!rec) return '<span class="badge badge-belum">⏳ Belum Absen</span>';
   const kat=(rec.kategori_absen||'').toUpperCase();
   const jenis=(rec.jenis_absen||'').toUpperCase();
-  if(rec.is_koreksi) return '<span class="badge" style="background:#dbeafe;color:#1e40af;border-color:#bfdbfe">✏️ '+(rec.label_absen||rec.kategori_absen||'Koreksi')+'</span>';
-  if(kat.includes('LIBUR')) return '<span class="badge badge-libur">🏖️ '+(rec.label_absen||'Libur')+'</span>';
-  if(kat.includes('BELUM')) return '<span class="badge badge-belum">⏳ Belum Waktunya Pulang</span>';
-  if(kat.includes('SEBELUM')) return '<span class="badge badge-awal">⏳ Pulang Sebelum Waktunya</span>';
-  if(kat.includes('DILUAR')) return '<span class="badge badge-diluar">⛔ Di Luar Jam Kerja</span>';
-  if(kat.includes('TEPAT') && jenis.includes('MASUK')) return '<span class="badge badge-tepat">✅ Masuk Tepat Waktu</span>';
-  if(kat.includes('TELAT')) return '<span class="badge badge-telat">⚠️ Terlambat Masuk</span>';
-  if(kat.includes('TEPAT') && jenis.includes('PULANG')) return '<span class="badge badge-tepat">✅ Pulang</span>';
-  if(kat.includes('TEPAT')) return '<span class="badge badge-tepat">✅ '+(rec.label_absen||'Tepat Waktu')+'</span>';
-  return '<span class="badge" style="background:#f1f5f9;color:#334155">'+(rec.label_absen||rec.kategori_absen||'-')+'</span>';
+  const isKoreksi = !!rec.is_koreksi;
+  // Samain semua badge biar TELAT hasil koreksi = Terlambat Masuk kayak data QR asli
+  if(kat.includes('LIBUR')){
+    return '<span class="badge badge-libur">🏖️ '+(kat==='LIBUR_SABTU'?'Libur Sabtu':kat==='LIBUR_MINGGU'?'Libur Minggu':(rec.label_absen||'Libur'))+(isKoreksi?' ✏️':'')+'</span>';
+  }
+  if(kat.includes('BELUM')){
+    return '<span class="badge badge-belum">⏳ Belum Waktunya Pulang'+(isKoreksi?' ✏️':'')+'</span>';
+  }
+  if(kat.includes('SEBELUM')){
+    return '<span class="badge badge-awal">⏳ Pulang Sebelum Waktunya'+(isKoreksi?' ✏️':'')+'</span>';
+  }
+  if(kat.includes('DILUAR')){
+    return '<span class="badge badge-diluar">⛔ Di Luar Jam Kerja'+(isKoreksi?' ✏️':'')+'</span>';
+  }
+  if(kat.includes('TEPAT') && jenis.includes('MASUK')){
+    return '<span class="badge badge-tepat">✅ Masuk Tepat Waktu'+(isKoreksi?' ✏️':'')+'</span>';
+  }
+  if(kat.includes('TELAT')){
+    return '<span class="badge badge-telat">⚠️ Terlambat Masuk'+(isKoreksi?' ✏️':'')+'</span>';
+  }
+  if(kat.includes('TEPAT') && jenis.includes('PULANG')){
+    return '<span class="badge badge-tepat">✅ Pulang'+(isKoreksi?' ✏️':'')+'</span>';
+  }
+  if(kat.includes('CEPAT') && jenis.includes('PULANG')){
+    return '<span class="badge" style="background:#e0f2fe;border-color:#bae6fd;color:#0c4a6e">⚡ Pulang Cepat'+(isKoreksi?' ✏️':'')+'</span>';
+  }
+  if(kat.includes('TEPAT')){
+    return '<span class="badge badge-tepat">✅ '+(rec.label_absen||'Tepat Waktu')+(isKoreksi?' ✏️':'')+'</span>';
+  }
+  return '<span class="badge" style="background:#f1f5f9;color:#334155">'+(rec.label_absen||rec.kategori_absen||'-')+(isKoreksi?' ✏️':'')+'</span>';
 }
 window.renderLaporanBaru = function(){
   const body=document.getElementById('rekapBody'); if(!body) return;
