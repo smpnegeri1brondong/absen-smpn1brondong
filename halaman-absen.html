@@ -417,7 +417,7 @@ try{
 }catch(e){ document.getElementById('firebaseInfo').textContent='❌ Firebase gagal: '+e.message; }
 
 const LAT=-6.9075625, LNG=112.2108125, PLUS="36R5+VX Tlogoretno"; // SMPN 1 Brondong sync dengan admin Adminnn-LOGIN-MATA-ENTER-FORGOT.html
-let CURRENT_LAT=-6.9075625, CURRENT_LNG=112.2108125, RADIUS=40;
+let CURRENT_LAT=-6.9075625, CURRENT_LNG=112.2108125, RADIUS=40; let MODE_UJI_COBA=false; window.MODE_UJI_COBA=false;
 const MIN_R=20, MAX_R=70, DEF_R=40;
 function clampR(v){ let n=parseInt(v); if(isNaN(n)) return DEF_R; if(n<MIN_R) return MIN_R; if(n>MAX_R) return MAX_R; return n; }
 
@@ -436,6 +436,8 @@ function initMap(){
     if(slat && slng){ CURRENT_LAT=parseFloat(slat); CURRENT_LNG=parseFloat(slng); }
     const lr = localStorage.getItem('RADIUS_CUSTOM') || localStorage.getItem('RADIUS_METER');
     if(lr){ RADIUS=clampR(lr); }
+    const uji = localStorage.getItem('MODE_UJI_COBA');
+    if(uji!==null){ MODE_UJI_COBA = uji==='1'; window.MODE_UJI_COBA = MODE_UJI_COBA; }
   }catch(e){}
   map=L.map('miniMap',{zoomControl:false}).setView([CURRENT_LAT,CURRENT_LNG],17);
   roadLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20});
@@ -795,6 +797,20 @@ async function prosesAbsenOtomatis(){
   };
   document.getElementById('lokasiStatus').textContent=`Jarak ${jarakText} • ${data.status} • ${jamInfo.jenis}`;
 
+  // === MODE PRODUKSI - BLOK LUAR RADIUS (cek MODE_UJI_COBA) ===
+  // MODE_UJI_COBA ON = boleh luar radius (uji coba dari rumah) + badge kecil merah di admin
+  // MODE_UJI_COBA OFF = produksi, luar radius diblok
+  if(lastDistance > RADIUS && !MODE_UJI_COBA){
+    document.getElementById('c2').innerHTML=`${jarakText} <div>❌</div>`; document.getElementById('c2').style.background='#fee2e2';
+    document.getElementById('c3').innerHTML=`Di Luar Radius <div>❌</div>`; document.getElementById('c3').style.background='#fee2e2';
+    document.getElementById('firebaseStatus').textContent=`❌ Di luar radius ${jarakText} - tidak tercatat`;
+    setTimeout(()=>{
+      showCustomAlert('❗ ANDA DI LUAR RADIUS', `<b>${currentGuru.nama}</b><br><br>Halo, <b>${currentGuru.nama}</b><br>Anda berada <b>${jarakText}</b> dari sekolah (radius aktif <b>${RADIUS}m</b>)<br><br>Absen anda <b>❌ TIDAK TERCATAT ❌</b> di laporan.<br><br>Silakan mendekat ke area sekolah dan scan lagi.<br><br><button onclick="closeCustomAlert()" style="background:#0f355c;color:white;border:none;padding:10px 20px;border-radius:10px;font-weight:800;width:100%">Mengerti</button>`);
+    },400);
+    setTimeout(()=>{ document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 SCAN LAGI'; },2000);
+    return;
+  }
+
   // === CEK BELUM WAKTUNYA PULANG - GAK TERCATAT ===
   if(jamInfo.kategori==='BELUM_BUKA'){
     document.getElementById('c3').innerHTML=`Belum Buka <div>⏰</div>`; document.getElementById('c3').style.background='#ffedd5';
@@ -1033,6 +1049,15 @@ async function startAdminSync(){
             localStorage.setItem('RADIUS_METER', String(r));
             try{ if(window.circle) window.circle.setRadius(r); }catch(e){}
             console.log("✅ Radius sync from admin:", r);
+          }
+        }
+        if(data.mode_uji_coba!==undefined || data.is_uji_coba!==undefined || data.mode_uji!==undefined){
+          let isOn = !!(data.mode_uji_coba ?? data.is_uji_coba ?? data.mode_uji);
+          if(isOn!==MODE_UJI_COBA){
+            MODE_UJI_COBA=isOn;
+            window.MODE_UJI_COBA=isOn;
+            localStorage.setItem('MODE_UJI_COBA', isOn ? '1' : '0');
+            console.log("🧪 Mode Uji Coba sync from admin:", isOn ? "ON - luar radius boleh" : "OFF - produksi blok");
           }
         }
         let nLat = data.latitude || data.lat;
