@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#0f355c"/>
-<link rel="apple-touch-icon" href="si-absen.png"/>
+<link rel="apple-touch-icon" href="logo-snebin.png"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-title" content="SI-ABSEN"/>
+<meta name="apple-mobile-web-app-title" content="SNEB.in"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<title>Admin SI-ABSEN</title>
+<title>Admin SNEB.in</title>
 <link rel="icon" href="logo-smp2.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -208,9 +208,9 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <body>
 <header class="header" style="gap:12px">
 <div class="logo-box">
-  <div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SI-ABSEN" style="width:100%;height:100%;object-fit:contain"/></div>
+  <div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SNEB.in" style="width:100%;height:100%;object-fit:contain"/></div>
 <div>
-  <div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SI-ABSEN</div>
+  <div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SNEB.in</div>
 <div style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.5px">Panel Admin</div>
 </div>
 </div>
@@ -944,7 +944,7 @@ function initMap(){
   currentMapMode=savedMode;
   if(savedMode==='sat'){ satLayer.addTo(mapAdmin); } else { roadLayer.addTo(mapAdmin); }
   
-  adminCircle=L.circle([LAT,LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f4c81',fillOpacity:0.12}).addTo(mapAdmin);
+  adminCircle=L.circle([LAT,LNG],{radius:RADIUS,color:typeof MODE!=='undefined' && MODE==='satelit'?'#ffffff':'#0f355c',weight:2,dashArray:'8 8',fillColor:typeof MODE!=='undefined' && MODE==='satelit'?'#38bdf8':'#0f4c81',fillOpacity:typeof MODE!=='undefined' && MODE==='satelit'?0.25:0.12}).addTo(mapAdmin);
   
   // Titik sekolah - BISA DIGESER
   const schoolIcon = L.divIcon({html:'<div style="width:30px;height:30px;background:#0f355c;border:3px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;box-shadow:0 2px 8px rgba(0,0,0,.3);font-size:14px">🏫</div>',iconSize:[30,30],className:''});
@@ -1296,7 +1296,7 @@ function updateGuru(){
       if(gid!==editingGID){ try{ await deleteDoc(doc(d, "gurus", editingGID)); }catch(e){} }
       if(isPassChanged){
         try{ await setDoc(doc(d, "users", gid), {gid:gid, password:pass, password_custom:pass, nama:nama, nip:nip, updated_at:new Date().toISOString()}, {merge:true}); if(gid!==editingGID){ try{ await deleteDoc(doc(d, "users", editingGID)); }catch(e){} } }catch(e){}
-        try{ localStorage.setItem('SI-ABSEN_PASS_'+gid, pass); }catch(e){}
+        try{ localStorage.setItem('SNEB.in_PASS_'+gid, pass); }catch(e){}
       }
       const LS='CUSTOM_GURUS_V5';
       let customs=[]; try{ customs=JSON.parse(localStorage.getItem(LS)||'[]'); }catch(e){ customs=[]; }
@@ -2015,7 +2015,7 @@ window.simpanGTKBaru=async()=>{
       customs=customs.filter(x=>x.gid!==gid);
       customs.push({gid:gid, originalGID:gid, nama:nama, nip:nip, password:password, isNew:true, created_at:new Date().toISOString()});
       localStorage.setItem('CUSTOM_GURUS_V5', JSON.stringify(customs));
-      localStorage.setItem('SI-ABSEN_PASS_'+gid, password);
+      localStorage.setItem('SNEB.in_PASS_'+gid, password);
     }catch(e){ console.log('custom save fail', e); }
     if(typeof gurus!=='undefined'){
       const idx=gurus.findIndex(x=>x.gid===gid);
@@ -2625,7 +2625,7 @@ window.simpanGTKBaru=async()=>{
 let deferredPrompt;
 const btn = document.createElement('button');
 btn.id='pwaInstallBtn';
-btn.innerHTML='📲 Install Aplikasi SI-ABSEN';
+btn.innerHTML='📲 Install Aplikasi SNEB.in';
 btn.style.cssText='position:fixed;bottom:20px;left:16px;right:16px;z-index:9999;background:#0f355c;color:white;border:none;height:52px;border-radius:16px;font-weight:800;display:none;';
 document.body.appendChild(btn);
 window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; btn.style.display='block'; });
