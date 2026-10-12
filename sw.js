@@ -1,11 +1,11 @@
 
-const CACHE_NAME = 'si-absen-v8-icon-baru';
+const CACHE_NAME = 'sneb-in-v1';
 const urlsToCache = [
   './',
   './index.html',
   './halaman-absen.html',
   './admin-absen.html',
-  './si-absen.png',
+  './logo-snebin.png',
   './logo-smp2.png',
   './manifest.json'
 ];
