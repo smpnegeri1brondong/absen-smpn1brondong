@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#0f355c"/>
-<link rel="apple-touch-icon" href="si-absen.png"/>
+<link rel="apple-touch-icon" href="logo-snebin.png"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-title" content="SI-ABSEN"/>
+<meta name="apple-mobile-web-app-title" content="SNEB.in"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<title>SI-ABSEN</title>
+<title>SNEB.in</title>
 <link rel="icon" href="logo-smp2.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -41,11 +41,14 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 #customAlert .modal-body{padding:20px;color:#334155;font-size:14px;line-height:1.5}
 #customAlert .modal-footer{padding:12px 20px;display:flex;justify-content:flex-end;border-top:1px solid #e2e8f0}
 #firebaseInfo{ display:none !important; }
+
+@keyframes blink-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(0.8)}}
+.live-dot{display:inline-block;animation:blink-dot 1.2s infinite;}
 </style>
 </head>
 <body>
 <header class="header">
-<div style="display:flex;align-items:center;gap:8px"><div style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'" alt="SI-ABSEN" style="width:100%;height:100%;object-fit:contain"/></div><div><div style="font-weight:800;color:#0f355c;font-size:12px">SI-ABSEN</div><div style="font-size:10px;color:#64748b">ABSEN GTK</div></div></div>
+<div style="display:flex;align-items:center;gap:8px"><div style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'" alt="SNEB.in" style="width:100%;height:100%;object-fit:contain"/></div><div><div style="font-weight:800;color:#0f355c;font-size:12px">SNEB.in</div><div style="font-size:10px;color:#64748b">ABSEN GTK</div></div></div>
 <div>
   <span id="gidBadge" class="hidden" style="background:#e0f2fe;color:#0f355c;font-size:11px;font-weight:700;padding:6px 10px;border-radius:999px"></span> 
   <a id="logoutBtn" href="#" class="hidden" onclick="logout();return false;" style="font-size:12px;color:#64748b">Logout</a>
@@ -57,11 +60,11 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
   <div style="display:inline-flex; flex-direction:column; align-items:center; gap:10px">
     <div style="width:78px;height:78px;border-radius:22px;background:white;border:1px solid #e2e8f0;box-shadow:0 8px 24px rgba(15,53,92,.12);overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'width:78px;height:78px;border-radius:22px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px\'>QR</div>'" alt="logo" style="width:84%;height:84%;object-fit:contain"/></div>
     <div>
-      <div style="font-weight:800;color:#0f355c;font-size:22px;letter-spacing:.3px">SI-ABSEN</div>
+      <div style="font-weight:800;color:#0f355c;font-size:22px;letter-spacing:.3px">SNEB.in</div>
       <div style="font-size:11px;color:#0369a1;font-weight:800;letter-spacing:1px;margin-top:2px">SMPN 1 BRONDONG</div>
       <div style="margin-top:8px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
         <span style="background:white;border:1px solid #bae6fd;color:#0f355c;padding:4px 10px;border-radius:999px;font-size:9px;font-weight:800">🔐 ID Privat •</span>
-        <span style="background:#0f355c;color:white;padding:4px 10px;border-radius:999px;font-size:9px;font-weight:700">● Live System ●</span>
+        <span style="background:#0f355c;color:white;padding:4px 12px;border-radius:999px;font-size:9px;font-weight:700;display:inline-flex;align-items:center;gap:6px"><span class="live-dot" style="width:7px;height:7px;background:#22c55e;border-radius:50%;display:inline-block;box-shadow:0 0 6px #22c55e"></span> Live System</span>
       </div>
     </div>
   </div>
@@ -123,7 +126,7 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
   <div style="display:flex;align-items:center;justify-content:flex-start;gap:8px">
     <div style="width:28px;height:28px;border-radius:8px;background:transparent;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'; this.parentElement.style.fontSize='10px'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'" alt="logo" style="width:100%;height:100%;object-fit:contain"/></div>
     <div style="text-align:left">
-      <div style="font-weight:800;font-size:11px;color:#0f355c">SI-ABSEN — SMPN 1 Brondong</div>
+      <div style="font-weight:800;font-size:11px;color:#0f355c">SNEB.in — SMPN 1 Brondong</div>
       <div style="font-size:9px;color:#94a3b8">QR Geofencing • ID Privat Terjaga • Anti Titip Absen</div>
     </div>
   </div>
@@ -377,7 +380,7 @@ try{
         onSnapshot(collection(window.db, "izin"), (snap)=>{
           try{
             const today = new Date().toISOString().split('T')[0];
-            const gid = (typeof currentGuru!=='undefined' && currentGuru) ? currentGuru.gid : (localStorage.getItem('SI-ABSEN_GID')||'');
+            const gid = (typeof currentGuru!=='undefined' && currentGuru) ? currentGuru.gid : (localStorage.getItem('SNEB.in_GID')||'');
             const list = [];
             snap.forEach(d=>{
               const data=d.data();
@@ -443,7 +446,7 @@ function initMap(){
   roadLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20});
   satLayer=L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20});
   if(MODE_MINI==='satelit') satLayer.addTo(map); else roadLayer.addTo(map);
-  circle=L.circle([CURRENT_LAT,CURRENT_LNG],{radius:RADIUS,color:'#0f355c',weight:2,dashArray:'8 8',fillColor:'#0f355c',fillOpacity:0.12}).addTo(map);
+  circle=L.circle([CURRENT_LAT,CURRENT_LNG],{radius:RADIUS,color:typeof MODE!=='undefined' && MODE==='satelit'?'#ffffff':'#0f355c',weight:2,dashArray:'8 8',fillColor:typeof MODE!=='undefined' && MODE==='satelit'?'#38bdf8':'#0f355c',fillOpacity:typeof MODE!=='undefined' && MODE==='satelit'?0.25:0.12}).addTo(map);
   const ic=L.divIcon({html:'<div style="width:28px;height:28px;background:#0f355c;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white">🏫</div>',iconSize:[28,28],className:''});
   schoolMarker=L.marker([CURRENT_LAT,CURRENT_LNG],{icon:ic}).addTo(map);
   window.map=map; window.circle=circle; window.schoolMarker=schoolMarker; window.roadLayer=roadLayer; window.satLayer=satLayer;
@@ -489,10 +492,7 @@ window.getJenisAbsen=(d)=>{
     const ket=jamKhusus.keterangan||'Pulang Cepat';
     const jamMulaiStr = String(Math.floor(mulai/60)).padStart(2,'0')+':'+String(mulai%60).padStart(2,'0');
     const jamSelesaiStr = String(Math.floor(selesai/60)).padStart(2,'0')+':'+String(selesai%60).padStart(2,'0');
-    // Masuk tetap normal
-    if(menit>=360 && menit<=435){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Masuk Tepat Waktu 06:00-07:15'}; }
-    if(menit>=436 && menit<=690){ const telat=menit-435; return {jenis:'MASUK', kategori:'TELAT', label:'Terlambat', color:'telat', valid:true, telatMenit:telat, pesan:`Terlambat ${telat} menit dari 07:15`}; }
-    // Pulang cepat logic: 30 menit sebelum mulai = sebelum waktunya, 90 menit sebelum = belum waktunya
+    // FIX BUG PULANG CEPAT: cek pulang cepat DULU sebelum masuk, soalnya masuk telat 07:16-11:30 nutupin jam 11:00 pulang cepat
     const belumMulai = mulai-90;
     const sebelumMulai = mulai-30;
     if(menit>=belumMulai && menit<sebelumMulai){
@@ -507,6 +507,9 @@ window.getJenisAbsen=(d)=>{
     if(menit>930){
       return {jenis:'PULANG', kategori:'DILUAR_JAM_KERJA', label:'Pulang Di Luar Jam Kerja', color:'diluar', valid:true, telatMenit:0, pesan:`Pulang di luar jam kerja >${jamSelesaiStr} - ${ket}`, pulangCepat:true, jamKhusus:jamKhusus};
     }
+    // Masuk tetap normal, tapi cuma sampai sebelum belumMulai (biar gak tabrakan sama pulang cepat)
+    if(menit>=360 && menit<=435){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Masuk Tepat Waktu 06:00-07:15'}; }
+    if(menit>=436 && menit<belumMulai){ const telat=menit-435; return {jenis:'MASUK', kategori:'TELAT', label:'Terlambat', color:'telat', valid:true, telatMenit:telat, pesan:`Terlambat ${telat} menit dari 07:15`}; }
   }
   // === 4. JAM NORMAL ===
   if(day===5){
@@ -670,17 +673,17 @@ window.doLogin=()=>{
     if(!g){ er.textContent='ID tidak ditemukan ('+i+') - total GTK: '+GURUS.length; er.classList.remove('hidden'); return; }
     let stored=null;
     if(window.customPassMap && window.customPassMap[g.gid]) stored=window.customPassMap[g.gid];
-    if(!stored){ try{ stored=localStorage.getItem('SI-ABSEN_PASS_'+g.gid); }catch(e){} }
+    if(!stored){ try{ stored=localStorage.getItem('SNEB.in_PASS_'+g.gid); }catch(e){} }
     if(stored && stored.toLowerCase().startsWith('brondong')){
       const num=stored.replace(/[^0-9]/g,'').slice(-4);
       const migrated='snebron'+num;
-      try{ localStorage.setItem('SI-ABSEN_PASS_'+g.gid, migrated); }catch(e){}
+      try{ localStorage.setItem('SNEB.in_PASS_'+g.gid, migrated); }catch(e){}
       stored=migrated;
     }
     const eff=stored||g.password||'';
     if(eff!==p){ er.textContent='Password salah. Silakan cek lagi atau hubungi admin.'; er.classList.remove('hidden'); return; }
     currentGuru=g; 
-    try{ localStorage.setItem('SI-ABSEN_GID',g.gid); }catch(e){}
+    try{ localStorage.setItem('SNEB.in_GID',g.gid); }catch(e){}
     showAbsenScreen();
   }catch(e){
     console.error('doLogin error', e);
@@ -690,7 +693,7 @@ window.doLogin=()=>{
 };
 
 function showAbsenScreen(){
-  if(!currentGuru){ const s=localStorage.getItem('SI-ABSEN_GID'); if(s) currentGuru=GURUS.find(g=>g.gid===s); }
+  if(!currentGuru){ const s=localStorage.getItem('SNEB.in_GID'); if(s) currentGuru=GURUS.find(g=>g.gid===s); }
   if(!currentGuru) return;
   document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('absenScreen').classList.remove('hidden');
   document.getElementById('gidBadge').textContent=currentGuru.gid; document.getElementById('gidBadge').classList.remove('hidden');
@@ -698,7 +701,7 @@ function showAbsenScreen(){
   document.getElementById('namaGuru').textContent=currentGuru.nama; document.getElementById('nipGuru').textContent='NIP '+(currentGuru.nip||'-')+' • '+currentGuru.gid;
   document.getElementById('inisialGuru').textContent=getInisial(currentGuru.nama);
   cekJamAbsen(); setInterval(cekJamAbsen,60000);
-  const isCustom=localStorage.getItem('SI-ABSEN_PASS_'+currentGuru.gid);
+  const isCustom=localStorage.getItem('SNEB.in_PASS_'+currentGuru.gid);
   // currentPassInfo removed - admin only
   setTimeout(()=>{ initMap(); cekLokasi(); setTimeout(()=>{ if(map) map.invalidateSize(); },1000); },500);
   // === CEK IZIN HARI INI (FULL blok sebelum kamera + MASUK/PULANG info sebelum absen) ===
@@ -712,7 +715,7 @@ window.lihatPass = function(){ return; };
 window.sembunyiPass = function(){ return; };
 window.toggleNewPass = function(){ return; };
 
-window.logout=()=>{ localStorage.removeItem('SI-ABSEN_GID'); location.reload(); };
+window.logout=()=>{ localStorage.removeItem('SNEB.in_GID'); location.reload(); };
 
 async function prosesAbsenOtomatis(){
   const now=new Date();
@@ -1015,17 +1018,17 @@ window.mulaiScan=async()=>{ await prosesAbsenOtomatis(); };
 window.hitungJarak=(lat1,lon1,lat2,lon2)=>{ const R=6371000; const toRad=x=>x*Math.PI/180; const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1); const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); };
 // old toggleGantiPass removed - admin only
 window.lihatPass=()=>{ 
-  const cur = localStorage.getItem('SI-ABSEN_PASS_'+currentGuru.gid) || currentGuru.password; 
+  const cur = localStorage.getItem('SNEB.in_PASS_'+currentGuru.gid) || currentGuru.password; 
   document.getElementById('currentPassInfo').innerHTML = '<div style="font-size:10px"><div style="font-weight:700;color:#0f355c">Aktif: <span style="font-family:monospace;background:white;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;word-break:break-all">'+cur+'</span></div><div style="margin-top:6px"><button onclick="sembunyiPass()" style="font-size:9px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:4px 10px;cursor:pointer;font-weight:700">🙈 Tutup</button></div></div>'; 
 };
 window.sembunyiPass=()=>{
-  const isCustom=localStorage.getItem('SI-ABSEN_PASS_'+currentGuru.gid);
+  const isCustom=localStorage.getItem('SNEB.in_PASS_'+currentGuru.gid);
   document.getElementById('currentPassInfo').innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-size:10px;color:#64748b"><span style="font-weight:700;color:#0f355c">'+(isCustom?'Custom':'Default')+'</span> • ••••••••</div><button onclick="lihatPass()" style="font-size:9px;background:white;border:1px solid #e2e8f0;border-radius:999px;padding:3px 8px;font-weight:700;color:#0f355c;cursor:pointer">Lihat</button></div>';
 };
-window.simpanPasswordBaru=async()=>{ const newP=document.getElementById('newPassInput').value.trim(); const confP=document.getElementById('confirmPassInput').value.trim(); const msg=document.getElementById('passChangeMsg'); msg.classList.remove('hidden'); if(!newP || newP.length<4){ msg.textContent='Password minimal 4'; msg.style.background='#fee2e2'; msg.style.color='#991b1b'; return; } if(newP!==confP){ msg.textContent='Ulangi tidak sama'; msg.style.background='#fee2e2'; msg.style.color='#991b1b'; return; } localStorage.setItem('SI-ABSEN_PASS_'+currentGuru.gid, newP); msg.textContent='✅ Disimpan!'; msg.style.background='#dcfce7'; msg.style.color='#166534'; try{ if(db){ await setDoc(doc(db,"users", currentGuru.gid), { password_custom: newP, updated_at: new Date().toISOString(), nama: currentGuru.nama }, {merge:true}); msg.textContent='✅ Disimpan di HP & Firestore!'; } }catch(e){ msg.textContent='✅ Lokal. Firestore: '+e.message; } };
+window.simpanPasswordBaru=async()=>{ const newP=document.getElementById('newPassInput').value.trim(); const confP=document.getElementById('confirmPassInput').value.trim(); const msg=document.getElementById('passChangeMsg'); msg.classList.remove('hidden'); if(!newP || newP.length<4){ msg.textContent='Password minimal 4'; msg.style.background='#fee2e2'; msg.style.color='#991b1b'; return; } if(newP!==confP){ msg.textContent='Ulangi tidak sama'; msg.style.background='#fee2e2'; msg.style.color='#991b1b'; return; } localStorage.setItem('SNEB.in_PASS_'+currentGuru.gid, newP); msg.textContent='✅ Disimpan!'; msg.style.background='#dcfce7'; msg.style.color='#166534'; try{ if(db){ await setDoc(doc(db,"users", currentGuru.gid), { password_custom: newP, updated_at: new Date().toISOString(), nama: currentGuru.nama }, {merge:true}); msg.textContent='✅ Disimpan di HP & Firestore!'; } }catch(e){ msg.textContent='✅ Lokal. Firestore: '+e.message; } };
 
 document.addEventListener('DOMContentLoaded', ()=>{
-  const s=localStorage.getItem('SI-ABSEN_GID'); if(s){ currentGuru=GURUS.find(g=>g.gid===s); if(currentGuru) showAbsenScreen(); }
+  const s=localStorage.getItem('SNEB.in_GID'); if(s){ currentGuru=GURUS.find(g=>g.gid===s); if(currentGuru) showAbsenScreen(); }
 });
 
 // === PATCH KONEK ADMIN TERBARU - MAP + RADIUS + GURU + PASSWORD ===
@@ -1091,7 +1094,7 @@ async function startAdminSync(){
             let idx=GURUS.findIndex(g=>g.gid===gid);
             if(idx>-1){ GURUS.splice(idx,1); changed=true; }
             // kalau yang dihapus adalah yang lagi login, logout
-            try{ if(typeof currentGuru!=='undefined' && currentGuru && currentGuru.gid===gid){ currentGuru=null; localStorage.removeItem('SI-ABSEN_GID'); } }catch(e){}
+            try{ if(typeof currentGuru!=='undefined' && currentGuru && currentGuru.gid===gid){ currentGuru=null; localStorage.removeItem('SNEB.in_GID'); } }catch(e){}
           } else {
             let ex=GURUS.find(g=>g.gid===gid);
             if(ex){
@@ -1131,7 +1134,7 @@ async function startAdminSync(){
         const custom=data.password_custom||data.password;
         if(custom && gid){
           window.customPassMap[gid]=custom;
-          try{ localStorage.setItem('SI-ABSEN_PASS_'+gid, custom); }catch(e){}
+          try{ localStorage.setItem('SNEB.in_PASS_'+gid, custom); }catch(e){}
         }
       });
       console.log("✅ Custom passwords loaded:", Object.keys(window.customPassMap).length);
@@ -1143,7 +1146,7 @@ async function startAdminSync(){
           const custom=data.password_custom;
           if(custom){
             window.customPassMap[gid]=custom;
-            try{ localStorage.setItem('SI-ABSEN_PASS_'+gid, custom); }catch(e){}
+            try{ localStorage.setItem('SNEB.in_PASS_'+gid, custom); }catch(e){}
           }
         });
       });
@@ -1200,7 +1203,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 let deferredPrompt;
 const btn = document.createElement('button');
 btn.id='pwaInstallBtn';
-btn.innerHTML='📲 Install Aplikasi SI-ABSEN';
+btn.innerHTML='📲 Install Aplikasi SNEB.in';
 btn.style.cssText='position:fixed;bottom:20px;left:16px;right:16px;z-index:9999;background:#0f355c;color:white;border:none;height:52px;border-radius:16px;font-weight:800;display:none;';
 document.body.appendChild(btn);
 window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; btn.style.display='block'; });
