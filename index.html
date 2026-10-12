@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#0f355c"/>
-<link rel="apple-touch-icon" href="si-absen.png"/>
+<link rel="apple-touch-icon" href="logo-snebin.png"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-title" content="SI-ABSEN"/>
+<meta name="apple-mobile-web-app-title" content="SNEB.in"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<title>SI-ABSEN - SMPN 1 Brondong | 36R6+X89</title>
+<title>SNEB.in - SMPN 1 Brondong</title>
 <link rel="icon" href="logo-smp2.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -56,14 +56,17 @@ body{margin:0;font-family:Inter,system-ui;background:#f8fafc;color:#0f172a}
   .btn{font-size:12px !important;height:40px !important}
 }
 
+
+@keyframes blink-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(0.8)}}
+.live-dot{display:inline-block;animation:blink-dot 1.2s infinite;}
 </style>
 </head>
 <body>
 <header class="header">
   <div class="logo-box">
-    <div class="logo-img"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'" alt="SI-ABSEN" style="width:100%;height:100%;object-fit:contain"/></div>
+    <div class="logo-img"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'" alt="SNEB.in" style="width:100%;height:100%;object-fit:contain"/></div>
     <div>
-      <div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SI-ABSEN</div>
+      <div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SNEB.in</div>
       <div style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.5px">SMPN 1 BRONDONG</div>
     </div>
   </div>
@@ -71,7 +74,7 @@ body{margin:0;font-family:Inter,system-ui;background:#f8fafc;color:#0f172a}
     <nav style="display:flex;gap:14px;font-size:12px;color:#64748b;font-weight:600" class="hide-mobile">
       <span>Cara Kerja</span><span>Keamanan</span><span>Privasi Aman</span>
     </nav>
-    <span style="background:#29df29;color:white;font-size:10px;font-weight:700;padding:5px 10px;border-radius:999px">● Live System</span>
+    <span style="background:#0f355c;color:white;font-size:10px;font-weight:700;padding:5px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px"><span class="live-dot" style="width:8px;height:8px;background:#22c55e;border-radius:50%;display:inline-block;box-shadow:0 0 6px #22c55e"></span> Live System</span>
   </div>
 </header>
 
@@ -82,7 +85,7 @@ body{margin:0;font-family:Inter,system-ui;background:#f8fafc;color:#0f172a}
   
   <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:28px;align-items:start">
     <div>
-      <h1 style="font-size:46px;line-height:0.9;font-weight:800;color:#0f355c;margin:0">SI-ABSEN<br/>SMPN 1<br/>Brondong</h1>
+      <h1 style="font-size:46px;line-height:0.9;font-weight:800;color:#0f355c;margin:0">SNEB.in<br/>SMPN 1<br/>Brondong</h1>
       <p style="color:#475569;font-size:13px;line-height:1.6;max-width:420px;margin-top:14px">Absensi QR Berbasis Lokasi | ID Privat & Terenkripsi<br/>Sekali cetak untuk ID Card, validasi otomatis hanya dalam radius yang telah ditentukan.</p>
       <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
         <a class="btn btn-primary" style="height:44px;padding:0 20px" href="halaman-absen.html">Masuk Sebagai GTK →</a>
@@ -99,7 +102,7 @@ body{margin:0;font-family:Inter,system-ui;background:#f8fafc;color:#0f172a}
         <div id="map"></div>
         <!-- FIX: z-index 500 -> 10 biar gak nutupin header -->
         <div style="position:absolute;top:12px;left:12px;right:12px;z-index:10;display:flex;justify-content:space-between;align-items:start;gap:8px;flex-wrap:wrap">
-          <div class="badge">● Radius Aktif •</div>
+          <div style="display:flex;gap:6px;align-items:center"><div id="modeBadge" class="badge" style="background:#dcfce7;color:#166534">✅ Produksi</div></div>
         <div style="position:absolute;top:40px;right:5px;z-index:10;display:flex;gap:8px;flex-wrap:wrap">
           <div style="background:#0f355c;color:white;border-radius:14px;padding:10px 12px;min-width:110px;box-shadow:0 2px 12px rgba(0,0,0,0.15)">
             <div style="color:#a1fca1;font-size:9px;font-weight:700;letter-spacing:0.8px;opacity:0.7">STATUS</div>
@@ -115,7 +118,7 @@ body{margin:0;font-family:Inter,system-ui;background:#f8fafc;color:#0f172a}
         <div style="position:absolute;bottom:12px;left:12px;right:12px;z-index:10;background:white;border-radius:14px;padding:10px 12px;box-shadow:0 4px 16px rgba(0,0,0,0.12);border:1px solid #e2e8f0">
           <div style="font-size:10px;font-weight:700;color:#94a3b8;letter-spacing:0.5px">SMPN 1 Brondong</div>
           <div style="font-size:12px;font-weight:800;color:#0f355c;margin-top:1px">Lamongan</div>
-          <div style="font-size:10px;color:#64748b;margin-top:1px">36R6+X89 • Boho, Tlogoretno</div>
+          <div style="font-size:10px;color:#64748b;margin-top:1px"><span id="plusCodeDisplay">36R6+X89</span> • Boho, Tlogoretno</div>
         </div>
       </div>
     </div>
@@ -158,7 +161,7 @@ body{margin:0;font-family:Inter,system-ui;background:#f8fafc;color:#0f172a}
   <div style="display:flex;align-items:center;justify-content:flex-start;gap:8px">
     <div style="width:28px;height:28px;border-radius:8px;background:transparent;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'; this.parentElement.style.fontSize='10px'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'" alt="logo" style="width:100%;height:100%;object-fit:contain"/></div>
     <div style="text-align:left">
-      <div style="font-weight:800;font-size:11px;color:#0f355c">SI-ABSEN — SMPN 1 Brondong</div>
+      <div style="font-weight:800;font-size:11px;color:#0f355c">SNEB.in — SMPN 1 Brondong</div>
       <div style="font-size:9px;color:#94a3b8">QR Geofencing • ID Privat Terjaga • Anti Titip Absen</div>
     </div>
   </div>
@@ -168,10 +171,101 @@ body{margin:0;font-family:Inter,system-ui;background:#f8fafc;color:#0f172a}
 </footer>
 
 <script>
-const LAT=-6.9075625, LNG=112.2108125, PLUS="36R6+X89";
+let LAT=-6.9075625, LNG=112.2108125, PLUS="36R6+X89";
 let RADIUS=parseInt(localStorage.getItem('RADIUS_METER')||'40');
 let MODE=localStorage.getItem('MAP_MODE')||'peta';
 let map, roadLayer, satLayer, circle, schoolMarker, markerUser, lineToDevice;
+
+// === SYNC FIRESTORE settings/config biar radius & titik sinkron dengan admin ===
+let dbIndex=null;
+async function initFirebaseIndex(){
+  try{
+    const {initializeApp, getApp} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+    const {getFirestore, doc, getDoc, onSnapshot} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const firebaseConfig={apiKey:"AIzaSyCSi5QKL-MapUUdGLV4OuiXupXa3XmRKvg",authDomain:"smpn1-brondong-absen.firebaseapp.com",projectId:"smpn1-brondong-absen",storageBucket:"smpn1-brondong-absen.firebasestorage.app",messagingSenderId:"174884842248",appId:"1:174884842248:web:8625540d5f3ff8b7f45abd"};
+    let app; try{ app=initializeApp(firebaseConfig); }catch(e){ app=getApp(); }
+    dbIndex=getFirestore(app);
+    const ref=doc(dbIndex,"settings","config");
+    const snap=await getDoc(ref);
+    if(snap.exists()){
+      const data=snap.data();
+      // Compat: baca semua varian field (baru + lama)
+      const newLat = data.lat || data.latitude;
+      const newLng = data.lng || data.longitude || data.lon;
+      const newRadius = data.radius || data.radius_meter;
+      if(newLat) LAT=parseFloat(newLat);
+      if(newLng) LNG=parseFloat(newLng);
+      if(data.plus_code) PLUS=data.plus_code;
+      if(newRadius) { 
+        RADIUS=parseInt(newRadius); 
+        localStorage.setItem('RADIUS_METER', RADIUS);
+        localStorage.setItem('RADIUS_CUSTOM', RADIUS);
+      }
+      // Mode uji coba
+      if(data.mode_uji_coba!==undefined || data.is_uji_coba!==undefined || data.mode_uji!==undefined){
+        const isOn = !!(data.mode_uji_coba ?? data.is_uji_coba ?? data.mode_uji);
+        localStorage.setItem('MODE_UJI_COBA', isOn ? '1' : '0');
+        const badgeMode=document.getElementById('modeBadge');
+        if(badgeMode){
+          badgeMode.textContent = isOn ? '🧪 Uji Coba ON' : '✅ Produksi';
+          badgeMode.style.background = isOn ? '#fef3c7' : '#dcfce7';
+          badgeMode.style.color = isOn ? '#92400e' : '#166534';
+        }
+      }
+      console.log("✅ Index sync settings/config:", data);
+      try{
+        if(map){
+          map.setView([LAT,LNG],17);
+          if(circle) { circle.setLatLng([LAT,LNG]); circle.setRadius(RADIUS); }
+          if(schoolMarker) { schoolMarker.setLatLng([LAT,LNG]); schoolMarker.setPopupContent(`SMPN 1 Brondong<br>${PLUS}`); }
+          const badge=document.getElementById('radiusBadge');
+          if(badge) badge.textContent=`● Radius ${RADIUS}m • ${PLUS}`;
+          const plusEl=document.getElementById('plusCodeDisplay');
+          if(plusEl) plusEl.textContent=PLUS;
+          const plusEl2=document.getElementById('plusCodeDisplayHeader');
+          if(plusEl2) plusEl2.textContent=PLUS;
+        }
+      }catch(e){ console.log("map update fail", e); }
+    }
+    // Realtime listener - compat semua field
+    onSnapshot(ref, (snap)=>{
+      if(!snap.exists()) return;
+      const data=snap.data();
+      let changed=false;
+      const newLat = data.lat || data.latitude;
+      const newLng = data.lng || data.longitude || data.lon;
+      const newRadius = data.radius || data.radius_meter;
+      if(newLat && parseFloat(newLat)!==LAT){ LAT=parseFloat(newLat); changed=true; }
+      if(newLng && parseFloat(newLng)!==LNG){ LNG=parseFloat(newLng); changed=true; }
+      if(newRadius && parseInt(newRadius)!==RADIUS){ RADIUS=parseInt(newRadius); localStorage.setItem('RADIUS_METER', RADIUS); localStorage.setItem('RADIUS_CUSTOM', RADIUS); changed=true; }
+      if(data.plus_code && data.plus_code!==PLUS){ PLUS=data.plus_code; changed=true; }
+      if(data.mode_uji_coba!==undefined || data.is_uji_coba!==undefined || data.mode_uji!==undefined){
+        const isOn = !!(data.mode_uji_coba ?? data.is_uji_coba ?? data.mode_uji);
+        localStorage.setItem('MODE_UJI_COBA', isOn ? '1' : '0');
+        const badgeMode=document.getElementById('modeBadge');
+        if(badgeMode){
+          badgeMode.textContent = isOn ? '🧪 Uji Coba ON' : '✅ Produksi';
+          badgeMode.style.background = isOn ? '#fef3c7' : '#dcfce7';
+          badgeMode.style.color = isOn ? '#92400e' : '#166534';
+        }
+      }
+      if(changed && map){
+        map.setView([LAT,LNG],17);
+        if(circle){ circle.setLatLng([LAT,LNG]); circle.setRadius(RADIUS); }
+        if(schoolMarker){ schoolMarker.setLatLng([LAT,LNG]); }
+        const badge=document.getElementById('radiusBadge');
+        if(badge) badge.textContent=`● Radius ${RADIUS}m • ${PLUS}`;
+        const plusEl=document.getElementById('plusCodeDisplay');
+        if(plusEl) plusEl.textContent=PLUS;
+        const plusEl2=document.getElementById('plusCodeDisplayHeader');
+        if(plusEl2) plusEl2.textContent=PLUS;
+        console.log("🔄 Index realtime update settings/config");
+      }
+    });
+  }catch(e){ console.log("initFirebaseIndex fail", e); }
+}
+initFirebaseIndex();
+
 
 function initMap(){
   map = L.map('map',{zoomControl:false}).setView([LAT,LNG],17);
@@ -245,7 +339,7 @@ window.addEventListener('DOMContentLoaded', initMap);
 let deferredPrompt;
 const btn = document.createElement('button');
 btn.id='pwaInstallBtn';
-btn.innerHTML='📲 Install Aplikasi SI-ABSEN';
+btn.innerHTML='📲 Install Aplikasi SNEB.in';
 btn.style.cssText='position:fixed;bottom:20px;left:16px;right:16px;z-index:9999;background:#0f355c;color:white;border:none;height:52px;border-radius:16px;font-weight:800;display:none;';
 document.body.appendChild(btn);
 window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; btn.style.display='block'; });
