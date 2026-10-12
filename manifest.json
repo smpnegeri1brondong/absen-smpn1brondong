@@ -1,7 +1,7 @@
 {
   "name": "SNEB.in SMPN 1 Brondong",
   "short_name": "SNEB.in",
-  "description": "SNEB.in - Sistem Absen GTK SMPN 1 Brondong - Info, Absen & Admin",
+  "description": "SNEB.in - Sistem Absen GTK SMPN 1 Brondong",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -34,7 +34,19 @@
       "purpose": "any maskable"
     },
     {
+      "src": "logo-smp2.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
       "src": "logo-snebin.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo-smp2.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

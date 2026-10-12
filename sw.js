@@ -1,28 +1,34 @@
-
-const CACHE_NAME = 'sneb-in-v1';
+const CACHE_NAME = 'sneb-in-v4';
 const urlsToCache = [
   './',
   './index.html',
   './halaman-absen.html',
   './admin-absen.html',
-  './logo-snebin.png',
   './logo-smp2.png',
+  './logo-snebin.png',
   './manifest.json'
 ];
 self.addEventListener('install', e=>{
-  e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(urlsToCache)).catch(()=>{}));
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(c=>{
+      return c.addAll(urlsToCache.map(url=>new Request(url, {cache: 'reload'}))).catch(err=>{
+        return Promise.allSettled(urlsToCache.map(u=>c.add(u)));
+      });
+    })
+  );
   self.skipWaiting();
 });
 self.addEventListener('activate', e=>{
-  e.waitUntil(caches.keys().then(keys=>Promise.all(keys.map(k=>k!==CACHE_NAME?caches.delete(k):null))));
-  self.clients.claim();
+  e.waitUntil(
+    caches.keys().then(keys=>Promise.all(keys.map(k=>{
+      if(k!==CACHE_NAME) return caches.delete(k);
+    }))).then(()=>self.clients.claim())
+  );
 });
 self.addEventListener('fetch', e=>{
-  // Jangan cache Firebase / Firestore / Google Maps
   if(e.request.url.includes('firestore.googleapis.com') || e.request.url.includes('firebase') || e.request.url.includes('googleapis.com') || e.request.url.includes('gstatic.com')){
     return;
   }
-  // Network first untuk HTML biar auto-update pas kamu push ke GitHub
   if(e.request.destination==='document'){
     e.respondWith(
       fetch(e.request).then(res=>{
