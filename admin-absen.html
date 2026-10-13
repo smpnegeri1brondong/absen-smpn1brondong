@@ -871,7 +871,7 @@ window.simpanIzin = async()=>{
     const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
     const isEdit = !!window.editingIzinId;
     const id = isEdit ? window.editingIzinId : `${gid}_${mulai}_${scope}_${Date.now()}`;
-    await setDoc(doc(db, "izin", id), {
+    const baseData = {
       gid: gid,
       nama: nama,
       jenis: jenis,
@@ -881,11 +881,15 @@ window.simpanIzin = async()=>{
       tanggal_selesai: selesai,
       keterangan: ket,
       status: 'DISETUJUI',
-      created_at: isEdit ? undefined : new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      edited: isEdit ? true : false,
-      created_by: isEdit ? undefined : 'admin'
-    }, {merge:true});
+      updated_at: new Date().toISOString()
+    };
+    if(isEdit){
+      baseData.edited = true;
+    } else {
+      baseData.created_at = new Date().toISOString();
+      baseData.created_by = 'admin';
+    }
+    await setDoc(doc(db, "izin", id), baseData, {merge:true});
     alert(`${isEdit?'✅ Izin di-update':'✅ Izin '+jenis+' '+scope+' untuk '+nama} ${mulai}${mulai!==selesai?' s/d '+selesai:''} tersimpan!`);
     document.getElementById('izinKeterangan').value='';
     window.editingIzinId=null;
