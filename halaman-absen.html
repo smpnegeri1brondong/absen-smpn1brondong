@@ -152,9 +152,25 @@ const firebaseConfig = {
   appId: "1:174884842248:web:8625540d5f3ff8b7f45abd"
 };
 let db=null;
+let auth=null;
 try{
   const app=initializeApp(firebaseConfig);
   db=getFirestore(app); window.db=db;
+  // === FIX ANTI-TRAUMA RULES: login anonymous biar bisa baca jam_khusus walau rules butuh auth ===
+  try{
+    const {getAuth, signInAnonymously, onAuthStateChanged} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+    auth=getAuth(app); window.auth=auth;
+    onAuthStateChanged(auth, (user)=>{
+      if(user){
+        console.log('✅ Auth anonymous OK:', user.uid);
+        document.getElementById('firebaseInfo').textContent='✅ Firebase: '+firebaseConfig.projectId+' • anon:'+user.uid.slice(0,4);
+        // load ulang setelah auth siap
+        setTimeout(()=>{ window.loadGurusFromFirestore?.(); window.loadKalenderLibur?.(); window.loadJamKhusus?.(); }, 500);
+      }
+    });
+    // coba login anonymous (gak ganggu admin login)
+    signInAnonymously(auth).catch(e=>console.log('anon auth fail (mungkin sudah login):', e.code));
+  }catch(e){ console.log('anon auth import fail', e); }
   document.getElementById('firebaseInfo').textContent='✅ Firebase: '+firebaseConfig.projectId+'';
   window.db=db;
 
@@ -192,6 +208,12 @@ try{
   window.kalenderLiburList = [];
   window.jamKhususList = [];
   window.izinList = [];
+  // Helper tanggal lokal YYYY-MM-DD (bukan UTC biar gak miss 1 hari di WIB)
+  window.getLocalDateStr = function(d){
+    const n=d||new Date();
+    return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+  };
+
   window.izinHariIni = null; // izin FULL/MASUK/PULANG yang aktif hari ini
   window.izinMasukHariIni = null;
   window.izinPulangHariIni = null;
@@ -298,7 +320,7 @@ try{
   };
   window.checkIzinDanTampilkanAlert = async function(){
     if(!currentGuru) return;
-    const today = new Date().toISOString().split('T')[0];
+    const today = window.getLocalDateStr();
     // libur punya prioritas, jika hari ini libur, jangan tampilkan izin
     try{
       const liburMap = window.kalenderLiburMap||{};
@@ -734,11 +756,11 @@ window.logout=()=>{ localStorage.removeItem('SNEB.in_GID'); location.reload(); }
 
 async function prosesAbsenOtomatis(){
   const now=new Date();
-  // === FIX: Force refresh jam khusus hari ini biar pulang cepat 08:13 langsung kebaca ===
+  // === FIX: Force refresh jam khusus & izin hari ini biar gak ketinggalan ===
   try{
     if(window.db){
       const {doc, getDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-      const todayStr = now.toISOString().split('T')[0];
+      const todayStr = window.getLocalDateStr(now);
       const docRef = doc(window.db, "jam_khusus", todayStr);
       const snap = await getDoc(docRef);
       if(snap.exists()){
@@ -757,12 +779,22 @@ async function prosesAbsenOtomatis(){
       }
     }
   }catch(e){ console.log('fresh jam khusus fail', e); }
+  // fresh izin juga
+  try{
+    if(window.db && typeof currentGuru!=='undefined' && currentGuru){
+      const tStr = window.getLocalDateStr(now);
+      const freshIzin = await window.loadIzinHariIni(currentGuru.gid, tStr);
+      if(freshIzin && freshIzin.length>0){
+        console.log('⚡ Izin fresh fetched:', tStr, freshIzin);
+      }
+    }
+  }catch(e){ console.log('fresh izin fail', e); }
   let jamInfo=getJenisAbsen(now);
   const jamStr=now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' WIB';
   const jamShort=now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
   // === CEK IZIN FULL - BLOK SEBELUM SIMPAN (jika lolos dari showAbsenScreen) ===
   try{
-    const todayStr = now.toISOString().split('T')[0];
+    const todayStr = window.getLocalDateStr(now);
     const liburMap = window.kalenderLiburMap||{};
     const isLibur = liburMap[todayStr] || (new Date().getDay()===0) || (new Date().getDay()===6);
     if(!isLibur && window.izinList && window.izinList.length>0){
@@ -780,7 +812,7 @@ async function prosesAbsenOtomatis(){
   }catch(e){ console.log('izin full block check fail', e); }
   // === OVERRIDE KATEGORI JIKA ADA IZIN MASUK/PULANG SETENGAH HARI ===
   try{
-    const todayStr = now.toISOString().split('T')[0];
+    const todayStr = window.getLocalDateStr(now);
     if(window.izinList && window.izinList.length>0){
       const jenisUpper = (jamInfo.jenis||'').toUpperCase();
       if(jenisUpper==='MASUK'){
@@ -898,7 +930,7 @@ async function prosesAbsenOtomatis(){
   try{
     if(db){
       const {query, where, getDocs} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-      const todayStr = now.toISOString().split('T')[0];
+      const todayStr = window.getLocalDateStr(now);
       const q = query(collection(db,"absensi"), where("gid","==",currentGuru.gid));
       const snap = await getDocs(q);
       let hasMasukToday=false, hasPulangToday=false;
