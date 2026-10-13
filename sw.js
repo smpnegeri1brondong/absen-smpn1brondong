@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sneb-in-v9-AUTO-LOGO-EDIT-KOREKSI-IZIN';
+const CACHE_NAME = 'sneb-in-v9.1-FIX-EDIT-IZIN-UNDEFINED';
 const urlsToCache = [
   './',
   './index.html',
