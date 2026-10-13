@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#0f355c"/>
-<link rel="apple-touch-icon" href="logo-snebin.png?v=9"/>
+<link rel="apple-touch-icon" href="logo-snebin.png"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="SNEB.in"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>Admin SNEB.in</title>
-<link rel="icon" href="logo-smp2.png?v=9">
+<link rel="icon" href="logo-smp2.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -208,7 +208,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <body>
 <header class="header" style="gap:12px">
 <div class="logo-box">
-  <div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png?v=9" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SNEB.in" style="width:100%;height:100%;object-fit:contain"/></div>
+  <div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SNEB.in" style="width:100%;height:100%;object-fit:contain"/></div>
 <div>
   <div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SNEB.in</div>
 <div style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.5px">Panel Admin</div>
@@ -843,15 +843,11 @@ window.renderIzinList = function(){
         <div style="font-size:11px;color:#334155;margin-top:2px"><span class="badge ${badge.cls}" style="font-size:10px">${badge.icon} ${badge.label}</span> 📅 ${tglLabel}</div>
         <div style="font-size:11px;color:#475569;margin-top:4px">📝 ${z.keterangan||'-'}</div>
       </div>
-      <div style="display:flex;gap:6px;flex-direction:column">
-        <button onclick="editIzin('${z.id}')" style="height:32px;padding:0 12px;border-radius:8px;border:1px solid #bfdbfe;background:#dbeafe;color:#1e40af;font-weight:700;font-size:11px;cursor:pointer">✏️ Edit</button>
-        <button onclick="hapusIzin('${z.id}')" style="height:32px;padding:0 12px;border-radius:8px;border:1px solid #fecaca;background:#fee2e2;color:#991b1b;font-weight:700;font-size:11px;cursor:pointer">Hapus</button>
-      </div>
+      <button onclick="hapusIzin('${z.id}')" style="height:32px;padding:0 12px;border-radius:8px;border:1px solid #fecaca;background:#fee2e2;color:#991b1b;font-weight:700;font-size:11px;cursor:pointer">Hapus</button>
     </div>`;
   }).join('');
 };
 
-window.editingIzinId = null;
 window.simpanIzin = async()=>{
   const gid = document.getElementById('izinGuruSelect')?.value||'';
   const jenis = document.getElementById('izinJenis')?.value||'SAKIT';
@@ -862,6 +858,7 @@ window.simpanIzin = async()=>{
   if(!gid){ alert('Pilih GTK dulu!'); return; }
   if(!mulai){ alert('Isi tanggal mulai!'); return; }
   if(!ket){ alert('Isi keterangan!'); return; }
+  // find nama
   let nama = gid;
   try{
     const g = (typeof gurus!=='undefined'? gurus.find(x=>x.gid===gid) : null) || (window.gurus||[]).find(x=>x.gid===gid);
@@ -869,9 +866,8 @@ window.simpanIzin = async()=>{
   }catch(e){}
   try{
     const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-    const isEdit = !!window.editingIzinId;
-    const id = isEdit ? window.editingIzinId : `${gid}_${mulai}_${scope}_${Date.now()}`;
-    const baseData = {
+    const id = `${gid}_${mulai}_${scope}_${Date.now()}`;
+    await setDoc(doc(db, "izin", id), {
       gid: gid,
       nama: nama,
       jenis: jenis,
@@ -881,63 +877,14 @@ window.simpanIzin = async()=>{
       tanggal_selesai: selesai,
       keterangan: ket,
       status: 'DISETUJUI',
-      updated_at: new Date().toISOString()
-    };
-    if(isEdit){
-      baseData.edited = true;
-    } else {
-      baseData.created_at = new Date().toISOString();
-      baseData.created_by = 'admin';
-    }
-    await setDoc(doc(db, "izin", id), baseData, {merge:true});
-    alert(`${isEdit?'✅ Izin di-update':'✅ Izin '+jenis+' '+scope+' untuk '+nama} ${mulai}${mulai!==selesai?' s/d '+selesai:''} tersimpan!`);
+      created_at: new Date().toISOString(),
+      created_by: 'admin'
+    }, {merge:true});
+    alert(`✅ Izin ${jenis} ${scope} untuk ${nama} ${mulai}${mulai!==selesai?' s/d '+selesai:''} tersimpan!\n${scope==='FULL'?'Alert GTK: FULL blok sebelum kamera':'Alert GTK: tetap wajib absen jam berapapun, tercatat sebagai '+jenis}`);
     document.getElementById('izinKeterangan').value='';
-    window.editingIzinId=null;
-    const btn=document.querySelector('button[onclick="simpanIzin()"]');
-    if(btn){ btn.textContent='💾 Simpan Izin'; btn.style.background='#0f172a'; }
-    const cancelBtn=document.getElementById('btnCancelEditIzin');
-    if(cancelBtn) cancelBtn.classList.add('hidden');
     loadIzin();
   }catch(e){ alert('Gagal: '+e.message); }
 };
-
-window.editIzin = (id)=>{
-  const z=(window.izinList||[]).find(x=>x.id===id);
-  if(!z){ alert('Izin tidak ditemukan'); return; }
-  document.getElementById('izinGuruSelect').value=z.gid;
-  document.getElementById('izinJenis').value=z.jenis;
-  document.getElementById('izinScope').value=z.scope;
-  document.getElementById('izinTanggalMulai').value=z.tanggal_mulai||z.tanggal;
-  document.getElementById('izinTanggalSelesai').value=z.tanggal_selesai||z.tanggal_mulai||z.tanggal;
-  document.getElementById('izinKeterangan').value=z.keterangan||'';
-  window.editingIzinId=id;
-  const btn=document.querySelector('button[onclick="simpanIzin()"]');
-  if(btn){ btn.textContent='✏️ Update Izin'; btn.style.background='#1e40af'; }
-  let cancelBtn=document.getElementById('btnCancelEditIzin');
-  if(!cancelBtn){
-    const cont=document.createElement('button');
-    cont.id='btnCancelEditIzin';
-    cont.textContent='Batal Edit';
-    cont.style.cssText='margin-top:8px;width:100%;height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;color:#64748b;font-weight:700;cursor:pointer';
-    cont.onclick=()=>window.cancelEditIzin();
-    btn.parentNode.insertBefore(cont, btn.nextSibling);
-  } else {
-    cancelBtn.classList.remove('hidden');
-  }
-  window.scrollTo({top:0, behavior:'smooth'});
-  const panel=document.getElementById('panelIzin');
-  if(panel) panel.scrollIntoView({behavior:'smooth'});
-};
-
-window.cancelEditIzin=()=>{
-  window.editingIzinId=null;
-  document.getElementById('izinKeterangan').value='';
-  const btn=document.querySelector('button[onclick="simpanIzin()"]');
-  if(btn){ btn.textContent='💾 Simpan Izin'; btn.style.background='#0f172a'; }
-  const cancelBtn=document.getElementById('btnCancelEditIzin');
-  if(cancelBtn) cancelBtn.classList.add('hidden');
-};
-
 
 window.hapusIzin = async(id)=>{
   if(!confirm('Hapus izin '+id+'?')) return;
@@ -2597,59 +2544,6 @@ window.resetKoreksi=async(jenis)=>{
     alert('Gagal reset: '+(e.message||e));
   }
 };
-
-// === FIX v9: KOREKSI STATUS DINAMIS SESUAI JENIS ===
-window.updateKoreksiStatusOptions=()=>{
-  const jenisEl=document.getElementById('koreksiJenis');
-  const statusEl=document.getElementById('koreksiStatus');
-  if(!jenisEl||!statusEl) return;
-  const jenis=jenisEl.value;
-  let opsi=[];
-  if(jenis==='MASUK'){
-    opsi=[
-      {v:'TEPAT_WAKTU', l:'TEPAT_WAKTU - Tepat Waktu'},
-      {v:'TELAT', l:'TELAT - Terlambat'},
-      {v:'SAKIT', l:'SAKIT - Izin Sakit'},
-      {v:'DINAS_LUAR', l:'DINAS_LUAR - Dinas Luar'},
-      {v:'URUSAN_KELUARGA', l:'URUSAN_KELUARGA - Urusan Keluarga'},
-      {v:'IZIN_LAIN', l:'IZIN_LAIN - Izin Lain'},
-      {v:'BELUM_ABSEN', l:'BELUM_ABSEN - Belum Absen (Reset)'},
-      {v:'LIBUR_SABTU', l:'LIBUR_SABTU'},
-      {v:'LIBUR_MINGGU', l:'LIBUR_MINGGU'},
-      {v:'LIBUR_NASIONAL', l:'LIBUR_NASIONAL - Libur Nasional'}
-    ];
-  } else {
-    opsi=[
-      {v:'TEPAT_WAKTU', l:'TEPAT_WAKTU - Pulang Tepat'},
-      {v:'PULANG_SEBELUM_WAKTUNYA', l:'PULANG_SEBELUM_WAKTUNYA'},
-      {v:'PULANG_CEPAT', l:'PULANG_CEPAT - Pulang Cepat'},
-      {v:'SAKIT', l:'SAKIT - Izin Sakit'},
-      {v:'DINAS_LUAR', l:'DINAS_LUAR - Dinas Luar'},
-      {v:'URUSAN_KELUARGA', l:'URUSAN_KELUARGA - Urusan Keluarga'},
-      {v:'IZIN_LAIN', l:'IZIN_LAIN - Izin Lain'},
-      {v:'BELUM_ABSEN', l:'BELUM_ABSEN - Belum Absen (Reset)'},
-      {v:'BELUM_WAKTUNYA_PULANG', l:'BELUM_WAKTUNYA_PULANG'},
-      {v:'DILUAR_JAM_KERJA', l:'DILUAR_JAM_KERJA'},
-      {v:'LIBUR_SABTU', l:'LIBUR_SABTU'},
-      {v:'LIBUR_MINGGU', l:'LIBUR_MINGGU'}
-    ];
-  }
-  statusEl.innerHTML=opsi.map(o=>`<option value="${o.v}">${o.l}</option>`).join('');
-};
-
-// Patch openKoreksi to call updateKoreksiStatusOptions
-(function(){
-  const origOpen = window.openKoreksi;
-  if(typeof origOpen==='function'){
-    window.openKoreksi=async function(gid,nama,tanggal){
-      const res = await origOpen(gid,nama,tanggal);
-      setTimeout(()=>{ try{ window.updateKoreksiStatusOptions(); }catch(e){} },100);
-      return res;
-    };
-  }
-})();
-
-
 window.simpanKoreksi=async()=>{
   const gid=document.getElementById('koreksiGID').value;
   const tanggal=document.getElementById('koreksiTanggal').value;
@@ -2794,7 +2688,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 </script>
 
-<div id="modalKoreksi" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px"><div class="card" style="width:100%;max-width:460px;background:white;border-radius:20px;padding:20px"><div style="font-weight:800;font-size:16px">✏️ Koreksi Absen - <span id="koreksiNama"></span></div><input type="hidden" id="koreksiGID"/><input type="hidden" id="koreksiTanggal"/><div id="koreksiInfo" style="margin-top:12px;padding:10px 12px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:12px;font-size:11px;color:#475569;display:none;line-height:1.5"></div><div style="margin-top:16px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">Jenis</div><select id="koreksiJenis" class="input" onchange="updateKoreksiStatusOptions()"><option value="MASUK">MASUK</option><option value="PULANG">PULANG</option></select></div><div style="margin-top:12px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">Status Baru</div><select id="koreksiStatus" class="input"><option value="TEPAT_WAKTU">TEPAT_WAKTU</option><option value="TELAT">TELAT</option><option value="PULANG_SEBELUM_WAKTUNYA">PULANG_SEBELUM_WAKTUNYA</option><option value="BELUM_WAKTUNYA_PULANG">BELUM_WAKTUNYA_PULANG</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option><option value="LIBUR_SABTU">LIBUR_SABTU</option><option value="LIBUR_MINGGU">LIBUR_MINGGU</option></select></div><div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><div style="font-size:13px;font-weight:700;margin-bottom:6px">Telat (menit)</div><input id="koreksiTelat" type="number" class="input" value="0"/></div><div><div style="font-size:13px;font-weight:700;margin-bottom:6px">Keterangan</div><input id="koreksiKeterangan" class="input" placeholder="Alasan"/></div></div><div style="margin-top:14px;padding:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:12px"><div style="font-size:10px;font-weight:800;color:#991b1b;letter-spacing:.5px;margin-bottom:6px">🔄 RESET KOREKSI (Opsi A - Per Jenis, Aman)</div><div style="display:flex;gap:8px"><button style="flex:1;height:40px;border-radius:10px;border:1px solid #fecaca;background:white;color:#991b1b;font-weight:800;font-size:11px;cursor:pointer" onclick="resetKoreksi('MASUK')">Reset MASUK</button><button style="flex:1;height:40px;border-radius:10px;border:1px solid #fecaca;background:white;color:#991b1b;font-weight:800;font-size:11px;cursor:pointer" onclick="resetKoreksi('PULANG')">Reset PULANG</button></div><div style="font-size:9px;color:#b45309;margin-top:6px;line-height:1.4">Hapus koreksi saja, data asli QR akan balik. Aman karena per jenis.</div></div><div style="display:flex;gap:10px;margin-top:16px"><button style="flex:1;height:48px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700" onclick="closeKoreksi()">Batal</button><button style="flex:1;height:48px;border-radius:12px;border:none;background:#0f172a;color:white;font-weight:800" onclick="simpanKoreksi()">Simpan</button></div></div></div>
+<div id="modalKoreksi" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px"><div class="card" style="width:100%;max-width:460px;background:white;border-radius:20px;padding:20px"><div style="font-weight:800;font-size:16px">✏️ Koreksi Absen - <span id="koreksiNama"></span></div><input type="hidden" id="koreksiGID"/><input type="hidden" id="koreksiTanggal"/><div id="koreksiInfo" style="margin-top:12px;padding:10px 12px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:12px;font-size:11px;color:#475569;display:none;line-height:1.5"></div><div style="margin-top:16px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">Jenis</div><select id="koreksiJenis" class="input"><option value="MASUK">MASUK</option><option value="PULANG">PULANG</option></select></div><div style="margin-top:12px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">Status Baru</div><select id="koreksiStatus" class="input"><option value="TEPAT_WAKTU">TEPAT_WAKTU</option><option value="TELAT">TELAT</option><option value="PULANG_SEBELUM_WAKTUNYA">PULANG_SEBELUM_WAKTUNYA</option><option value="BELUM_WAKTUNYA_PULANG">BELUM_WAKTUNYA_PULANG</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option><option value="LIBUR_SABTU">LIBUR_SABTU</option><option value="LIBUR_MINGGU">LIBUR_MINGGU</option></select></div><div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><div style="font-size:13px;font-weight:700;margin-bottom:6px">Telat (menit)</div><input id="koreksiTelat" type="number" class="input" value="0"/></div><div><div style="font-size:13px;font-weight:700;margin-bottom:6px">Keterangan</div><input id="koreksiKeterangan" class="input" placeholder="Alasan"/></div></div><div style="margin-top:14px;padding:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:12px"><div style="font-size:10px;font-weight:800;color:#991b1b;letter-spacing:.5px;margin-bottom:6px">🔄 RESET KOREKSI (Opsi A - Per Jenis, Aman)</div><div style="display:flex;gap:8px"><button style="flex:1;height:40px;border-radius:10px;border:1px solid #fecaca;background:white;color:#991b1b;font-weight:800;font-size:11px;cursor:pointer" onclick="resetKoreksi('MASUK')">Reset MASUK</button><button style="flex:1;height:40px;border-radius:10px;border:1px solid #fecaca;background:white;color:#991b1b;font-weight:800;font-size:11px;cursor:pointer" onclick="resetKoreksi('PULANG')">Reset PULANG</button></div><div style="font-size:9px;color:#b45309;margin-top:6px;line-height:1.4">Hapus koreksi saja, data asli QR akan balik. Aman karena per jenis.</div></div><div style="display:flex;gap:10px;margin-top:16px"><button style="flex:1;height:48px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700" onclick="closeKoreksi()">Batal</button><button style="flex:1;height:48px;border-radius:12px;border:none;background:#0f172a;color:white;font-weight:800" onclick="simpanKoreksi()">Simpan</button></div></div></div>
 <script>
 // Fallback login admin - biar tombol bisa diklik walau module lambat
 document.addEventListener("DOMContentLoaded", ()=>{

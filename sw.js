@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sneb-in-v9.1-FIX-EDIT-IZIN-UNDEFINED';
+const CACHE_NAME = 'sneb-in-v8-FINAL-FIX-IZIN-PULANGCEPAT';
 const urlsToCache = [
   './',
   './index.html',
@@ -10,7 +10,7 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', e=>{
-  console.log('[SW v9] Installing - FINAL FIX');
+  console.log('[SW v8] Installing - FINAL FIX');
   e.waitUntil(
     caches.open(CACHE_NAME).then(c=>{
       return c.addAll(urlsToCache.map(url=>new Request(url, {cache: 'reload'})))
@@ -21,7 +21,7 @@ self.addEventListener('install', e=>{
 });
 
 self.addEventListener('activate', e=>{
-  console.log('[SW v9] Activating - clean old cache');
+  console.log('[SW v8] Activating - clean old cache');
   e.waitUntil(
     caches.keys().then(keys=>Promise.all(keys.map(k=>{
       if(k!==CACHE_NAME){
