@@ -214,6 +214,17 @@ try{
       console.log('✅ Kalender libur loaded:', Object.keys(window.kalenderLiburMap).length);
     }catch(e){ console.log('kalender_libur load fail', e); }
   };
+  // Load cache dulu biar pulang cepat 08:13 langsung kebaca tanpa nunggu Firestore
+  try{
+    const cachedJam = localStorage.getItem('JAM_KHUSUS_CACHE');
+    if(cachedJam){
+      const parsed = JSON.parse(cachedJam);
+      window.jamKhususMap = parsed.map||{};
+      window.jamKhususList = parsed.list||[];
+      console.log('📦 Jam khusus from cache:', Object.keys(window.jamKhususMap).length);
+    }
+  }catch(e){}
+
   window.loadJamKhusus = async () => {
     try{
       if(!db) return;
@@ -226,7 +237,6 @@ try{
         if(!tgl) return;
         let mulai=data.pulang_mulai;
         let selesai=data.pulang_selesai;
-        // support string "11:00"
         function parseMenit(v){
           if(typeof v==='number') return v;
           if(!v) return null;
@@ -238,11 +248,13 @@ try{
         mulai=parseMenit(mulai);
         selesai=parseMenit(selesai);
         if(mulai===null || isNaN(mulai)) return;
-        if(selesai===null || isNaN(selesai)) selesai=930; // default 15:30
+        if(selesai===null || isNaN(selesai)) selesai=930;
         const ket=data.keterangan||data.nama||'Pulang Cepat';
         window.jamKhususMap[tgl]={mulai, selesai, keterangan:ket, tanggal:tgl};
         window.jamKhususList.push({tanggal:tgl, mulai, selesai, keterangan:ket});
       });
+      // simpan ke cache biar next open langsung kebaca
+      try{ localStorage.setItem('JAM_KHUSUS_CACHE', JSON.stringify({map:window.jamKhususMap, list:window.jamKhususList, time:Date.now()})); }catch(e){}
       console.log('✅ Jam khusus loaded:', Object.keys(window.jamKhususMap).length);
     }catch(e){ console.log('jam_khusus load fail', e); }
   };
@@ -373,6 +385,7 @@ try{
             window.jamKhususMap[tgl]={mulai, selesai, keterangan:ket, tanggal:tgl};
             window.jamKhususList.push({tanggal:tgl, mulai, selesai, keterangan:ket});
           });
+          try{ localStorage.setItem('JAM_KHUSUS_CACHE', JSON.stringify({map:window.jamKhususMap, list:window.jamKhususList, time:Date.now()})); }catch(e){}
           console.log('🔄 Realtime jam khusus:', Object.keys(window.jamKhususMap).length);
           if(typeof window.cekJamAbsen==='function') window.cekJamAbsen();
         });
@@ -487,29 +500,31 @@ window.getJenisAbsen=(d)=>{
   let jamKhusus=null;
   try{ if(window.jamKhususMap && window.jamKhususMap[tglStr]) jamKhusus=window.jamKhususMap[tglStr]; }catch(e){}
   if(jamKhusus){
-    const mulai=jamKhusus.mulai; // misal 660 = 11:00
-    const selesai=jamKhusus.selesai!=null?jamKhusus.selesai:930; // default 15:30 kalo cuma isi mulai
+    const mulai=jamKhusus.mulai; // misal 660 = 11:00 atau 493 = 08:13
+    const selesai=jamKhusus.selesai!=null?jamKhusus.selesai:930; // default 15:30
     const ket=jamKhusus.keterangan||'Pulang Cepat';
     const jamMulaiStr = String(Math.floor(mulai/60)).padStart(2,'0')+':'+String(mulai%60).padStart(2,'0');
     const jamSelesaiStr = String(Math.floor(selesai/60)).padStart(2,'0')+':'+String(selesai%60).padStart(2,'0');
-    // FIX BUG PULANG CEPAT: cek pulang cepat DULU sebelum masuk, soalnya masuk telat 07:16-11:30 nutupin jam 11:00 pulang cepat
-    const belumMulai = mulai-90;
-    const sebelumMulai = mulai-30;
-    if(menit>=belumMulai && menit<sebelumMulai){
-      return {jenis:'PULANG', kategori:'BELUM_WAKTUNYA_PULANG_CEPAT', label:'Belum Waktunya Pulang Cepat', color:'awal', valid:false, telatMenit:0, pesan:`Belum waktunya pulang cepat ${jamMulaiStr} - ${ket}`, pulangCepat:true, jamKhusus:jamKhusus};
+    // === FIX PULANG CEPAT EARLY (08:13) ===
+    // Kalau jam sekarang SEBELUM mulai -> masih dianggap MASUK (biar gak tabrakan)
+    // Contoh: pulang cepat 08:13, jam 08:10 masih MASUK, jam 08:13 baru PULANG
+    if(menit < mulai){
+      if(menit < 360){
+        return {jenis:'BELUM_BUKA', kategori:'BELUM_BUKA', label:'Belum Buka', color:'awal', valid:false, telatMenit:0, pesan:'Belum buka 00:00-06:00'};
+      }
+      if(menit>=360 && menit<=435){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Masuk Tepat Waktu 06:00-07:15'}; }
+      // TELAT sampai 1 menit sebelum pulang cepat mulai - FIX untuk 08:13
+      const telat=menit-435;
+      return {jenis:'MASUK', kategori:'TELAT', label:'Terlambat', color:'telat', valid:true, telatMenit:telat, pesan:`Terlambat ${telat} menit dari 07:15`};
     }
-    if(menit>=sebelumMulai && menit<mulai){
-      return {jenis:'PULANG', kategori:'PULANG_SEBELUM_WAKTUNYA_CEPAT', label:'Pulang Sebelum Waktunya Cepat', color:'awal', valid:true, telatMenit:0, pesan:`Pulang Sebelum Waktunya Cepat ${jamMulaiStr} - ${ket}`, pulangCepat:true, jamKhusus:jamKhusus};
-    }
+    // Kalau sudah >= mulai -> PULANG CEPAT
     if(menit>=mulai && menit<=selesai){
       return {jenis:'PULANG', kategori:'PULANG_CEPAT', label:'Pulang Cepat '+jamMulaiStr, color:'tepat', valid:true, telatMenit:0, pesan:`Pulang Cepat ${jamMulaiStr}-${jamSelesaiStr} - ${ket}`, pulangCepat:true, jamKhusus:jamKhusus};
     }
-    if(menit>930){
+    // Lewat selesai tapi masih dalam hari itu
+    if(menit> selesai && menit<=1439){
       return {jenis:'PULANG', kategori:'DILUAR_JAM_KERJA', label:'Pulang Di Luar Jam Kerja', color:'diluar', valid:true, telatMenit:0, pesan:`Pulang di luar jam kerja >${jamSelesaiStr} - ${ket}`, pulangCepat:true, jamKhusus:jamKhusus};
     }
-    // Masuk tetap normal, tapi cuma sampai sebelum belumMulai (biar gak tabrakan sama pulang cepat)
-    if(menit>=360 && menit<=435){ return {jenis:'MASUK', kategori:'TEPAT_WAKTU', label:'Tepat Waktu', color:'tepat', valid:true, telatMenit:0, pesan:'Masuk Tepat Waktu 06:00-07:15'}; }
-    if(menit>=436 && menit<belumMulai){ const telat=menit-435; return {jenis:'MASUK', kategori:'TELAT', label:'Terlambat', color:'telat', valid:true, telatMenit:telat, pesan:`Terlambat ${telat} menit dari 07:15`}; }
   }
   // === 4. JAM NORMAL ===
   if(day===5){
@@ -719,6 +734,29 @@ window.logout=()=>{ localStorage.removeItem('SNEB.in_GID'); location.reload(); }
 
 async function prosesAbsenOtomatis(){
   const now=new Date();
+  // === FIX: Force refresh jam khusus hari ini biar pulang cepat 08:13 langsung kebaca ===
+  try{
+    if(window.db){
+      const {doc, getDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      const todayStr = now.toISOString().split('T')[0];
+      const docRef = doc(window.db, "jam_khusus", todayStr);
+      const snap = await getDoc(docRef);
+      if(snap.exists()){
+        const data=snap.data();
+        function parseMenit(v){ if(typeof v==='number') return v; if(!v) return null; if(typeof v==='string' && v.includes(':')){ const p=v.split(':'); return parseInt(p[0])*60+parseInt(p[1]||0); } return parseInt(v); }
+        let mulai=parseMenit(data.pulang_mulai);
+        let selesai=parseMenit(data.pulang_selesai);
+        if(mulai!=null && !isNaN(mulai)){
+          if(selesai==null || isNaN(selesai)) selesai=930;
+          const ket=data.keterangan||'Pulang Cepat';
+          if(!window.jamKhususMap) window.jamKhususMap={};
+          window.jamKhususMap[todayStr]={mulai, selesai, keterangan:ket, tanggal:todayStr};
+          try{ localStorage.setItem('JAM_KHUSUS_CACHE', JSON.stringify({map:window.jamKhususMap, list:window.jamKhususList||[], time:Date.now()})); }catch(e){}
+          console.log('⚡ Pulang cepat fresh fetched:', todayStr, mulai, selesai);
+        }
+      }
+    }
+  }catch(e){ console.log('fresh jam khusus fail', e); }
   let jamInfo=getJenisAbsen(now);
   const jamStr=now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' WIB';
   const jamShort=now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
@@ -873,8 +911,8 @@ async function prosesAbsenOtomatis(){
             const j=(d.jenis_absen||'').toUpperCase();
             const kat=(d.kategori_absen||'').toUpperCase();
             if(j.includes('MASUK')) hasMasukToday=true;
-            // Pulang final = TEPAT_WAKTU (PULANG) atau PULANG_SEBELUM_WAKTUNYA
-            if(j.includes('PULANG') && (kat.includes('TEPAT') || kat.includes('SEBELUM')) ) hasPulangToday=true;
+            // Pulang final = TEPAT_WAKTU (PULANG) atau PULANG_SEBELUM_WAKTUNYA atau PULANG_CEPAT
+            if(j.includes('PULANG') && (kat.includes('TEPAT') || kat.includes('SEBELUM') || kat.includes('CEPAT') || kat.includes('DILUAR')) ) hasPulangToday=true;
           }
         }catch(e){}
       });
