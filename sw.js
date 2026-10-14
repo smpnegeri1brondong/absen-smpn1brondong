@@ -1,16 +1,16 @@
-const CACHE_NAME = 'sneb-in-v11-FORCE-LOGO-UPDATE';
+const CACHE_NAME = 'sneb-in-v12-FORCE-LOGO-V2';
 const urlsToCache = [
   './',
   './index.html',
   './halaman-absen.html',
   './admin-absen.html',
-  './logo-snebin.png?v=11',
-  './logo-smp2.png?v=11',
+  './logo-snebin-v2.png',
+  './logo-smp2.png',
   './manifest.json'
 ];
 
 self.addEventListener('install', e=>{
-  console.log('[SW v11] Installing - FINAL FIX');
+  console.log('[SW v12] Installing - FINAL FIX');
   e.waitUntil(
     caches.open(CACHE_NAME).then(c=>{
       return c.addAll(urlsToCache.map(url=>new Request(url, {cache: 'reload'})))
@@ -21,7 +21,7 @@ self.addEventListener('install', e=>{
 });
 
 self.addEventListener('activate', e=>{
-  console.log('[SW v11] Activating - clean old cache');
+  console.log('[SW v12] Activating - clean old cache');
   e.waitUntil(
     caches.keys().then(keys=>Promise.all(keys.map(k=>{
       if(k!==CACHE_NAME){
