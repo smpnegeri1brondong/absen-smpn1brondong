@@ -1543,6 +1543,25 @@ window.exportExcel=()=>{
       const nama = (masuk&&masuk.liburNama) || (pulang&&pulang.liburNama) || (masuk&&masuk.label_absen) || (pulang&&pulang.label_absen) || 'Libur';
       return nama;
     } else if(isIzinMasuk || isIzinPulang){
+      // FIX: kalau cuma 1 izin tapi sisi lain real, tampilkan keduanya
+      if(isIzinPulang && masuk && !masuk.is_izin){
+        const ketP = pulang.keterangan || pulang.izinKeterangan || pulang.label_absen || pulang.izinJenis || 'Izin';
+        const jamM = safeJam(masuk);
+        const tglP = pulang.tanggal_mulai || pulang.tanggal || '';
+        if(masuk.waktu && jamM !== '-'){
+          return 'MASUK ' + jamM + ' • ' + (masuk.label_absen||'') + ' | PULANG Izin ' + ketP + (tglP ? ' • ' + tglP : '');
+        }
+        return ketP + (tglP ? ' • ' + tglP : '');
+      }
+      if(isIzinMasuk && pulang && !pulang.is_izin){
+        const ketM = masuk.keterangan || masuk.izinKeterangan || masuk.label_absen || masuk.izinJenis || 'Izin';
+        const jamP = safeJam(pulang);
+        const tglM = masuk.tanggal_mulai || masuk.tanggal || '';
+        if(pulang.waktu && jamP !== '-'){
+          return 'MASUK Izin ' + ketM + (tglM ? ' • ' + tglM : '') + ' | PULANG ' + jamP;
+        }
+        return ketM + (tglM ? ' • ' + tglM : '');
+      }
       const rec = isIzinMasuk ? masuk : pulang;
       const ket = rec.keterangan || rec.izinKeterangan || rec.label_absen || rec.izinJenis || 'Izin';
       const mulai = rec.tanggal_mulai || rec.tanggal || '';
@@ -2482,21 +2501,42 @@ window.renderLaporanBaru = function(){
         else if(tglP) ketFinal += ''; // tgl sama gak perlu dobel
         keterangan = ketFinal;
       } else {
-        const rec = isIzinMasuk ? masuk : pulang;
-        const ket = rec.keterangan || rec.izinKeterangan || rec.label_absen || rec.izinJenis || 'Izin';
-        const jamRec = safeJam(rec);
-        const mulai = rec.tanggal_mulai || rec.tanggal || '';
-        const selesai = rec.tanggal_selesai || mulai;
-        let tglInfo = '';
-        if(mulai){
-          if(mulai===selesai) tglInfo = mulai;
-          else tglInfo = mulai + ' s/d ' + selesai;
-        }
-        if(rec.waktu && jamRec !== '-'){
-          const prefix = isIzinMasuk ? 'MASUK ' : 'PULANG ';
-          keterangan = prefix + jamRec + ' • ' + ket + (tglInfo ? ' • ' + tglInfo : '');
+        // FIX: kalau cuma 1 izin tapi sisi lain real (contoh: MASUK real Terlambat + PULANG izin), tampilkan jam real juga
+        if(isIzinPulang && masuk && !masuk.is_izin){
+          const ketP = pulang.keterangan || pulang.izinKeterangan || pulang.label_absen || pulang.izinJenis || 'Izin';
+          const jamM = safeJam(masuk);
+          const tglP = pulang.tanggal_mulai || pulang.tanggal || '';
+          if(masuk.waktu && jamM !== '-'){
+            keterangan = 'MASUK ' + jamM + ' • ' + (masuk.label_absen||masuk.kategori_absen||'') + ' | PULANG Izin ' + ketP + (tglP ? ' • ' + tglP : '');
+          } else {
+            keterangan = ketP + (tglP ? ' • ' + tglP : '');
+          }
+        } else if(isIzinMasuk && pulang && !pulang.is_izin){
+          const ketM = masuk.keterangan || masuk.izinKeterangan || masuk.label_absen || masuk.izinJenis || 'Izin';
+          const jamP = safeJam(pulang);
+          const tglM = masuk.tanggal_mulai || masuk.tanggal || '';
+          if(pulang.waktu && jamP !== '-'){
+            keterangan = 'MASUK Izin ' + ketM + (tglM ? ' • ' + tglM : '') + ' | PULANG ' + jamP + ' • ' + (pulang.label_absen||'');
+          } else {
+            keterangan = ketM + (tglM ? ' • ' + tglM : '');
+          }
         } else {
-          keterangan = ket + (tglInfo ? ' • ' + tglInfo : '');
+          const rec = isIzinMasuk ? masuk : pulang;
+          const ket = rec.keterangan || rec.izinKeterangan || rec.label_absen || rec.izinJenis || 'Izin';
+          const jamRec = safeJam(rec);
+          const mulai = rec.tanggal_mulai || rec.tanggal || '';
+          const selesai = rec.tanggal_selesai || mulai;
+          let tglInfo = '';
+          if(mulai){
+            if(mulai===selesai) tglInfo = mulai;
+            else tglInfo = mulai + ' s/d ' + selesai;
+          }
+          if(rec.waktu && jamRec !== '-'){
+            const prefix = isIzinMasuk ? 'MASUK ' : 'PULANG ';
+            keterangan = prefix + jamRec + ' • ' + ket + (tglInfo ? ' • ' + tglInfo : '');
+          } else {
+            keterangan = ket + (tglInfo ? ' • ' + tglInfo : '');
+          }
         }
       }
     } else if(!masuk && !pulang) keterangan='-';
