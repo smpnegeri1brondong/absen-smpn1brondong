@@ -764,9 +764,9 @@ async function loadIzin(){
         sel.innerHTML = '<option value="">Pilih GTK...</option>' + gurusArr.map(g=>`<option value="${g.gid}">${g.nama} - ${g.gid}</option>`).join('');
       }
     }catch(e){}
-    // re-render laporan if needed
-    if(typeof renderLaporanBaru==='function' && document.getElementById('filterTanggal')?.value){
-      renderLaporanBaru();
+    // re-render laporan jika izin loaded - FIX badge pulang gak auto
+    if(typeof renderLaporanBaru==='function'){
+      try{ renderLaporanBaru(); }catch(e){ console.log('render after izin load fail', e); }
     }
   }catch(e){
     console.log('loadIzin fail', e);
@@ -807,8 +807,9 @@ async function startIzinLiveSync(){
         window.izinMapByGID = map;
         console.log('📝 izin live sync', arr.length);
         renderIzinList();
-        if(typeof renderLaporanBaru==='function' && document.getElementById('filterTanggal')?.value){
-          renderLaporanBaru();
+        // FIX badge pulang gak auto - selalu render ulang saat izin berubah
+        if(typeof renderLaporanBaru==='function'){
+          try{ renderLaporanBaru(); }catch(e){ console.log('render after izin sync fail', e); }
         }
       }catch(e){ console.log('izin live sync parse fail', e); }
     });
