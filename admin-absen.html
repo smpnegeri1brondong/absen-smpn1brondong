@@ -2359,14 +2359,33 @@ function parseAbsenGTK(gid, tanggalStr){
             masuk = fakeMasuk;
           }
         }
-        // PULANG scope
+        // PULANG scope - FIX jam pulang muncul untuk semua GTK
         if(pulangIzin){
           const jenis = jenisToBadge(pulangIzin.jenis);
           if(pulang){
-            const overridden = {...pulang, kategori_absen:jenis, label_absen: pulangIzin.jenis, is_izin:true, is_izin_pulang:true, izinJenis:pulangIzin.jenis, izinScope:'PULANG', keterangan:pulangIzin.keterangan||pulang.keterangan||'', tanggal:tanggalStr};
+            const overridden = {...pulang, kategori_absen:jenis, label_absen: pulangIzin.jenis, is_izin:true, is_izin_pulang:true, izinJenis:pulangIzin.jenis, izinScope:'PULANG', keterangan:pulangIzin.keterangan||pulang.keterangan||'', tanggal:tanggalStr, tanggal_mulai:pulangIzin.tanggal_mulai||pulang.tanggal_mulai, tanggal_selesai:pulangIzin.tanggal_selesai||pulang.tanggal_selesai};
             pulang = overridden;
           } else {
-            const fakePulang = {kategori_absen:jenis, label_absen: pulangIzin.jenis, jenis_absen:'PULANG', is_izin:true, is_izin_pulang:true, izinJenis:pulangIzin.jenis, izinScope:'PULANG', keterangan:pulangIzin.keterangan||'', tanggal:tanggalStr, tanggal_mulai:pulangIzin.tanggal_mulai, tanggal_selesai:pulangIzin.tanggal_selesai};
+            // Coba cari pulang real di allAbsen yang mungkin kelewat karena limit / filter tanggal
+            let realPulangFallback = null;
+            try{
+              if(window.allAbsen && window.allAbsen.length>0){
+                const cand = window.allAbsen.filter(a=> a.gid===g.gid && (a.jenis_absen||'').toUpperCase().includes('PULANG'));
+                if(cand.length>0){
+                  // cari yang tanggalnya sama atau paling dekat hari ini
+                  const todayStr = tanggalStr;
+                  const found = cand.find(a=> (a.tanggal||'').startsWith(todayStr)) || cand[0];
+                  if(found && found.waktu) realPulangFallback = found;
+                }
+              }
+            }catch(e){}
+            const fakePulang = {
+              kategori_absen:jenis, label_absen: pulangIzin.jenis, jenis_absen:'PULANG',
+              is_izin:true, is_izin_pulang:true, izinJenis:pulangIzin.jenis, izinScope:'PULANG',
+              keterangan:pulangIzin.keterangan||'', tanggal:tanggalStr,
+              tanggal_mulai:pulangIzin.tanggal_mulai, tanggal_selesai:pulangIzin.tanggal_selesai,
+              waktu: realPulangFallback ? realPulangFallback.waktu : null
+            };
             pulang = fakePulang;
           }
         }
@@ -2662,7 +2681,7 @@ async function loadAbsensiRealtime(){
     const {collection, query, orderBy, limit, onSnapshot} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
     const d = window.db || (typeof db!=='undefined'?db:null);
     if(!d) return;
-    const q = query(collection(d, "absensi"), orderBy("waktu","desc"), limit(500));
+    const q = query(collection(d, "absensi"), orderBy("waktu","desc"), limit(1500));
     onSnapshot(q, (snap)=>{
       window.allAbsen=[]; allAbsen=[];
       snap.forEach(docSnap=>{ const data=docSnap.data(); data._id=docSnap.id; allAbsen.push(data); window.allAbsen.push(data); });
