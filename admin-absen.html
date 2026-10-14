@@ -2409,8 +2409,34 @@ window.renderLaporanBaru = function(){
   let countSudahMasuk=0;
 
   parsedList.forEach((item, idx)=>{
-    const g=item.guru;
-    const masuk=item.masuk; const pulang=item.pulang;
+    let g=item.guru;
+    let masuk=item.masuk; let pulang=item.pulang;
+    // === FIX BADGE PULANG TIDAK UPDATE: fallback cek izin langsung jika parse belum bikin fake ===
+    try{
+      if(typeof getIzinForDate==='function'){
+        const izinArrFallback = getIzinForDate(g.gid, tanggalStr);
+        if(izinArrFallback && izinArrFallback.length>0){
+          const masukIzinFb = izinArrFallback.find(z=> z.scope==='MASUK');
+          const pulangIzinFb = izinArrFallback.find(z=> z.scope==='PULANG');
+          const fullIzinFb = izinArrFallback.find(z=> (z.scope||'FULL')==='FULL');
+          const jenisToBadgeFb = (j)=>{ const u=(j||'').toUpperCase(); if(u==='SAKIT'||u==='SAKIT') return 'SAKIT'; if(u==='DINAS_LUAR'||u==='DINAS LUAR'||u.includes('DINAS')) return 'DINAS_LUAR'; if(u==='URUSAN_KELUARGA'||u==='URUSAN KELUARGA'||u.includes('KELUARGA')) return 'URUSAN_KELUARGA'; return 'IZIN_LAIN'; };
+          if(fullIzinFb && !masuk && !pulang){
+            const jenisFb = jenisToBadgeFb(fullIzinFb.jenis);
+            const fakeFb = {kategori_absen:jenisFb, label_absen: fullIzinFb.jenis, jenis_absen:'IZIN', is_izin:true, is_izin_full:true, izinJenis:fullIzinFb.jenis, izinScope:'FULL', keterangan:fullIzinFb.keterangan||'', tanggal:tanggalStr, tanggal_mulai:fullIzinFb.tanggal_mulai, tanggal_selesai:fullIzinFb.tanggal_selesai};
+            masuk = fakeFb; pulang = {...fakeFb};
+          } else {
+            if(masukIzinFb && !masuk){
+              const jenisFb = jenisToBadgeFb(masukIzinFb.jenis);
+              masuk = {kategori_absen:jenisFb, label_absen: masukIzinFb.jenis, jenis_absen:'MASUK', is_izin:true, is_izin_masuk:true, izinJenis:masukIzinFb.jenis, izinScope:'MASUK', keterangan:masukIzinFb.keterangan||'', tanggal:tanggalStr, tanggal_mulai:masukIzinFb.tanggal_mulai, tanggal_selesai:masukIzinFb.tanggal_selesai};
+            }
+            if(pulangIzinFb && !pulang){
+              const jenisFb = jenisToBadgeFb(pulangIzinFb.jenis);
+              pulang = {kategori_absen:jenisFb, label_absen: pulangIzinFb.jenis, jenis_absen:'PULANG', is_izin:true, is_izin_pulang:true, izinJenis:pulangIzinFb.jenis, izinScope:'PULANG', keterangan:pulangIzinFb.keterangan||'', tanggal:tanggalStr, tanggal_mulai:pulangIzinFb.tanggal_mulai, tanggal_selesai:pulangIzinFb.tanggal_selesai};
+            }
+          }
+        }
+      }
+    }catch(e){ console.log('fallback izin fail', e); }
     let telatMasuk = masuk ? (masuk.telat_menit||masuk.telat||0) : 0;
     try{
       const isIzinMasukFix = masuk && (masuk.is_izin || masuk.is_izin_masuk || ['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes((masuk.kategori_absen||'').toUpperCase()));
@@ -2436,21 +2462,41 @@ window.renderLaporanBaru = function(){
       const nama = (masuk&&masuk.liburNama) || (pulang&&pulang.liburNama) || (masuk&&masuk.label_absen) || (pulang&&pulang.label_absen) || 'Libur';
       keterangan = nama;
     } else if(isIzinMasuk || isIzinPulang){
-      const rec = isIzinMasuk ? masuk : pulang;
-      const ket = rec.keterangan || rec.izinKeterangan || rec.label_absen || rec.izinJenis || 'Izin';
-      const jamRec = safeJam(rec);
-      const mulai = rec.tanggal_mulai || rec.tanggal || '';
-      const selesai = rec.tanggal_selesai || mulai;
-      let tglInfo = '';
-      if(mulai){
-        if(mulai===selesai) tglInfo = mulai;
-        else tglInfo = mulai + ' s/d ' + selesai;
-      }
-      if(rec.waktu && jamRec !== '-'){
-        const prefix = isIzinMasuk ? 'MASUK ' : 'PULANG ';
-        keterangan = prefix + jamRec + ' • ' + ket + (tglInfo ? ' • ' + tglInfo : '');
+      // FIX double izin: tampilkan kedua izin jika ada MASUK + PULANG
+      if(isIzinMasuk && isIzinPulang){
+        const ketM = masuk.keterangan || masuk.izinKeterangan || masuk.label_absen || masuk.izinJenis || 'Izin';
+        const ketP = pulang.keterangan || pulang.izinKeterangan || pulang.label_absen || pulang.izinJenis || 'Izin';
+        const jamM = safeJam(masuk);
+        const jamP = safeJam(pulang);
+        const tglM = masuk.tanggal_mulai || masuk.tanggal || '';
+        const tglP = pulang.tanggal_mulai || pulang.tanggal || '';
+        let ketFinal = '';
+        if(masuk.waktu && jamM !== '-') ketFinal += 'MASUK ' + jamM + ' • ' + ketM;
+        else ketFinal += ketM;
+        if(tglM) ketFinal += ' • ' + tglM;
+        ketFinal += ' | ';
+        if(pulang.waktu && jamP !== '-') ketFinal += 'PULANG ' + jamP + ' • ' + ketP;
+        else ketFinal += 'PULANG Izin ' + ketP;
+        if(tglP && tglP !== tglM) ketFinal += ' • ' + tglP;
+        else if(tglP) ketFinal += ''; // tgl sama gak perlu dobel
+        keterangan = ketFinal;
       } else {
-        keterangan = ket + (tglInfo ? ' • ' + tglInfo : '');
+        const rec = isIzinMasuk ? masuk : pulang;
+        const ket = rec.keterangan || rec.izinKeterangan || rec.label_absen || rec.izinJenis || 'Izin';
+        const jamRec = safeJam(rec);
+        const mulai = rec.tanggal_mulai || rec.tanggal || '';
+        const selesai = rec.tanggal_selesai || mulai;
+        let tglInfo = '';
+        if(mulai){
+          if(mulai===selesai) tglInfo = mulai;
+          else tglInfo = mulai + ' s/d ' + selesai;
+        }
+        if(rec.waktu && jamRec !== '-'){
+          const prefix = isIzinMasuk ? 'MASUK ' : 'PULANG ';
+          keterangan = prefix + jamRec + ' • ' + ket + (tglInfo ? ' • ' + tglInfo : '');
+        } else {
+          keterangan = ket + (tglInfo ? ' • ' + tglInfo : '');
+        }
       }
     } else if(!masuk && !pulang) keterangan='-';
     else if(masuk && masuk.is_koreksi) keterangan=masuk.keterangan||'Dikoreksi admin';
