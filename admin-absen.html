@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#0f355c"/>
-<link rel="apple-touch-icon" href="logo-snebin.png?v=9"/>
+<link rel="apple-touch-icon" href="logo-snebin.png?v=10"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="SNEB.in"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>Admin SNEB.in</title>
-<link rel="icon" href="logo-smp2.png?v=9">
+<link rel="icon" href="logo-smp2.png?v=10">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -208,7 +208,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <body>
 <header class="header" style="gap:12px">
 <div class="logo-box">
-  <div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png?v=9" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SNEB.in" style="width:100%;height:100%;object-fit:contain"/></div>
+  <div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png?v=10" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SNEB.in" style="width:100%;height:100%;object-fit:contain"/></div>
 <div>
   <div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SNEB.in</div>
 <div style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.5px">Panel Admin</div>
@@ -871,7 +871,7 @@ window.simpanIzin = async()=>{
     const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
     const isEdit = !!window.editingIzinId;
     const id = isEdit ? window.editingIzinId : `${gid}_${mulai}_${scope}_${Date.now()}`;
-    await setDoc(doc(db, "izin", id), {
+    const dataIzin = {
       gid: gid,
       nama: nama,
       jenis: jenis,
@@ -881,11 +881,14 @@ window.simpanIzin = async()=>{
       tanggal_selesai: selesai,
       keterangan: ket,
       status: 'DISETUJUI',
-      created_at: isEdit ? undefined : new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      edited: isEdit ? true : false,
-      created_by: isEdit ? undefined : 'admin'
-    }, {merge:true});
+      edited: isEdit ? true : false
+    };
+    if(!isEdit){
+      dataIzin.created_at = new Date().toISOString();
+      dataIzin.created_by = 'admin';
+    }
+    await setDoc(doc(db, "izin", id), dataIzin, {merge:true});
     alert(`${isEdit?'✅ Izin di-update':'✅ Izin '+jenis+' '+scope+' untuk '+nama} ${mulai}${mulai!==selesai?' s/d '+selesai:''} tersimpan!`);
     document.getElementById('izinKeterangan').value='';
     window.editingIzinId=null;
@@ -1447,7 +1450,7 @@ function renderGurus(filter=''){const grid=document.getElementById('guruGrid');i
   <button style="height:40px;border-radius:12px;border:1px solid #fecaca;background:#fee2e2;font-weight:700;color:#991b1b;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;grid-column:span 2" onclick="hapusGuru('${g.gid}')">🗑️ Hapus GTK</button>
 </div>`;;grid.appendChild(div);setTimeout(()=>{const el=document.getElementById(qrId);if(!el)return;el.innerHTML='';new QRCode(el,{text:`${g.gid}`,width:84,height:84,colorDark:"#0f355c",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M}); el.style.cursor='pointer'; el.title='Klik untuk download QR'; el.onclick=()=>downloadQR(g.gid,g.nama); },100);});grid.querySelectorAll('button[data-act="reset"]').forEach(b=>{b.onclick=async()=>{const gid=b.dataset.gid;if(!confirm('Reset '+gid+'?'))return;try{await deleteDoc(doc(db,"users",gid));alert('✅ Reset!');delete customPassMap[gid];renderGurus(document.getElementById('searchGuru').value);}catch(e){alert(e.message);}};});grid.querySelectorAll('button[data-act="copy"]').forEach(b=>{b.onclick=()=>{const g=gurus.find(x=>x.gid===b.dataset.gid);const c=customPassMap[b.dataset.gid];const t=c?c.password_custom:g.password;navigator.clipboard.writeText(t).then(()=>alert('Copied: '+t));};});}
 document.getElementById('searchGuru').oninput=()=>{renderGurus(document.getElementById('searchGuru').value);};
-async function loadRekap(){const grid=document.getElementById('laporanBody');grid.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px">Memuat...</td></tr>';try{const q=query(collection(db,"absensi"),orderBy("waktu","desc"),limit(1000));const snap=await getDocs(q);allAbsen=[];snap.forEach(d=>{const data=d.data();data._id=d.id;allAbsen.push(data);});applyFilter();document.getElementById('rekapInfo').textContent=`${allAbsen.length} data dimuat`;}catch(e){grid.innerHTML=`<tr><td colspan="9" style="color:red">${e.message}</td></tr>`;}}
+async function loadRekap(){const grid=document.getElementById('laporanBody');grid.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px">Memuat...</td></tr>';try{const q=query(collection(db,"absensi"),orderBy("waktu","desc"),limit(1500));const snap=await getDocs(q);allAbsen=[];snap.forEach(d=>{const data=d.data();data._id=d.id;allAbsen.push(data);});applyFilter();document.getElementById('rekapInfo').textContent=`${allAbsen.length} data dimuat`;}catch(e){grid.innerHTML=`<tr><td colspan="9" style="color:red">${e.message}</td></tr>`;}}
 window.loadRekap=loadRekap;
 
 window.updateBulkBar=()=>{
@@ -2475,15 +2478,10 @@ window.renderLaporanBaru = function(){
     const telatMasuk = isIzinMasukFix ? 0 : (masuk ? (masuk.telat_menit||masuk.telat||0) : 0);
     const telatText = masuk ? formatTelat(telatMasuk) : '-';
     function safeJam(rec){
-      if(!rec) return '-';
-      let w = rec.waktu || rec.timestamp || rec.created_at;
-      if(!w) return '-';
+      if(!rec || !rec.waktu) return '-';
       try{
-        let d;
-        if(w && typeof w.toDate === 'function'){ d = w.toDate(); }
-        else if(w && w.seconds){ d = new Date(w.seconds*1000); }
-        else { d = new Date(w); }
-        if(!d || isNaN(d.getTime())) return '-';
+        const d = new Date(rec.waktu);
+        if(isNaN(d.getTime())) return '-';
         return d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
       }catch(e){ return '-'; }
     }
