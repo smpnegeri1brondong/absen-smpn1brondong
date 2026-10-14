@@ -995,7 +995,6 @@ async function prosesAbsenOtomatis(){
       }
 
       if(jamInfo.jenis==='MASUK' && hasMasukToday){
-        // FIX izin PULANG early 07:56
         try{
           const pulangIzinEarly = window.izinList ? window.izinList.find(z=> z.scope==='PULANG') : null;
           if(pulangIzinEarly){
