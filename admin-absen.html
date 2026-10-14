@@ -764,9 +764,9 @@ async function loadIzin(){
         sel.innerHTML = '<option value="">Pilih GTK...</option>' + gurusArr.map(g=>`<option value="${g.gid}">${g.nama} - ${g.gid}</option>`).join('');
       }
     }catch(e){}
-    // re-render laporan jika izin loaded - FIX badge auto
-    if(typeof renderLaporanBaru==='function'){
-      try{ renderLaporanBaru(); }catch(e){}
+    // re-render laporan if needed
+    if(typeof renderLaporanBaru==='function' && document.getElementById('filterTanggal')?.value){
+      renderLaporanBaru();
     }
   }catch(e){
     console.log('loadIzin fail', e);
@@ -807,8 +807,8 @@ async function startIzinLiveSync(){
         window.izinMapByGID = map;
         console.log('📝 izin live sync', arr.length);
         renderIzinList();
-        if(typeof renderLaporanBaru==='function'){
-          try{ renderLaporanBaru(); }catch(e){}
+        if(typeof renderLaporanBaru==='function' && document.getElementById('filterTanggal')?.value){
+          renderLaporanBaru();
         }
       }catch(e){ console.log('izin live sync parse fail', e); }
     });
@@ -1596,54 +1596,12 @@ window.exportExcel=()=>{
       const nama = (masuk&&masuk.liburNama) || (pulang&&pulang.liburNama) || (masuk&&masuk.label_absen) || (pulang&&pulang.label_absen) || 'Libur';
       return nama;
     } else if(isIzinMasuk || isIzinPulang){
-      if(isIzinMasuk && isIzinPulang){
-        const ketM = masuk.keterangan || masuk.izinKeterangan || masuk.label_absen || masuk.izinJenis || 'Izin';
-        const ketP = pulang.keterangan || pulang.izinKeterangan || pulang.label_absen || pulang.izinJenis || 'Izin';
-        const jamM = safeJam(masuk);
-        const jamP = safeJam(pulang);
-        const tglM = masuk.tanggal_mulai || masuk.tanggal || '';
-        const tglP = pulang.tanggal_mulai || pulang.tanggal || '';
-        let ketFinal = '';
-        if(masuk.waktu && jamM !== '-') ketFinal += 'MASUK ' + jamM + ' • ' + ketM;
-        else ketFinal += ketM;
-        if(tglM) ketFinal += ' • ' + tglM;
-        ketFinal += ' | ';
-        if(pulang.waktu && jamP !== '-') ketFinal += 'PULANG ' + jamP + ' • ' + ketP;
-        else ketFinal += 'PULANG Izin ' + ketP;
-        if(tglP && tglP !== tglM) ketFinal += ' • ' + tglP;
-        return ketFinal;
-      }
-      if(isIzinPulang && masuk && !masuk.is_izin){
-        const ketP = pulang.keterangan || pulang.izinKeterangan || pulang.label_absen || pulang.izinJenis || 'Izin';
-        const jamM = safeJam(masuk);
-        const jamP = safeJam(pulang);
-        const tglP = pulang.tanggal_mulai || pulang.tanggal || '';
-        let left = (masuk.waktu && jamM !== '-') ? 'MASUK ' + jamM + ' • ' + (masuk.label_absen||'') : (masuk.label_absen||'');
-        let right = (pulang.waktu && jamP !== '-') ? 'PULANG ' + jamP + ' • ' + ketP : 'PULANG Izin ' + ketP;
-        if(tglP) right += ' • ' + tglP;
-        return left + ' | ' + right;
-      }
-      if(isIzinMasuk && pulang && !pulang.is_izin){
-        const ketM = masuk.keterangan || masuk.izinKeterangan || masuk.label_absen || masuk.izinJenis || 'Izin';
-        const jamP = safeJam(pulang);
-        const jamM = safeJam(masuk);
-        const tglM = masuk.tanggal_mulai || masuk.tanggal || '';
-        let left = (masuk.waktu && jamM !== '-') ? 'MASUK ' + jamM + ' • ' + ketM : 'MASUK Izin ' + ketM;
-        if(tglM) left += ' • ' + tglM;
-        let right = (pulang.waktu && jamP !== '-') ? 'PULANG ' + jamP + ' • ' + (pulang.label_absen||'') : 'PULANG ' + (pulang.label_absen||'');
-        return left + ' | ' + right;
-      }
       const rec = isIzinMasuk ? masuk : pulang;
       const ket = rec.keterangan || rec.izinKeterangan || rec.label_absen || rec.izinJenis || 'Izin';
       const mulai = rec.tanggal_mulai || rec.tanggal || '';
       const selesai = rec.tanggal_selesai || mulai;
       let tglInfo = '';
       if(mulai){ tglInfo = mulai===selesai ? mulai : mulai+' s/d '+selesai; }
-      const jamRec = safeJam(rec);
-      if(rec.waktu && jamRec !== '-'){
-        const prefix = isIzinMasuk ? 'MASUK ' : 'PULANG ';
-        return prefix + jamRec + ' • ' + ket + (tglInfo ? ' • '+tglInfo : '');
-      }
       return ket + (tglInfo ? ' • '+tglInfo : '');
     } else if(!masuk && !pulang) return '-';
     else if(masuk && masuk.is_koreksi) return masuk.keterangan||'Dikoreksi admin';
@@ -1665,11 +1623,7 @@ window.exportExcel=()=>{
   const rows = parsedList.map((item, idx)=>{
     const g=item.guru;
     const masuk=item.masuk; const pulang=item.pulang;
-    let telatMasuk = masuk ? (masuk.telat_menit||masuk.telat||0) : 0;
-    try{
-      const isIzinMasukFix = masuk && (masuk.is_izin || masuk.is_izin_masuk || ['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes((masuk.kategori_absen||'').toUpperCase()));
-      if(isIzinMasukFix) telatMasuk = 0;
-    }catch(e){}
+    const telatMasuk = masuk ? (masuk.telat_menit||masuk.telat||0) : 0;
     const telatText = masuk ? formatTelat(telatMasuk) : '-';
     const statusMasuk = labelPlain(masuk);
     const statusPulang = labelPlain(pulang);
@@ -2359,33 +2313,25 @@ function parseAbsenGTK(gid, tanggalStr){
             masuk = fakeMasuk;
           }
         }
-        // PULANG scope - FIX jam pulang muncul untuk semua GTK
+        // PULANG scope - FIX jam pulang muncul untuk semua GTK + waktu fallback
         if(pulangIzin){
           const jenis = jenisToBadge(pulangIzin.jenis);
           if(pulang){
             const overridden = {...pulang, kategori_absen:jenis, label_absen: pulangIzin.jenis, is_izin:true, is_izin_pulang:true, izinJenis:pulangIzin.jenis, izinScope:'PULANG', keterangan:pulangIzin.keterangan||pulang.keterangan||'', tanggal:tanggalStr, tanggal_mulai:pulangIzin.tanggal_mulai||pulang.tanggal_mulai, tanggal_selesai:pulangIzin.tanggal_selesai||pulang.tanggal_selesai};
             pulang = overridden;
           } else {
-            // Coba cari pulang real di allAbsen yang mungkin kelewat karena limit / filter tanggal
             let realPulangFallback = null;
             try{
               if(window.allAbsen && window.allAbsen.length>0){
                 const cand = window.allAbsen.filter(a=> a.gid===g.gid && (a.jenis_absen||'').toUpperCase().includes('PULANG'));
                 if(cand.length>0){
-                  // cari yang tanggalnya sama atau paling dekat hari ini
                   const todayStr = tanggalStr;
                   const found = cand.find(a=> (a.tanggal||'').startsWith(todayStr)) || cand[0];
                   if(found && found.waktu) realPulangFallback = found;
                 }
               }
             }catch(e){}
-            const fakePulang = {
-              kategori_absen:jenis, label_absen: pulangIzin.jenis, jenis_absen:'PULANG',
-              is_izin:true, is_izin_pulang:true, izinJenis:pulangIzin.jenis, izinScope:'PULANG',
-              keterangan:pulangIzin.keterangan||'', tanggal:tanggalStr,
-              tanggal_mulai:pulangIzin.tanggal_mulai, tanggal_selesai:pulangIzin.tanggal_selesai,
-              waktu: realPulangFallback ? realPulangFallback.waktu : null
-            };
+            const fakePulang = {kategori_absen:jenis, label_absen: pulangIzin.jenis, jenis_absen:'PULANG', is_izin:true, is_izin_pulang:true, izinJenis:pulangIzin.jenis, izinScope:'PULANG', keterangan:pulangIzin.keterangan||'', tanggal:tanggalStr, tanggal_mulai:pulangIzin.tanggal_mulai, tanggal_selesai:pulangIzin.tanggal_selesai, waktu: realPulangFallback ? realPulangFallback.waktu : null};
             pulang = fakePulang;
           }
         }
@@ -2523,44 +2469,21 @@ window.renderLaporanBaru = function(){
   let countSudahMasuk=0;
 
   parsedList.forEach((item, idx)=>{
-    let g=item.guru;
-    let masuk=item.masuk; let pulang=item.pulang;
-    try{
-      if(typeof getIzinForDate==='function'){
-        const izinArrFallback = getIzinForDate(g.gid, tanggalStr);
-        if(izinArrFallback && izinArrFallback.length>0){
-          const masukIzinFb = izinArrFallback.find(z=> z.scope==='MASUK');
-          const pulangIzinFb = izinArrFallback.find(z=> z.scope==='PULANG');
-          const fullIzinFb = izinArrFallback.find(z=> (z.scope||'FULL')==='FULL');
-          const jenisToBadgeFb = (j)=>{ const u=(j||'').toUpperCase(); if(u==='SAKIT') return 'SAKIT'; if(u.includes('DINAS')) return 'DINAS_LUAR'; if(u.includes('KELUARGA')) return 'URUSAN_KELUARGA'; return 'IZIN_LAIN'; };
-          if(fullIzinFb && !masuk && !pulang){
-            const jenisFb = jenisToBadgeFb(fullIzinFb.jenis);
-            const fakeFb = {kategori_absen:jenisFb, label_absen: fullIzinFb.jenis, jenis_absen:'IZIN', is_izin:true, is_izin_full:true, izinJenis:fullIzinFb.jenis, izinScope:'FULL', keterangan:fullIzinFb.keterangan||'', tanggal:tanggalStr, tanggal_mulai:fullIzinFb.tanggal_mulai, tanggal_selesai:fullIzinFb.tanggal_selesai};
-            masuk = fakeFb; pulang = {...fakeFb};
-          } else {
-            if(masukIzinFb && !masuk){
-              const jenisFb = jenisToBadgeFb(masukIzinFb.jenis);
-              masuk = {kategori_absen:jenisFb, label_absen: masukIzinFb.jenis, jenis_absen:'MASUK', is_izin:true, is_izin_masuk:true, izinJenis:masukIzinFb.jenis, izinScope:'MASUK', keterangan:masukIzinFb.keterangan||'', tanggal:tanggalStr, tanggal_mulai:masukIzinFb.tanggal_mulai, tanggal_selesai:masukIzinFb.tanggal_selesai};
-            }
-            if(pulangIzinFb && !pulang){
-              const jenisFb = jenisToBadgeFb(pulangIzinFb.jenis);
-              pulang = {kategori_absen:jenisFb, label_absen: pulangIzinFb.jenis, jenis_absen:'PULANG', is_izin:true, is_izin_pulang:true, izinJenis:pulangIzinFb.jenis, izinScope:'PULANG', keterangan:pulangIzinFb.keterangan||'', tanggal:tanggalStr, tanggal_mulai:pulangIzinFb.tanggal_mulai, tanggal_selesai:pulangIzinFb.tanggal_selesai};
-            }
-          }
-        }
-      }
-    }catch(e){}
-    let telatMasuk = masuk ? (masuk.telat_menit||masuk.telat||0) : 0;
-    try{
-      const isIzinMasukFix = masuk && (masuk.is_izin || masuk.is_izin_masuk || ['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes((masuk.kategori_absen||'').toUpperCase()));
-      if(isIzinMasukFix) telatMasuk = 0;
-    }catch(e){}
+    const g=item.guru;
+    const masuk=item.masuk; const pulang=item.pulang;
+    const isIzinMasukFix = masuk && (masuk.is_izin || ['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes((masuk.kategori_absen||'').toUpperCase()));
+    const telatMasuk = isIzinMasukFix ? 0 : (masuk ? (masuk.telat_menit||masuk.telat||0) : 0);
     const telatText = masuk ? formatTelat(telatMasuk) : '-';
     function safeJam(rec){
-      if(!rec || !rec.waktu) return '-';
+      if(!rec) return '-';
+      let w = rec.waktu || rec.timestamp || rec.created_at;
+      if(!w) return '-';
       try{
-        const d = new Date(rec.waktu);
-        if(isNaN(d.getTime())) return '-';
+        let d;
+        if(w && typeof w.toDate === 'function'){ d = w.toDate(); }
+        else if(w && w.seconds){ d = new Date(w.seconds*1000); }
+        else { d = new Date(w); }
+        if(!d || isNaN(d.getTime())) return '-';
         return d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
       }catch(e){ return '-'; }
     }
@@ -2574,66 +2497,60 @@ window.renderLaporanBaru = function(){
     if(isLiburMasuk || isLiburPulang){
       const nama = (masuk&&masuk.liburNama) || (pulang&&pulang.liburNama) || (masuk&&masuk.label_absen) || (pulang&&pulang.label_absen) || 'Libur';
       keterangan = nama;
+    } else if(isIzinMasuk && isIzinPulang){
+      const ketM = masuk.keterangan || masuk.izinKeterangan || masuk.label_absen || masuk.izinJenis || 'Izin Masuk';
+      const ketP = pulang.keterangan || pulang.izinKeterangan || pulang.label_absen || pulang.izinJenis || 'Izin Pulang';
+      const jamM = safeJam(masuk);
+      const jamP = safeJam(pulang);
+      const tglM = masuk.tanggal_mulai || masuk.tanggal || '';
+      const tglP = pulang.tanggal_mulai || pulang.tanggal || '';
+      let left = (masuk.waktu && jamM !== '-') ? 'MASUK ' + jamM + ' • ' + ketM : ketM;
+      if(tglM) left += ' • ' + tglM;
+      let right = (pulang.waktu && jamP !== '-') ? 'PULANG ' + jamP + ' • ' + ketP : 'PULANG Izin ' + ketP;
+      if(tglP) right += ' • ' + tglP;
+      keterangan = left + ' | ' + right;
+    } else if(isIzinPulang && masuk && !masuk.is_izin){
+      const ketP = pulang.keterangan || pulang.izinKeterangan || pulang.label_absen || pulang.izinJenis || 'Izin';
+      const jamM = safeJam(masuk);
+      const jamP = safeJam(pulang);
+      const tglP = pulang.tanggal_mulai || pulang.tanggal || '';
+      let left = '';
+      if(masuk.waktu && jamM !== '-') left = 'MASUK ' + jamM + ' • ' + (masuk.label_absen||masuk.kategori_absen||'');
+      else left = (masuk.label_absen||'');
+      let right = '';
+      if(pulang.waktu && jamP !== '-') right = 'PULANG ' + jamP + ' • ' + ketP;
+      else right = 'PULANG Izin ' + ketP;
+      if(tglP) right += ' • ' + tglP;
+      keterangan = left + ' | ' + right;
+    } else if(isIzinMasuk && pulang && !pulang.is_izin){
+      const ketM = masuk.keterangan || masuk.izinKeterangan || masuk.label_absen || masuk.izinJenis || 'Izin';
+      const jamM = safeJam(masuk);
+      const jamP = safeJam(pulang);
+      const tglM = masuk.tanggal_mulai || masuk.tanggal || '';
+      let left = '';
+      if(masuk.waktu && jamM !== '-') left = 'MASUK ' + jamM + ' • ' + ketM;
+      else left = 'MASUK Izin ' + ketM;
+      if(tglM) left += ' • ' + tglM;
+      let right = '';
+      if(pulang.waktu && jamP !== '-') right = 'PULANG ' + jamP + ' • ' + (pulang.label_absen||pulang.kategori_absen||'');
+      else right = (pulang.label_absen||'');
+      keterangan = left + ' | ' + right;
     } else if(isIzinMasuk || isIzinPulang){
-      if(isIzinMasuk && isIzinPulang){
-        const ketM = masuk.keterangan || masuk.izinKeterangan || masuk.label_absen || masuk.izinJenis || 'Izin';
-        const ketP = pulang.keterangan || pulang.izinKeterangan || pulang.label_absen || pulang.izinJenis || 'Izin';
-        const jamM = safeJam(masuk);
-        const jamP = safeJam(pulang);
-        const tglM = masuk.tanggal_mulai || masuk.tanggal || '';
-        const tglP = pulang.tanggal_mulai || pulang.tanggal || '';
-        let ketFinal = '';
-        if(masuk.waktu && jamM !== '-') ketFinal += 'MASUK ' + jamM + ' • ' + ketM;
-        else ketFinal += ketM;
-        if(tglM) ketFinal += ' • ' + tglM;
-        ketFinal += ' | ';
-        if(pulang.waktu && jamP !== '-') ketFinal += 'PULANG ' + jamP + ' • ' + ketP;
-        else ketFinal += 'PULANG Izin ' + ketP;
-        if(tglP && tglP !== tglM) ketFinal += ' • ' + tglP;
-        keterangan = ketFinal;
-      } else if(isIzinPulang && masuk && !masuk.is_izin){
-        const ketP = pulang.keterangan || pulang.izinKeterangan || pulang.label_absen || pulang.izinJenis || 'Izin';
-        const jamM = safeJam(masuk);
-        const jamP = safeJam(pulang);
-        const tglP = pulang.tanggal_mulai || pulang.tanggal || '';
-        let left = '';
-        if(masuk.waktu && jamM !== '-') left = 'MASUK ' + jamM + ' • ' + (masuk.label_absen||masuk.kategori_absen||'');
-        else left = (masuk.label_absen||'');
-        let right = '';
-        if(pulang.waktu && jamP !== '-') right = 'PULANG ' + jamP + ' • ' + ketP;
-        else right = 'PULANG Izin ' + ketP;
-        if(tglP) right += ' • ' + tglP;
-        keterangan = left + ' | ' + right;
-      } else if(isIzinMasuk && pulang && !pulang.is_izin){
-        const ketM = masuk.keterangan || masuk.izinKeterangan || masuk.label_absen || masuk.izinJenis || 'Izin';
-        const jamP = safeJam(pulang);
-        const jamM = safeJam(masuk);
-        const tglM = masuk.tanggal_mulai || masuk.tanggal || '';
-        let left = '';
-        if(masuk.waktu && jamM !== '-') left = 'MASUK ' + jamM + ' • ' + ketM;
-        else left = 'MASUK Izin ' + ketM;
-        if(tglM) left += ' • ' + tglM;
-        let right = '';
-        if(pulang.waktu && jamP !== '-') right = 'PULANG ' + jamP + ' • ' + (pulang.label_absen||'');
-        else right = 'PULANG ' + (pulang.label_absen||'');
-        keterangan = left + ' | ' + right;
+      const rec = isIzinMasuk ? masuk : pulang;
+      const ket = rec.keterangan || rec.izinKeterangan || rec.label_absen || rec.izinJenis || 'Izin';
+      const mulai = rec.tanggal_mulai || rec.tanggal || '';
+      const selesai = rec.tanggal_selesai || mulai;
+      let tglInfo = '';
+      if(mulai){
+        if(mulai===selesai) tglInfo = mulai;
+        else tglInfo = mulai + ' s/d ' + selesai;
+      }
+      const jam = safeJam(rec);
+      if(rec.waktu && jam !== '-'){
+        const prefix = isIzinMasuk ? 'MASUK ' : 'PULANG ';
+        keterangan = prefix + jam + ' • ' + ket + (tglInfo ? ' • ' + tglInfo : '');
       } else {
-        const rec = isIzinMasuk ? masuk : pulang;
-        const ket = rec.keterangan || rec.izinKeterangan || rec.label_absen || rec.izinJenis || 'Izin';
-        const jamRec = safeJam(rec);
-        const mulai = rec.tanggal_mulai || rec.tanggal || '';
-        const selesai = rec.tanggal_selesai || mulai;
-        let tglInfo = '';
-        if(mulai){
-          if(mulai===selesai) tglInfo = mulai;
-          else tglInfo = mulai + ' s/d ' + selesai;
-        }
-        if(rec.waktu && jamRec !== '-'){
-          const prefix = isIzinMasuk ? 'MASUK ' : 'PULANG ';
-          keterangan = prefix + jamRec + ' • ' + ket + (tglInfo ? ' • ' + tglInfo : '');
-        } else {
-          keterangan = ket + (tglInfo ? ' • ' + tglInfo : '');
-        }
+        keterangan = ket + (tglInfo ? ' • ' + tglInfo : '');
       }
     } else if(!masuk && !pulang) keterangan='-';
     else if(masuk && masuk.is_koreksi) keterangan=masuk.keterangan||'Dikoreksi admin';
