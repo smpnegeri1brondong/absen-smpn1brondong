@@ -1566,10 +1566,15 @@ window.exportExcel=()=>{
   }
   // Helper
   function safeJam(rec){
-    if(!rec || !rec.waktu) return '-';
+    if(!rec) return '-';
+    let w = rec.waktu || rec.timestamp || rec.created_at;
+    if(!w) return '-';
     try{
-      const d=new Date(rec.waktu);
-      if(isNaN(d.getTime())) return '-';
+      let d;
+      if(w && typeof w.toDate === 'function'){ d = w.toDate(); }
+      else if(w && w.seconds){ d = new Date(w.seconds*1000); }
+      else { d = new Date(w); }
+      if(!d || isNaN(d.getTime())) return '-';
       return d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
     }catch(e){ return '-'; }
   }
