@@ -189,14 +189,9 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 </div>
 
 
-<div class="card" style="padding:12px 14px;border:1px solid #e2e8f0;background:#f8fafc">
-  <div style="display:flex;align-items:center;gap:10px">
-    <div style="width:36px;height:36px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:18px">🔒</div>
-    <div>
-      <div style="font-size:11px;font-weight:800;color:#0f355c">Akun dikelola Admin</div>
-      <div style="font-size:10px;color:#64748b;margin-top:2px">Ganti password hanya via admin. Hubungi admin jika lupa password.</div>
-    </div>
-  </div>
+<div style="display:flex;align-items:flex-start;gap:6px;padding:8px 4px 10px 4px;margin-bottom:6px">
+  <span style="font-size:12px;line-height:1">🔒</span>
+  <span style="font-size:11px;color:#64748b;line-height:1.4">Ganti password dan perbaikan data diri bisa menghubungi admin. Hubungi admin jika lupa password</span>
 </div>
 
 <div class="card" style="overflow:hidden"><div style="font-size:11px;font-weight:800;color:#64748b">GPS • </div><div id="statusLokasi" style="font-weight:800;color:#0f355c;margin-top:6px">Belum cek</div><div id="locText" style="font-size:12px;color:#64748b">Klik Cek Lokasi</div><div id="radiusBadge" style="margin-top:8px;display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:5px 10px;font-size:11px">Menunggu GPS</div><div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;position:relative;z-index:1"><div id="miniMap"></div></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="flex:1" onclick="cekLokasi()">📍 Cek Lokasi</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('peta')">Peta</button><button class="btn btn-outline" style="flex:1" onclick="setModeMini('satelit')">Sat</button></div></div>
@@ -1643,10 +1638,17 @@ window.loadStatusHariIni=async()=>{
     const today=window.getLocalDateStr?window.getLocalDateStr():new Date().toISOString().split('T')[0];
     const db=window.db; if(!db) return;
     const {collection, query, where, getDocs} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-    const q=query(collection(db,"absensi"), where("gid","==",g.gid), where("tanggal","==",today));
+    // FIX: hindari composite index - query cuma gid, filter tanggal client-side
+    const q=query(collection(db,"absensi"), where("gid","==",g.gid));
     const snap=await getDocs(q);
     let masuk=null, pulang=null;
-    snap.forEach(d=>{ const data=d.data(); if(data.jenis_absen==='MASUK' || data.jenis==='MASUK') masuk=data; if(data.jenis_absen==='PULANG' || data.jenis==='PULANG') pulang=data; });
+    snap.forEach(d=>{ 
+      const data=d.data(); 
+      const tgl=data.tanggal||'';
+      if(tgl!==today) return;
+      if(data.jenis_absen==='MASUK' || data.jenis==='MASUK') masuk=data; 
+      if(data.jenis_absen==='PULANG' || data.jenis==='PULANG') pulang=data; 
+    });
     const card=document.getElementById('statusHariIniCard');
     if(card) card.classList.remove('hidden');
     const tglEl=document.getElementById('statusTanggal');
@@ -1672,14 +1674,27 @@ window.loadStatusHariIni=async()=>{
       if(sPulang) sPulang.textContent='Belum';
       if(sPulangJam) sPulangJam.textContent='-';
     }
-    // progress
+    // progress + cek libur untuk opsi B
     let prog=0;
     if(masuk && !pulang) prog=50;
     if(masuk && pulang) prog=100;
     const pFill=document.getElementById('progressFill');
     const pText=document.getElementById('statusProgressText');
-    if(pFill) pFill.style.width=prog+'%';
-    if(pText) pText.textContent=prog+'%';
+    try{
+      const liburMap=window.kalenderLiburMap||{};
+      const day=new Date().getDay();
+      const isLibur=!!(liburMap[today] || day===0 || day===6);
+      if(isLibur){
+        if(pFill) pFill.style.width='0%';
+        if(pText){ pText.textContent='Libur'; pText.style.background='rgba(255,255,255,.25)'; }
+      } else {
+        if(pFill) pFill.style.width=prog+'%';
+        if(pText) pText.textContent=prog+'%';
+      }
+    }catch(e){
+      if(pFill) pFill.style.width=prog+'%';
+      if(pText) pText.textContent=prog+'%';
+    }
   }catch(e){ console.log('status hari ini fail', e); }
 };
 
