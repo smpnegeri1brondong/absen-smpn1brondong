@@ -767,11 +767,17 @@ window.startCamera=async()=>{
     await html5QrCode.start({facingMode:"environment"}, {fps:10, qrbox:{width:250,height:250}}, async decoded=>{
       if(isProcessing) return;
       try{ window.playBeep && window.playBeep(); }catch(e){}
-      // === CEK LIBUR DULU - KAMERA TETEP TAMPIL TAPI ALERT ===
+      // === CEK LIBUR DULU - ALERT FINAL MAS/MBAK ===
       if(window.isLiburHariIni){
         const namaLibur=window.namaLiburHariIni||'Minggu';
-        const msg=`Hari ini libur <b>${namaLibur}</b><br><br>Absen dinonaktifkan hari ini.<br>Kamera tetep tampil tapi scan akan ditolak.`;
-        if(typeof showCustomAlert==='function') showCustomAlert('🗓️ LIBUR '+namaLibur.toUpperCase(), msg+'<br><br><button onclick="closeCustomAlert()" style="background:#0f355c;color:white;border:none;padding:10px 20px;border-radius:10px;font-weight:800;width:100%">Oke, Mengerti</button>');
+        const g=window.currentGuru||{};
+        const isP=(g.gender||'').toString().toUpperCase().startsWith('P');
+        const panggilan=isP?'mbak':'mas';
+        const namaLengkap=g.nama||'GTK';
+        let pesanLibur='';
+        try{ const inf=window.getJenisAbsen?window.getJenisAbsen(new Date()):null; if(inf&&inf.pesan) pesanLibur=inf.pesan; }catch(e){}
+        const msg='<div style="text-align:left"><b>'+namaLengkap+'</b><br><br>Terlalu Rajin nih '+panggilan+'<br><br>Hari ini libur <b>'+namaLibur+'</b><br><span style="font-size:12px;color:#64748b">'+pesanLibur+'</span><br><br><span style="background:#e0f2fe;color:#0369a1;padding:8px 14px;border-radius:999px;font-size:12px;font-weight:800;display:inline-block">Libuuurrrrrrrrrr</span></div>';
+        if(typeof showCustomAlert==='function') showCustomAlert('INI HARI LIBUR HEYY', msg);
         try{
           document.getElementById('btnStartCam').classList.remove('hidden');
           document.getElementById('btnStartCam').disabled=false;
@@ -1241,9 +1247,7 @@ async function prosesAbsenOtomatis(){
       msg=`<b>${currentGuru.nama}</b><br><br>Masih jam <b>${jamStr}</b><br>Belum waktunya pulang<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Belum bisa absen, coba lagi nanti</span>`;
     } else if(jenis==='LIBUR'){
       title='INI HARI LIBUR HEYY';
-      const isP=(currentGuru.gender||'').toString().toUpperCase().startsWith('P');
-      const panggilanLibur=isP?'mbak':'mas';
-      msg=`<b>${currentGuru.nama}</b><br><br>Terlalu Rajin nih ${panggilanLibur}<br>${jamInfo.pesan}<br><br><span style="background:#e0f2fe;color:#0f355c;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">Libuuurrrrrrrrrr</span>`;
+      msg=`<b>${currentGuru.nama}</b><br><br>Terlalu Rajin nih mas<br>${jamInfo.pesan}<br><br>Absen kamu <b>TETAP TERCATAT</b> di laporan sebagai <b>${jamInfo.label}</b><br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#e0f2fe;color:#0f355c;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">Libuuurrrrrrrrrr</span>`;
     } else if(kat==='DILUAR_JAM_KERJA' || kat==='DILUAR'){
       title='🌙 PULANG DI LUAR JAM KERJA';
       msg=`<b>${currentGuru.nama}</b><br><br>Absen pulang jam <b>${jamStr}</b><br>Udah di luar jam kerja ini<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fee2e2;color:#991b1b;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">📌 Di Luar Jam Kerja</span>`;
@@ -1264,11 +1268,16 @@ async function prosesAbsenOtomatis(){
 
 window.mulaiScan=async()=>{ 
   try{ window.playBeep && window.playBeep(); }catch(e){}
-  // === CEK LIBUR DULU - KAMERA TETEP TAMPIL TAPI ALERT ===
   if(window.isLiburHariIni){
     const namaLibur=window.namaLiburHariIni||'Minggu';
-    const msg=`Hari ini libur <b>${namaLibur}</b><br><br>Absen dinonaktifkan hari ini.<br>Kamera tetep tampil tapi scan akan ditolak.<br><br>Jam: <b>${new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})} WIB</b>`;
-    if(typeof showCustomAlert==='function') showCustomAlert('🗓️ LIBUR '+namaLibur.toUpperCase(), msg+'<br><br><button onclick="closeCustomAlert()" style="background:#0f355c;color:white;border:none;padding:10px 20px;border-radius:10px;font-weight:800;width:100%">Oke, Mengerti</button>');
+    const g=window.currentGuru||{};
+    const isP=(g.gender||'').toString().toUpperCase().startsWith('P');
+    const panggilan=isP?'mbak':'mas';
+    const namaLengkap=g.nama||'GTK';
+    let pesanLibur='';
+    try{ const inf=window.getJenisAbsen?window.getJenisAbsen(new Date()):null; if(inf&&inf.pesan) pesanLibur=inf.pesan; }catch(e){}
+    const msg='<div style="text-align:left"><b>'+namaLengkap+'</b><br><br>Terlalu Rajin nih '+panggilan+'<br><br>Hari ini libur <b>'+namaLibur+'</b><br><span style="font-size:12px;color:#64748b">'+pesanLibur+'</span><br><br><span style="background:#e0f2fe;color:#0369a1;padding:8px 14px;border-radius:999px;font-size:12px;font-weight:800;display:inline-block">Libuuurrrrrrrrrr</span></div>';
+    if(typeof showCustomAlert==='function') showCustomAlert('INI HARI LIBUR HEYY', msg);
     // reset tombol kamera
     try{
       document.getElementById('btnStartCam').classList.remove('hidden');
