@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="SNEB.in"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>Admin SNEB.in</title>
-<link rel="icon" href="logo-smp2.png?v=11">
+<link rel="icon" href="logo-smp2.png?v=9">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -208,7 +208,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <body>
 <header class="header" style="gap:12px">
 <div class="logo-box">
-  <div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png?v=11" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SNEB.in" style="width:100%;height:100%;object-fit:contain"/></div>
+  <div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png?v=9" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SNEB.in" style="width:100%;height:100%;object-fit:contain"/></div>
 <div>
   <div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SNEB.in</div>
 <div style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.5px">Panel Admin</div>
@@ -871,7 +871,7 @@ window.simpanIzin = async()=>{
     const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
     const isEdit = !!window.editingIzinId;
     const id = isEdit ? window.editingIzinId : `${gid}_${mulai}_${scope}_${Date.now()}`;
-    const dataIzin = {
+    await setDoc(doc(db, "izin", id), {
       gid: gid,
       nama: nama,
       jenis: jenis,
@@ -881,14 +881,11 @@ window.simpanIzin = async()=>{
       tanggal_selesai: selesai,
       keterangan: ket,
       status: 'DISETUJUI',
+      created_at: isEdit ? undefined : new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      edited: isEdit ? true : false
-    };
-    if(!isEdit){
-      dataIzin.created_at = new Date().toISOString();
-      dataIzin.created_by = 'admin';
-    }
-    await setDoc(doc(db, "izin", id), dataIzin, {merge:true});
+      edited: isEdit ? true : false,
+      created_by: isEdit ? undefined : 'admin'
+    }, {merge:true});
     alert(`${isEdit?'✅ Izin di-update':'✅ Izin '+jenis+' '+scope+' untuk '+nama} ${mulai}${mulai!==selesai?' s/d '+selesai:''} tersimpan!`);
     document.getElementById('izinKeterangan').value='';
     window.editingIzinId=null;
@@ -1439,7 +1436,7 @@ window.simpanGTKBaru=simpanGTKBaru;
 window.openTambahGTK=openTambahGTK;
 window.closeTambahGTK=closeTambahGTK;
 
-function renderGurus(filter=''){const grid=document.getElementById('guruGrid');if(!grid)return;grid.innerHTML='';let list=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));if(filter){const f=filter.toLowerCase();list=gurus.filter(g=>g.nama.toLowerCase().includes(f)||g.gid.toLowerCase().includes(f));}document.getElementById('totalGuruInfo').textContent=list.length+' GTK';list.forEach((g,i)=>{const isHonorer=g.nip==='-'||!g.nip;const custom=customPassMap[g.gid];const div=document.createElement('div');div.className='card';div.style.display='flex';div.style.flexDirection='column';div.style.gap='12px';const qrId='qr-'+i+'-'+g.gid;div.innerHTML=`<div style="display:flex;gap:12px"><div id="${qrId}" style="width:84px;height:84px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer" title="Klik untuk preview QR"></div><div style="flex:1"><div style="font-weight:800;color:#0f355c;font-size:14px">${g.nama} ${isHonorer?'<span style="background:#fef3c7;color:#92400e;font-size:9px;padding:2px 6px;border-radius:999px">HONORER</span>':''}</div><div style="font-size:11px;color:#64748b;margin-top:2px">NIP: ${g.nip||'-'} • ${g.gid}</div><div style="margin-top:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="font-size:9px;color:#94a3b8;font-weight:700">DEFAULT</div><div style="font-family:monospace;font-weight:800;font-size:13px">${g.password}</div>${custom && custom.password_custom && custom.password_custom!==g.password ? `<div style="margin-top:6px;border-top:1px solid #e2e8f0;padding-top:6px"><div style="font-size:9px;color:#dc2626;font-weight:700">CUSTOM</div><div style="font-family:monospace;font-weight:800;color:#dc2626;font-size:13px">${custom.password_custom}</div></div>` : ''}</div></div></div>
+function renderGurus(filter=''){const grid=document.getElementById('guruGrid');if(!grid)return;grid.innerHTML='';let list=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));let fullList=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));if(filter){const f=filter.toLowerCase();list=gurus.filter(g=>g.nama.toLowerCase().includes(f)||g.gid.toLowerCase().includes(f)).sort((a,b)=>(a.no||9999)-(b.no||9999));}document.getElementById('totalGuruInfo').textContent=list.length+' GTK';list.forEach((g,i)=>{const isHonorer=g.nip==='-'||!g.nip;const custom=customPassMap[g.gid];const idxGlobal=fullList.findIndex(x=>x.gid===g.gid);const isFirst=idxGlobal===0;const isLast=idxGlobal===fullList.length-1;const div=document.createElement('div');div.className='card';div.style.display='flex';div.style.flexDirection='column';div.style.gap='12px';const qrId='qr-'+i+'-'+g.gid;div.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:6px 10px"><div style="display:flex;align-items:center;gap:8px"><div style="font-weight:800;background:#0f355c;color:white;min-width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;padding:0 6px">#${g.no||idxGlobal+1}</div><div style="font-size:11px;color:#64748b;font-weight:700">${g.jabatan?g.jabatan:''}</div></div><div style="display:flex;gap:4px"><button title="Ke paling atas ⤒" style="height:32px;min-width:32px;padding:0 8px;border-radius:8px;border:1px solid #e2e8f0;background:white;font-weight:800;cursor:pointer;font-size:12px" onclick="moveGuruTop('${g.gid}')" ${isFirst?'disabled':''}>⤒</button><button title="Naik ↑" style="height:32px;min-width:32px;padding:0 8px;border-radius:8px;border:1px solid #e2e8f0;background:white;font-weight:800;cursor:pointer;font-size:14px" onclick="moveGuruUp('${g.gid}')" ${isFirst?'disabled':''}>↑</button><button title="Turun ↓" style="height:32px;min-width:32px;padding:0 8px;border-radius:8px;border:1px solid #e2e8f0;background:white;font-weight:800;cursor:pointer;font-size:14px" onclick="moveGuruDown('${g.gid}')" ${isLast?'disabled':''}>↓</button></div></div><div style="display:flex;gap:12px"><div id="${qrId}" style="width:84px;height:84px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer" title="Klik untuk preview QR"></div><div style="flex:1"><div style="font-weight:800;color:#0f355c;font-size:14px">${g.nama} ${isHonorer?'<span style="background:#fef3c7;color:#92400e;font-size:9px;padding:2px 6px;border-radius:999px">HONORER</span>':''}</div><div style="font-size:11px;color:#64748b;margin-top:2px">NIP: ${g.nip||'-'} • ${g.gid}</div><div style="margin-top:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="font-size:9px;color:#94a3b8;font-weight:700">DEFAULT</div><div style="font-family:monospace;font-weight:800;font-size:13px">${g.password}</div>${custom && custom.password_custom && custom.password_custom!==g.password ? `<div style="margin-top:6px;border-top:1px solid #e2e8f0;padding-top:6px"><div style="font-size:9px;color:#dc2626;font-weight:700">CUSTOM</div><div style="font-family:monospace;font-weight:800;color:#dc2626;font-size:13px">${custom.password_custom}</div></div>` : ''}</div></div></div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
   <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="directDownloadQR('${g.gid}','${g.nama}')">⬇️ Download QR</button>
   <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="copyDataQR('${g.gid}','${g.nama}','${g.nip}')">📋 Copy Data QR</button>
@@ -1448,9 +1445,72 @@ function renderGurus(filter=''){const grid=document.getElementById('guruGrid');i
   <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="copyPass('${g.gid}')">📋 Copy Pass</button>
   <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="openEditGuru('${g.gid}')">✏️ Edit</button>
   <button style="height:40px;border-radius:12px;border:1px solid #fecaca;background:#fee2e2;font-weight:700;color:#991b1b;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;grid-column:span 2" onclick="hapusGuru('${g.gid}')">🗑️ Hapus GTK</button>
-</div>`;;grid.appendChild(div);setTimeout(()=>{const el=document.getElementById(qrId);if(!el)return;el.innerHTML='';new QRCode(el,{text:`${g.gid}`,width:84,height:84,colorDark:"#0f355c",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M}); el.style.cursor='pointer'; el.title='Klik untuk download QR'; el.onclick=()=>downloadQR(g.gid,g.nama); },100);});grid.querySelectorAll('button[data-act="reset"]').forEach(b=>{b.onclick=async()=>{const gid=b.dataset.gid;if(!confirm('Reset '+gid+'?'))return;try{await deleteDoc(doc(db,"users",gid));alert('✅ Reset!');delete customPassMap[gid];renderGurus(document.getElementById('searchGuru').value);}catch(e){alert(e.message);}};});grid.querySelectorAll('button[data-act="copy"]').forEach(b=>{b.onclick=()=>{const g=gurus.find(x=>x.gid===b.dataset.gid);const c=customPassMap[b.dataset.gid];const t=c?c.password_custom:g.password;navigator.clipboard.writeText(t).then(()=>alert('Copied: '+t));};});}
+</div>`;;grid.appendChild(div);setTimeout(()=>{const el=document.getElementById(qrId);if(!el)return;el.innerHTML='';new QRCode(el,{text:`${g.gid}`,width:84,height:84,colorDark:"#0f355c",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M}); el.style.cursor='pointer'; el.title='Klik untuk download QR'; el.onclick=()=>downloadQR(g.gid,g.nama); },100);});// === OPSI B: URUTAN JABATAN ↑↓⤒ (tidak sentuh map) ===
+window.moveGuruUp = async(gid)=>{
+  try{
+    const sorted=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));
+    const idx=sorted.findIndex(x=>x.gid===gid);
+    if(idx<=0) return;
+    const curr=sorted[idx]; const prev=sorted[idx-1];
+    const tmpNo=curr.no; curr.no=prev.no; prev.no=tmpNo;
+    const g1=gurus.find(x=>x.gid===curr.gid); if(g1) g1.no=curr.no;
+    const g2=gurus.find(x=>x.gid===prev.gid); if(g2) g2.no=prev.no;
+    try{
+      const {doc, setDoc}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      const d=window.db||db; if(d){
+        await setDoc(doc(d,"gurus",curr.gid), {no:curr.no}, {merge:true});
+        await setDoc(doc(d,"gurus",prev.gid), {no:prev.no}, {merge:true});
+      }
+    }catch(e){ console.log('up fail', e); }
+    renderGurus(document.getElementById('searchGuru')?.value||'');
+    if(typeof renderLaporanBaru==='function') renderLaporanBaru();
+  }catch(e){ alert(e.message); }
+};
+window.moveGuruDown = async(gid)=>{
+  try{
+    const sorted=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));
+    const idx=sorted.findIndex(x=>x.gid===gid);
+    if(idx<0 || idx>=sorted.length-1) return;
+    const curr=sorted[idx]; const next=sorted[idx+1];
+    const tmpNo=curr.no; curr.no=next.no; next.no=tmpNo;
+    const g1=gurus.find(x=>x.gid===curr.gid); if(g1) g1.no=curr.no;
+    const g2=gurus.find(x=>x.gid===next.gid); if(g2) g2.no=next.no;
+    try{
+      const {doc, setDoc}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      const d=window.db||db; if(d){
+        await setDoc(doc(d,"gurus",curr.gid), {no:curr.no}, {merge:true});
+        await setDoc(doc(d,"gurus",next.gid), {no:next.no}, {merge:true});
+      }
+    }catch(e){ console.log('down fail', e); }
+    renderGurus(document.getElementById('searchGuru')?.value||'');
+    if(typeof renderLaporanBaru==='function') renderLaporanBaru();
+  }catch(e){ alert(e.message); }
+};
+window.moveGuruTop = async(gid)=>{
+  try{
+    if(!confirm('Pindah ke paling atas (#1)?')) return;
+    let sorted=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));
+    const idx=sorted.findIndex(x=>x.gid===gid);
+    if(idx<=0) return;
+    const moving=sorted.splice(idx,1)[0];
+    sorted.unshift(moving);
+    sorted.forEach((g,i)=>{ g.no=i+1; });
+    gurus.forEach(g=>{ const f=sorted.find(x=>x.gid===g.gid); if(f) g.no=f.no; });
+    try{
+      const {doc, setDoc}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      const d=window.db||db; if(d){
+        for(const gg of sorted){
+          try{ await setDoc(doc(d,"gurus",gg.gid), {no:gg.no}, {merge:true}); }catch(e){}
+        }
+      }
+    }catch(e){ console.log('top fail', e); }
+    renderGurus(document.getElementById('searchGuru')?.value||'');
+    if(typeof renderLaporanBaru==='function') renderLaporanBaru();
+  }catch(e){ alert(e.message); }
+};
+grid.querySelectorAll('button[data-act="reset"]').forEach(b=>{b.onclick=async()=>{const gid=b.dataset.gid;if(!confirm('Reset '+gid+'?'))return;try{await deleteDoc(doc(db,"users",gid));alert('✅ Reset!');delete customPassMap[gid];renderGurus(document.getElementById('searchGuru').value);}catch(e){alert(e.message);}};});grid.querySelectorAll('button[data-act="copy"]').forEach(b=>{b.onclick=()=>{const g=gurus.find(x=>x.gid===b.dataset.gid);const c=customPassMap[b.dataset.gid];const t=c?c.password_custom:g.password;navigator.clipboard.writeText(t).then(()=>alert('Copied: '+t));};});}
 document.getElementById('searchGuru').oninput=()=>{renderGurus(document.getElementById('searchGuru').value);};
-async function loadRekap(){const grid=document.getElementById('laporanBody');grid.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px">Memuat...</td></tr>';try{const q=query(collection(db,"absensi"),orderBy("waktu","desc"),limit(1500));const snap=await getDocs(q);allAbsen=[];snap.forEach(d=>{const data=d.data();data._id=d.id;allAbsen.push(data);});applyFilter();document.getElementById('rekapInfo').textContent=`${allAbsen.length} data dimuat`;}catch(e){grid.innerHTML=`<tr><td colspan="9" style="color:red">${e.message}</td></tr>`;}}
+async function loadRekap(){const grid=document.getElementById('laporanBody');grid.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px">Memuat...</td></tr>';try{const q=query(collection(db,"absensi"),orderBy("waktu","desc"),limit(1000));const snap=await getDocs(q);allAbsen=[];snap.forEach(d=>{const data=d.data();data._id=d.id;allAbsen.push(data);});applyFilter();document.getElementById('rekapInfo').textContent=`${allAbsen.length} data dimuat`;}catch(e){grid.innerHTML=`<tr><td colspan="9" style="color:red">${e.message}</td></tr>`;}}
 window.loadRekap=loadRekap;
 
 window.updateBulkBar=()=>{
@@ -1569,15 +1629,10 @@ window.exportExcel=()=>{
   }
   // Helper
   function safeJam(rec){
-    if(!rec) return '-';
-    let w = rec.waktu || rec.timestamp || rec.created_at;
-    if(!w) return '-';
+    if(!rec || !rec.waktu) return '-';
     try{
-      let d;
-      if(w && typeof w.toDate === 'function'){ d = w.toDate(); }
-      else if(w && w.seconds){ d = new Date(w.seconds*1000); }
-      else { d = new Date(w); }
-      if(!d || isNaN(d.getTime())) return '-';
+      const d=new Date(rec.waktu);
+      if(isNaN(d.getTime())) return '-';
       return d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
     }catch(e){ return '-'; }
   }
@@ -1605,7 +1660,9 @@ window.exportExcel=()=>{
       const selesai = rec.tanggal_selesai || mulai;
       let tglInfo = '';
       if(mulai){ tglInfo = mulai===selesai ? mulai : mulai+' s/d '+selesai; }
-      return ket + (tglInfo ? ' • '+tglInfo : '');
+      const jam = safeJam(rec);
+      const jamPart = (jam && jam!=='-') ? jam : '';
+      return (jamPart ? jamPart+' • ' : '') + ket + (tglInfo ? ' • '+tglInfo : '');
     } else if(!masuk && !pulang) return '-';
     else if(masuk && masuk.is_koreksi) return masuk.keterangan||'Dikoreksi admin';
     else if(masuk && !pulang) return 'Sudah masuk '+safeJam(masuk)+', belum pulang';
@@ -1681,16 +1738,32 @@ window.exportCSV=async()=>{
     const telatText = masuk ? formatTelat(telatMasuk) : '-';
     const statusMasuk = labelPlain(masuk);
     const statusPulang = labelPlain(pulang);
-    let ket='';
-    if(masuk && pulang) ket=safeJam(masuk)+' - '+safeJam(pulang);
-    else if(masuk && !pulang) ket='Sudah masuk '+safeJam(masuk)+', belum pulang';
-    else if(!masuk && pulang) ket='Pulang '+safeJam(pulang);
-    else {
-      const kat=(masuk?.kategori_absen||pulang?.kategori_absen||'').toUpperCase();
-      if(kat.includes('LIBUR')) ket=masuk?.label_absen||pulang?.label_absen||'Libur';
-      else if(masuk?.keterangan) ket=masuk.keterangan;
-      else ket='-';
+    function keteranganPlainCSV(masuk, pulang){
+      const isLiburMasuk = masuk && ((masuk.kategori_absen||'').toUpperCase().includes('LIBUR') || masuk.is_libur);
+      const isLiburPulang = pulang && ((pulang.kategori_absen||'').toUpperCase().includes('LIBUR') || pulang.is_libur);
+      const isIzinMasuk = masuk && (masuk.is_izin || ['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes((masuk.kategori_absen||'').toUpperCase()));
+      const isIzinPulang = pulang && (pulang.is_izin || ['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes((pulang.kategori_absen||'').toUpperCase()));
+      if(isLiburMasuk || isLiburPulang){
+        const nama = (masuk&&masuk.liburNama) || (pulang&&pulang.liburNama) || (masuk&&masuk.label_absen) || (pulang&&pulang.label_absen) || 'Libur';
+        return nama;
+      } else if(isIzinMasuk || isIzinPulang){
+        const rec = isIzinMasuk ? masuk : pulang;
+        const ket = rec.keterangan || rec.izinKeterangan || rec.label_absen || rec.izinJenis || 'Izin';
+        const mulai = rec.tanggal_mulai || rec.tanggal || '';
+        const selesai = rec.tanggal_selesai || mulai;
+        let tglInfo = '';
+        if(mulai){ tglInfo = mulai===selesai ? mulai : mulai+' s/d '+selesai; }
+        const jam = safeJam(rec);
+        const jamPart = (jam && jam!=='-') ? jam : '';
+        return (jamPart ? jamPart+' • ' : '') + ket + (tglInfo ? ' • '+tglInfo : '');
+      } else if(!masuk && !pulang) return '-';
+      else if(masuk && masuk.is_koreksi) return masuk.keterangan||'Dikoreksi admin';
+      else if(masuk && !pulang) return 'Sudah masuk '+safeJam(masuk)+', belum pulang';
+      else if(!masuk && pulang) return 'Pulang '+safeJam(pulang);
+      else if(masuk && pulang) return safeJam(masuk)+' - '+safeJam(pulang);
+      return '-';
     }
+    let ket=keteranganPlainCSV(masuk, pulang);
     csv+=`"${g.no||idx+1}","${g.nama}","${g.nip||'-'}","${statusMasuk}","${telatText}","${statusPulang}","${ket}"\n`;
   });
   const blob=new Blob([csv],{type:'text/csv'});
@@ -2316,25 +2389,14 @@ function parseAbsenGTK(gid, tanggalStr){
             masuk = fakeMasuk;
           }
         }
-        // PULANG scope - FIX jam pulang muncul untuk semua GTK + waktu fallback
+        // PULANG scope
         if(pulangIzin){
           const jenis = jenisToBadge(pulangIzin.jenis);
           if(pulang){
-            const overridden = {...pulang, kategori_absen:jenis, label_absen: pulangIzin.jenis, is_izin:true, is_izin_pulang:true, izinJenis:pulangIzin.jenis, izinScope:'PULANG', keterangan:pulangIzin.keterangan||pulang.keterangan||'', tanggal:tanggalStr, tanggal_mulai:pulangIzin.tanggal_mulai||pulang.tanggal_mulai, tanggal_selesai:pulangIzin.tanggal_selesai||pulang.tanggal_selesai};
+            const overridden = {...pulang, kategori_absen:jenis, label_absen: pulangIzin.jenis, is_izin:true, is_izin_pulang:true, izinJenis:pulangIzin.jenis, izinScope:'PULANG', keterangan:pulangIzin.keterangan||pulang.keterangan||'', tanggal:tanggalStr};
             pulang = overridden;
           } else {
-            let realPulangFallback = null;
-            try{
-              if(window.allAbsen && window.allAbsen.length>0){
-                const cand = window.allAbsen.filter(a=> a.gid===g.gid && (a.jenis_absen||'').toUpperCase().includes('PULANG'));
-                if(cand.length>0){
-                  const todayStr = tanggalStr;
-                  const found = cand.find(a=> (a.tanggal||'').startsWith(todayStr)) || cand[0];
-                  if(found && found.waktu) realPulangFallback = found;
-                }
-              }
-            }catch(e){}
-            const fakePulang = {kategori_absen:jenis, label_absen: pulangIzin.jenis, jenis_absen:'PULANG', is_izin:true, is_izin_pulang:true, izinJenis:pulangIzin.jenis, izinScope:'PULANG', keterangan:pulangIzin.keterangan||'', tanggal:tanggalStr, tanggal_mulai:pulangIzin.tanggal_mulai, tanggal_selesai:pulangIzin.tanggal_selesai, waktu: realPulangFallback ? realPulangFallback.waktu : null};
+            const fakePulang = {kategori_absen:jenis, label_absen: pulangIzin.jenis, jenis_absen:'PULANG', is_izin:true, is_izin_pulang:true, izinJenis:pulangIzin.jenis, izinScope:'PULANG', keterangan:pulangIzin.keterangan||'', tanggal:tanggalStr, tanggal_mulai:pulangIzin.tanggal_mulai, tanggal_selesai:pulangIzin.tanggal_selesai};
             pulang = fakePulang;
           }
         }
@@ -2474,8 +2536,7 @@ window.renderLaporanBaru = function(){
   parsedList.forEach((item, idx)=>{
     const g=item.guru;
     const masuk=item.masuk; const pulang=item.pulang;
-    const isIzinMasukFix = masuk && (masuk.is_izin || ['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes((masuk.kategori_absen||'').toUpperCase()));
-    const telatMasuk = isIzinMasukFix ? 0 : (masuk ? (masuk.telat_menit||masuk.telat||0) : 0);
+    const telatMasuk = masuk ? (masuk.telat_menit||masuk.telat||0) : 0;
     const telatText = masuk ? formatTelat(telatMasuk) : '-';
     function safeJam(rec){
       if(!rec || !rec.waktu) return '-';
@@ -2495,44 +2556,6 @@ window.renderLaporanBaru = function(){
     if(isLiburMasuk || isLiburPulang){
       const nama = (masuk&&masuk.liburNama) || (pulang&&pulang.liburNama) || (masuk&&masuk.label_absen) || (pulang&&pulang.label_absen) || 'Libur';
       keterangan = nama;
-    } else if(isIzinMasuk && isIzinPulang){
-      const ketM = masuk.keterangan || masuk.izinKeterangan || masuk.label_absen || masuk.izinJenis || 'Izin Masuk';
-      const ketP = pulang.keterangan || pulang.izinKeterangan || pulang.label_absen || pulang.izinJenis || 'Izin Pulang';
-      const jamM = safeJam(masuk);
-      const jamP = safeJam(pulang);
-      const tglM = masuk.tanggal_mulai || masuk.tanggal || '';
-      const tglP = pulang.tanggal_mulai || pulang.tanggal || '';
-      let left = (masuk.waktu && jamM !== '-') ? 'MASUK ' + jamM + ' • ' + ketM : ketM;
-      if(tglM) left += ' • ' + tglM;
-      let right = (pulang.waktu && jamP !== '-') ? 'PULANG ' + jamP + ' • ' + ketP : 'PULANG Izin ' + ketP;
-      if(tglP) right += ' • ' + tglP;
-      keterangan = left + ' | ' + right;
-    } else if(isIzinPulang && masuk && !masuk.is_izin){
-      const ketP = pulang.keterangan || pulang.izinKeterangan || pulang.label_absen || pulang.izinJenis || 'Izin';
-      const jamM = safeJam(masuk);
-      const jamP = safeJam(pulang);
-      const tglP = pulang.tanggal_mulai || pulang.tanggal || '';
-      let left = '';
-      if(masuk.waktu && jamM !== '-') left = 'MASUK ' + jamM + ' • ' + (masuk.label_absen||masuk.kategori_absen||'');
-      else left = (masuk.label_absen||'');
-      let right = '';
-      if(pulang.waktu && jamP !== '-') right = 'PULANG ' + jamP + ' • ' + ketP;
-      else right = 'PULANG Izin ' + ketP;
-      if(tglP) right += ' • ' + tglP;
-      keterangan = left + ' | ' + right;
-    } else if(isIzinMasuk && pulang && !pulang.is_izin){
-      const ketM = masuk.keterangan || masuk.izinKeterangan || masuk.label_absen || masuk.izinJenis || 'Izin';
-      const jamM = safeJam(masuk);
-      const jamP = safeJam(pulang);
-      const tglM = masuk.tanggal_mulai || masuk.tanggal || '';
-      let left = '';
-      if(masuk.waktu && jamM !== '-') left = 'MASUK ' + jamM + ' • ' + ketM;
-      else left = 'MASUK Izin ' + ketM;
-      if(tglM) left += ' • ' + tglM;
-      let right = '';
-      if(pulang.waktu && jamP !== '-') right = 'PULANG ' + jamP + ' • ' + (pulang.label_absen||pulang.kategori_absen||'');
-      else right = (pulang.label_absen||'');
-      keterangan = left + ' | ' + right;
     } else if(isIzinMasuk || isIzinPulang){
       const rec = isIzinMasuk ? masuk : pulang;
       const ket = rec.keterangan || rec.izinKeterangan || rec.label_absen || rec.izinJenis || 'Izin';
@@ -2543,13 +2566,9 @@ window.renderLaporanBaru = function(){
         if(mulai===selesai) tglInfo = mulai;
         else tglInfo = mulai + ' s/d ' + selesai;
       }
-      const jam = safeJam(rec);
-      if(rec.waktu && jam !== '-'){
-        const prefix = isIzinMasuk ? 'MASUK ' : 'PULANG ';
-        keterangan = prefix + jam + ' • ' + ket + (tglInfo ? ' • ' + tglInfo : '');
-      } else {
-        keterangan = ket + (tglInfo ? ' • ' + tglInfo : '');
-      }
+      const jamRec = (rec && rec.waktu) ? (function(r){ try{ const d=new Date(r.waktu); return d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return '-'; } })(rec) : '';
+      const jamPart = (jamRec && jamRec!=='-') ? jamRec : '';
+      keterangan = (jamPart ? jamPart+' • ' : '') + ket + (tglInfo ? ' • ' + tglInfo : '');
     } else if(!masuk && !pulang) keterangan='-';
     else if(masuk && masuk.is_koreksi) keterangan=masuk.keterangan||'Dikoreksi admin';
     else if(masuk && !pulang) keterangan='Sudah masuk '+jamMasuk+', belum pulang';
@@ -2596,7 +2615,7 @@ async function loadAbsensiRealtime(){
     const {collection, query, orderBy, limit, onSnapshot} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
     const d = window.db || (typeof db!=='undefined'?db:null);
     if(!d) return;
-    const q = query(collection(d, "absensi"), orderBy("waktu","desc"), limit(1500));
+    const q = query(collection(d, "absensi"), orderBy("waktu","desc"), limit(500));
     onSnapshot(q, (snap)=>{
       window.allAbsen=[]; allAbsen=[];
       snap.forEach(docSnap=>{ const data=docSnap.data(); data._id=docSnap.id; allAbsen.push(data); window.allAbsen.push(data); });
