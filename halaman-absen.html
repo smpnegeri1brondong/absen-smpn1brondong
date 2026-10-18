@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#0f355c"/>
-<link rel="apple-touch-icon" href="logo-snebin-v3.png"/>
+<link rel="apple-touch-icon" href="logo-snebin.png?v=9"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="SNEB.in"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>SNEB.in</title>
-<link rel="icon" href="logo-smp2.png?v=11">
+<link rel="icon" href="logo-smp2.png?v=9">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -44,21 +44,61 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 
 @keyframes blink-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(0.8)}}
 .live-dot{display:inline-block;animation:blink-dot 1.2s infinite;}
+
+/* BURGER MENU */
+.burger-btn{width:40px;height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer}
+.burger-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:none}
+.burger-overlay.show{display:block}
+.burger-drawer{position:fixed;top:0;right:0;bottom:0;width:280px;max-width:85vw;background:white;z-index:9999;transform:translateX(100%);transition:transform .25s ease;box-shadow:-4px 0 24px rgba(0,0,0,.15);display:flex;flex-direction:column}
+.burger-drawer.show{transform:translateX(0)}
+.burger-head{padding:20px 18px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:12px}
+.burger-item{padding:14px 18px;display:flex;align-items:center;gap:12px;font-weight:700;font-size:14px;color:#0f172a;cursor:pointer;border-bottom:1px solid #f1f5f9}
+.burger-item:hover{background:#f8fafc}
+.burger-item.active{background:#f0f9ff;color:#0f355c}
+/* STATUS CARD */
+.status-card{background:linear-gradient(135deg,#0f355c 0%,#1e4a7a 100%);color:white;border-radius:20px;padding:16px;position:relative;overflow:hidden}
+.status-card::before{content:'';position:absolute;top:-20px;right:-20px;width:120px;height:120px;background:rgba(255,255,255,.08);border-radius:50%}
+.progress-bar{height:8px;background:rgba(255,255,255,.2);border-radius:999px;overflow:hidden;margin-top:10px}
+.progress-fill{height:100%;background:#22c55e;border-radius:999px;transition:width .5s ease}
+/* LIBUR FULL */
+.libur-full{background:linear-gradient(135deg,#e0f2fe,#f0f9ff);border:1px dashed #bae6fd;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;text-align:left}
+.izin-badge{padding:8px 14px;border-radius:12px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:8px;margin-bottom:12px}
+.izin-full{background:#fef3c7;border:1px solid #fde68a;color:#92400e}
+.izin-cepat{background:#dbeafe;border:1px solid #bfdbfe;color:#1e40af}
+/* HISTORY & PERSENTASE */
+.tab-content{display:none}
+.tab-content.active{display:block}
+.history-item{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #f1f5f9}
+.history-item:last-child{border-bottom:none}
+.donut-wrap{width:140px;height:140px;border-radius:50%;position:relative;margin:0 auto;background:conic-gradient(#22c55e 0% 70%, #f59e0b 70% 85%, #3b82f6 85% 95%, #ef4444 95% 100%)}
+.donut-center{position:absolute;inset:20px;background:white;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+
 </style>
 </head>
 <body>
 <header class="header">
-<div style="display:flex;align-items:center;gap:8px"><div style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png?v=11" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'" alt="SNEB.in" style="width:100%;height:100%;object-fit:contain"/></div><div><div style="font-weight:800;color:#0f355c;font-size:12px">SNEB.in</div><div style="font-size:10px;color:#64748b">ABSEN GTK</div></div></div>
-<div>
+<div style="display:flex;align-items:center;gap:8px"><div style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png?v=9" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'" alt="SNEB.in" style="width:100%;height:100%;object-fit:contain"/></div><div><div style="font-weight:800;color:#0f355c;font-size:12px">SNEB.in</div><div style="font-size:10px;color:#64748b">ABSEN GTK</div></div></div>
+<div style="display:flex;align-items:center;gap:8px">
   <span id="gidBadge" class="hidden" style="background:#e0f2fe;color:#0f355c;font-size:11px;font-weight:700;padding:6px 10px;border-radius:999px"></span> 
-  <a id="logoutBtn" href="#" class="hidden" onclick="logout();return false;" style="font-size:12px;color:#64748b">Logout</a>
+  <span id="logoutBtn" class="hidden" style="display:none"></span><button id="burgerBtn" class="burger-btn hidden" onclick="toggleBurger()">☰</button>
 </div>
 </header>
+<div id="burgerOverlay" class="burger-overlay" onclick="closeBurger()"></div>
+<nav id="burgerDrawer" class="burger-drawer">
+  <div class="burger-head">
+    <div id="burgerInisial" style="width:44px;height:44px;border-radius:12px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800">G</div>
+    <div><div id="burgerNama" style="font-weight:800;color:#0f355c;font-size:14px">GTK</div><div id="burgerGID" style="font-size:11px;color:#64748b">G-XXXXX</div></div>
+  </div>
+  <div id="burgerAbsen" class="burger-item active" onclick="switchAppTab('absen');closeBurger()">📷 <span>Absen</span></div>
+  <div id="burgerHistory" class="burger-item" onclick="switchAppTab('history');closeBurger()">📊 <span>History & Persentase</span></div>
+  <div class="burger-item" onclick="logout()" style="margin-top:auto;border-top:1px solid #e2e8f0;color:#dc2626">🚪 <span>Logout</span></div>
+</nav>
+
 <div class="container">
 <div id="loginScreen" style="margin:-16px -16px 0; padding:0 16px 24px; background:radial-gradient(120% 80% at 50% 0%, #e0f2fe 0%, #f0f9ff 40%, #f8fafc 100%); min-height:calc(100vh - 64px)">
 <div style="padding:28px 0 18px; text-align:center">
   <div style="display:inline-flex; flex-direction:column; align-items:center; gap:10px">
-    <div style="width:78px;height:78px;border-radius:22px;background:white;border:1px solid #e2e8f0;box-shadow:0 8px 24px rgba(15,53,92,.12);overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png?v=11" onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'width:78px;height:78px;border-radius:22px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px\'>QR</div>'" alt="logo" style="width:84%;height:84%;object-fit:contain"/></div>
+    <div style="width:78px;height:78px;border-radius:22px;background:white;border:1px solid #e2e8f0;box-shadow:0 8px 24px rgba(15,53,92,.12);overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png?v=9" onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'width:78px;height:78px;border-radius:22px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px\'>QR</div>'" alt="logo" style="width:84%;height:84%;object-fit:contain"/></div>
     <div>
       <div style="font-weight:800;color:#0f355c;font-size:22px;letter-spacing:.3px">SNEB.in</div>
       <div style="font-size:11px;color:#0369a1;font-weight:800;letter-spacing:1px;margin-top:2px">SMPN 1 BRONDONG</div>
@@ -102,6 +142,34 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
   <div style="display:flex;justify-content:space-between">
     <div><div style="font-size:11px;font-weight:800;color:#64748b">PROFIL GTK</div><div id="namaGuru" style="font-weight:800;color:#0f355c;margin-top:4px;font-size:16px"></div><div id="nipGuru" style="font-size:12px;color:#64748b"></div></div><div id="inisialGuru" style="width:44px;height:44px;border-radius:999px;background:#0f355c;color:white;display:flex;align-items:center;justify-content:center;font-weight:800"></div></div><div id="jamInfo" style="margin-top:10px;display:none"></div><div id="firebaseInfo" style="display:none !important">Firebase: mengecek...</div></div>
 
+<div id="greetingCard" class="card" style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1px solid #bae6fd">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div><div id="greetingText" style="font-weight:800;color:#0f355c;font-size:15px">Selamat pagi, Pak/Bu</div><div id="greetingSub" style="font-size:11px;color:#0369a1;margin-top:2px">Senin, 12 Mei • Masuk 07:00-14:00</div></div>
+    <div style="width:36px;height:36px;border-radius:10px;background:white;border:1px solid #bae6fd;display:flex;align-items:center;justify-content:center;font-size:18px">👋</div>
+  </div>
+</div>
+
+<div id="statusHariIniCard" class="status-card hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1">
+    <div><div style="font-size:10px;letter-spacing:.5px;opacity:.8;font-weight:800">STATUS HARI INI</div><div id="statusTanggal" style="font-size:12px;font-weight:700;margin-top:2px">Hari ini</div></div>
+    <div id="statusProgressText" style="font-size:11px;font-weight:800;background:rgba(255,255,255,.2);padding:4px 10px;border-radius:999px">0%</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;position:relative;z-index:1">
+    <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:10px"><div style="font-size:9px;opacity:.8;font-weight:800">MASUK</div><div id="statusMasuk" style="font-weight:800;margin-top:4px;font-size:13px">Belum</div><div id="statusMasukJam" style="font-size:10px;opacity:.8">-</div></div>
+    <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:10px"><div style="font-size:9px;opacity:.8;font-weight:800">PULANG</div><div id="statusPulang" style="font-weight:800;margin-top:4px;font-size:13px">Belum</div><div id="statusPulangJam" style="font-size:10px;opacity:.8">-</div></div>
+  </div>
+  <div class="progress-bar"><div id="progressFill" class="progress-fill" style="width:0%"></div></div>
+</div>
+
+<div id="izinBadgeContainer" class="hidden"></div>
+
+<div id="liburFullCard" class="libur-full hidden">
+  <div style="width:36px;height:36px;border-radius:10px;background:white;border:1px solid #bae6fd;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🗓️</div>
+  <div style="flex:1"><div id="liburFullTitle" style="font-weight:800;color:#0f355c;font-size:13px">Libur Minggu</div><div id="liburFullDesc" style="font-size:11px;color:#0369a1;margin-top:2px">Absen dinonaktifkan hari ini • Minggu</div></div>
+  <div style="font-size:10px;color:#64748b;background:white;border:1px solid #e2e8f0;padding:4px 8px;border-radius:999px">OFF</div>
+</div>
+
+
 <div class="card" style="padding:12px 14px;border:1px solid #e2e8f0;background:#f8fafc">
   <div style="display:flex;align-items:center;gap:10px">
     <div style="width:36px;height:36px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:18px">🔒</div>
@@ -122,9 +190,42 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 <div id="hasil" style="display:none;margin-top:14px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:14px;padding:14px"><div id="jamWaktu" style="font-weight:700;color:#166534"></div><div id="firebaseStatus" style="margin-top:4px;font-size:10px"></div><div id="lokasiStatus" style="margin-top:4px;font-size:10px;color:#64748b"></div></div>
 </div>
 </div>
+
+<div id="historyScreen" class="hidden">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-weight:800;color:#0f355c;font-size:14px">📊 History & Persentase</div>
+      <div style="display:flex;gap:6px">
+        <button id="tabHistoryBtn" class="btn btn-primary" style="height:36px;width:auto;padding:0 14px;font-size:12px" onclick="switchHistoryTab('history')">History 7 Hari</button>
+        <button id="tabPersenBtn" class="btn btn-outline" style="height:36px;width:auto;padding:0 14px;font-size:12px" onclick="switchHistoryTab('persen')">Persentase Bulan</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="historyTab" class="tab-content active">
+    <div class="card">
+      <div style="font-weight:800;color:#0f355c;font-size:13px;margin-bottom:10px">Absen 7 Hari Terakhir</div>
+      <div id="historyList" style="display:grid;gap:0"><div style="text-align:center;color:#94a3b8;padding:20px">Memuat...</div></div>
+    </div>
+  </div>
+
+  <div id="persenTab" class="tab-content">
+    <div class="card">
+      <div style="font-weight:800;color:#0f355c;font-size:13px;margin-bottom:14px">Persentase Bulan <span id="persenBulanLabel"></span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:16px">
+        <div style="position:relative">
+          <div id="donutChart" class="donut-wrap"></div>
+          <div class="donut-center"><div id="donutTotal" style="font-weight:800;font-size:20px;color:#0f355c">0%</div><div style="font-size:10px;color:#64748b">Hadir</div></div>
+        </div>
+        <div id="persenStats" style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <footer style="margin-top:20px;background:white;border-top:1px solid #e2e8f0;border-radius:20px 20px 0 0;padding:16px 14px;text-align:left">
   <div style="display:flex;align-items:center;justify-content:flex-start;gap:8px">
-    <div style="width:28px;height:28px;border-radius:8px;background:transparent;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png?v=11" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'; this.parentElement.style.fontSize='10px'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'" alt="logo" style="width:100%;height:100%;object-fit:contain"/></div>
+    <div style="width:28px;height:28px;border-radius:8px;background:transparent;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png?v=9" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'; this.parentElement.style.fontSize='10px'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'" alt="logo" style="width:100%;height:100%;object-fit:contain"/></div>
     <div style="text-align:left">
       <div style="font-weight:800;font-size:11px;color:#0f355c">SNEB.in — SMPN 1 Brondong</div>
       <div style="font-size:9px;color:#94a3b8">QR Geofencing • ID Privat Terjaga • Anti Titip Absen</div>
@@ -184,7 +285,15 @@ try{
       snap.forEach(d=>{
         const g = d.data();
         if(g.gid && g.nama){
-          custom.push({no:g.no||999, nama:g.nama, nip:g.nip||'-', gid:g.gid, password:g.password||g.password_default||'snebron0000'});
+          custom.push({
+            no:g.no||999, 
+            nama:g.nama, 
+            nip:g.nip||'-', 
+            gid:g.gid, 
+            password:g.password||g.password_default||'snebron0000',
+            gender:g.gender||g.Gender||g.jenis||g.Jenis||'L',
+            jenis:g.gender||g.jenis||'L'
+          });
         }
       });
       if(custom.length>0){
@@ -489,6 +598,23 @@ function initMap(){
 }
 window.setModeMini=(mode)=>{ MODE_MINI=mode; localStorage.setItem('MAP_MODE',mode); if(mode==='satelit'){ if(map.hasLayer(roadLayer)) map.removeLayer(roadLayer); satLayer.addTo(map); } else { if(map.hasLayer(satLayer)) map.removeLayer(satLayer); roadLayer.addTo(map); } };
 window.getInisial=(nama)=>{ const p=nama.trim().split(/\s+/); if(p.length>=2) return (p[0][0]+p[1][0]).toUpperCase(); return nama.substring(0,2).toUpperCase(); };
+window.getSapaan=(guru)=>{
+  try{
+    const gen=(guru?.gender||guru?.jenis||'').toString().toUpperCase();
+    return gen.startsWith('P') ? 'Bu' : 'Pak';
+  }catch(e){ return 'Pak'; }
+};
+window.getNamaPendek=(nama)=>{
+  try{
+    let n=nama.replace(/,.*$/,'').trim();
+    let parts=n.split(/\s+/);
+    let start=0;
+    if(parts[0] && /^Drs?\.?$/i.test(parts[0])) start=1;
+    let pendek=parts.slice(start, start+2).join(' ');
+    return pendek||nama.split(' ')[0];
+  }catch(e){ return nama; }
+};
+
 window.formatJarak=(meter)=>{ const m=Math.round(meter||0); if(m>=1000){ const km=(m/1000).toFixed(m%1000===0?0:1); return km.replace('.0','')+' KM'; } return m+'m'; };
 
 function formatTelat(menit){
@@ -640,6 +766,22 @@ window.startCamera=async()=>{
     if(!html5QrCode) html5QrCode=new Html5Qrcode("reader");
     await html5QrCode.start({facingMode:"environment"}, {fps:10, qrbox:{width:250,height:250}}, async decoded=>{
       if(isProcessing) return;
+      try{ window.playBeep && window.playBeep(); }catch(e){}
+      // === CEK LIBUR DULU - KAMERA TETEP TAMPIL TAPI ALERT ===
+      if(window.isLiburHariIni){
+        const namaLibur=window.namaLiburHariIni||'Minggu';
+        const msg=`Hari ini libur <b>${namaLibur}</b><br><br>Absen dinonaktifkan hari ini.<br>Kamera tetep tampil tapi scan akan ditolak.`;
+        if(typeof showCustomAlert==='function') showCustomAlert('🗓️ LIBUR '+namaLibur.toUpperCase(), msg+'<br><br><button onclick="closeCustomAlert()" style="background:#0f355c;color:white;border:none;padding:10px 20px;border-radius:10px;font-weight:800;width:100%">Oke, Mengerti</button>');
+        try{
+          document.getElementById('btnStartCam').classList.remove('hidden');
+          document.getElementById('btnStartCam').disabled=false;
+          document.getElementById('btnStartCam').textContent='📷 SCAN LAGI';
+          await html5QrCode.stop();
+        }catch(e){}
+        isProcessing=false;
+        return;
+      }
+      
       
 function findGuruByQR(idQR){
   const up = (idQR||'').toUpperCase();
@@ -719,7 +861,7 @@ window.doLogin=()=>{
     }
     const eff=stored||g.password||'';
     if(eff!==p){ er.textContent='Password salah. Silakan cek lagi atau hubungi admin.'; er.classList.remove('hidden'); return; }
-    currentGuru=g; 
+    currentGuru=g; window.currentGuru=g;
     try{ localStorage.setItem('SNEB.in_GID',g.gid); }catch(e){}
     showAbsenScreen();
   }catch(e){
@@ -732,11 +874,21 @@ window.doLogin=()=>{
 function showAbsenScreen(){
   if(!currentGuru){ const s=localStorage.getItem('SNEB.in_GID'); if(s) currentGuru=GURUS.find(g=>g.gid===s); }
   if(!currentGuru) return;
+  window.currentGuru=currentGuru;
   document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('absenScreen').classList.remove('hidden');
   document.getElementById('gidBadge').textContent=currentGuru.gid; document.getElementById('gidBadge').classList.remove('hidden');
-  document.getElementById('logoutBtn').classList.remove('hidden');
+  // logout di header dihapus, hanya di burger drawer
+  document.getElementById('logoutBtn')?.classList.add('hidden');
   document.getElementById('namaGuru').textContent=currentGuru.nama; document.getElementById('nipGuru').textContent='NIP '+(currentGuru.nip||'-')+' • '+currentGuru.gid;
   document.getElementById('inisialGuru').textContent=getInisial(currentGuru.nama);
+  // === UPGRADE BURGER + GREETING ===
+  try{
+    document.getElementById('burgerBtn')?.classList.remove('hidden');
+    if(typeof window.updateGreeting==='function') window.updateGreeting();
+    if(typeof window.loadStatusHariIni==='function') window.loadStatusHariIni();
+    if(typeof window.checkLiburFull==='function') window.checkLiburFull();
+    if(typeof window.checkIzinBadge==='function') window.checkIzinBadge();
+  }catch(e){ console.log('upgrade hook fail', e); }
   cekJamAbsen(); setInterval(cekJamAbsen,60000);
   const isCustom=localStorage.getItem('SNEB.in_PASS_'+currentGuru.gid);
   // currentPassInfo removed - admin only
@@ -823,13 +975,10 @@ async function prosesAbsenOtomatis(){
           jamInfo.label = masukIzin.jenis;
           jamInfo.is_izin = true;
           jamInfo.is_izin_masuk = true;
-          jamInfo.is_izin_pulang = false;
-          jamInfo.is_izin_full = false;
           jamInfo.izinJenis = masukIzin.jenis;
           jamInfo.izinScope = 'MASUK';
           jamInfo.izinKeterangan = masukIzin.keterangan;
-          jamInfo.telatMenit = 0;
-          console.log('🔄 Override MASUK jadi izin', masukIzin.jenis, '- telat 0, clear pulang flag (fix dobel izin)');
+          console.log('🔄 Override MASUK jadi izin', masukIzin.jenis);
         }
       }
       if(jenisUpper==='PULANG'){
@@ -840,13 +989,10 @@ async function prosesAbsenOtomatis(){
           jamInfo.label = pulangIzin.jenis;
           jamInfo.is_izin = true;
           jamInfo.is_izin_pulang = true;
-          jamInfo.is_izin_masuk = false;
-          jamInfo.is_izin_full = false;
           jamInfo.izinJenis = pulangIzin.jenis;
           jamInfo.izinScope = 'PULANG';
           jamInfo.izinKeterangan = pulangIzin.keterangan;
-          jamInfo.telatMenit = 0;
-          console.log('🔄 Override PULANG jadi izin', pulangIzin.jenis, '- telat 0, clear masuk flag (fix dobel izin)');
+          console.log('🔄 Override PULANG jadi izin', pulangIzin.jenis);
         }
       }
     }
@@ -999,41 +1145,13 @@ async function prosesAbsenOtomatis(){
       }
 
       if(jamInfo.jenis==='MASUK' && hasMasukToday){
-        try{
-          const pulangIzinEarly = window.izinList ? window.izinList.find(z=> z.scope==='PULANG') : null;
-          if(pulangIzinEarly){
-            jamInfo.original_kategori = jamInfo.kategori;
-            jamInfo.original_jenis = jamInfo.jenis;
-            jamInfo.jenis = 'PULANG';
-            jamInfo.kategori = (pulangIzinEarly.jenis||'DINAS_LUAR').toUpperCase();
-            jamInfo.label = pulangIzinEarly.jenis;
-            jamInfo.is_izin = true;
-            jamInfo.is_izin_pulang = true;
-            jamInfo.is_izin_masuk = false;
-            jamInfo.is_izin_full = false;
-            jamInfo.izinJenis = pulangIzinEarly.jenis;
-            jamInfo.izinScope = 'PULANG';
-            jamInfo.izinKeterangan = pulangIzinEarly.keterangan;
-            jamInfo.telatMenit = 0;
-            console.log('🔄 MASUK->PULANG early izin pulang', pulangIzinEarly.jenis, '- clear is_izin_masuk biar alert PULANG, bukan MASUK (fix Nanda dobel izin)');
-          } else {
-            document.getElementById('c3').innerHTML=`Sudah Masuk <div>⏳</div>`; document.getElementById('c3').style.background='#fef3c7';
-            document.getElementById('firebaseStatus').textContent=`⏳ Sudah absen masuk hari ini`;
-            setTimeout(()=>{
-              showCustomAlert('⏳ SUDAH ABSEN MASUK', `<b>${currentGuru.nama}</b><br><br>Anda <b>Sudah Absen Masuk</b> hari ini<br><br>Silahkan Absen Lagi Nanti Ketika <b>Pulang</b><br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Tunggu absen pulang</span>`);
-            },400);
-            setTimeout(()=>{ document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 SCAN LAGI'; },2000);
-            return;
-          }
-        }catch(e){
-          document.getElementById('c3').innerHTML=`Sudah Masuk <div>⏳</div>`; document.getElementById('c3').style.background='#fef3c7';
-          document.getElementById('firebaseStatus').textContent=`⏳ Sudah absen masuk hari ini`;
-          setTimeout(()=>{
-            showCustomAlert('⏳ SUDAH ABSEN MASUK', `<b>${currentGuru.nama}</b><br><br>Anda <b>Sudah Absen Masuk</b> hari ini<br><br>Silahkan Absen Lagi Nanti Ketika <b>Pulang</b><br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Tunggu absen pulang</span>`);
-          },400);
-          setTimeout(()=>{ document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 SCAN LAGI'; },2000);
-          return;
-        }
+        document.getElementById('c3').innerHTML=`Sudah Masuk <div>⏳</div>`; document.getElementById('c3').style.background='#fef3c7';
+        document.getElementById('firebaseStatus').textContent=`⏳ Sudah absen masuk hari ini`;
+        setTimeout(()=>{
+          showCustomAlert('⏳ SUDAH ABSEN MASUK', `<b>${currentGuru.nama}</b><br><br>Anda <b>Sudah Absen Masuk</b> hari ini<br><br>Silahkan Absen Lagi Nanti Ketika <b>Pulang</b><br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Tunggu absen pulang</span>`);
+        },400);
+        setTimeout(()=>{ document.getElementById('btnStartCam').classList.remove('hidden'); document.getElementById('btnStartCam').disabled=false; document.getElementById('btnStartCam').textContent='📷 SCAN LAGI'; },2000);
+        return;
       }
       if(jamInfo.jenis==='PULANG' && hasPulangToday){
         document.getElementById('c3').innerHTML=`Sudah Pulang <div>⏳</div>`; document.getElementById('c3').style.background='#fef3c7';
@@ -1142,7 +1260,23 @@ async function prosesAbsenOtomatis(){
 }
 
 
-window.mulaiScan=async()=>{ await prosesAbsenOtomatis(); };
+window.mulaiScan=async()=>{ 
+  try{ window.playBeep && window.playBeep(); }catch(e){}
+  // === CEK LIBUR DULU - KAMERA TETEP TAMPIL TAPI ALERT ===
+  if(window.isLiburHariIni){
+    const namaLibur=window.namaLiburHariIni||'Minggu';
+    const msg=`Hari ini libur <b>${namaLibur}</b><br><br>Absen dinonaktifkan hari ini.<br>Kamera tetep tampil tapi scan akan ditolak.<br><br>Jam: <b>${new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})} WIB</b>`;
+    if(typeof showCustomAlert==='function') showCustomAlert('🗓️ LIBUR '+namaLibur.toUpperCase(), msg+'<br><br><button onclick="closeCustomAlert()" style="background:#0f355c;color:white;border:none;padding:10px 20px;border-radius:10px;font-weight:800;width:100%">Oke, Mengerti</button>');
+    // reset tombol kamera
+    try{
+      document.getElementById('btnStartCam').classList.remove('hidden');
+      document.getElementById('btnStartCam').disabled=false;
+      document.getElementById('btnStartCam').textContent='📷 SCAN LAGI';
+    }catch(e){}
+    return;
+  }
+  await prosesAbsenOtomatis(); 
+};
 window.hitungJarak=(lat1,lon1,lat2,lon2)=>{ const R=6371000; const toRad=x=>x*Math.PI/180; const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1); const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); };
 // old toggleGantiPass removed - admin only
 window.lihatPass=()=>{ 
@@ -1386,6 +1520,392 @@ document.addEventListener('DOMContentLoaded', ()=>{
 </script>
 
 
+
+
+<script>
+// === BURGER MENU LOGIC ===
+window.toggleBurger=()=>{
+  const d=document.getElementById('burgerDrawer');
+  const o=document.getElementById('burgerOverlay');
+  const isShow=d.classList.contains('show');
+  if(isShow){ closeBurger(); } else { d.classList.add('show'); o.classList.add('show'); }
+};
+window.closeBurger=()=>{
+  document.getElementById('burgerDrawer')?.classList.remove('show');
+  document.getElementById('burgerOverlay')?.classList.remove('show');
+};
+window.switchAppTab=(tab)=>{
+  // hide all main screens
+  document.getElementById('absenScreen')?.classList.add('hidden');
+  document.getElementById('historyScreen')?.classList.add('hidden');
+  // reset burger active
+  document.getElementById('burgerAbsen')?.classList.remove('active');
+  document.getElementById('burgerHistory')?.classList.remove('active');
+  if(tab==='absen'){
+    document.getElementById('absenScreen')?.classList.remove('hidden');
+    document.getElementById('burgerAbsen')?.classList.add('active');
+  } else if(tab==='history'){
+    document.getElementById('historyScreen')?.classList.remove('hidden');
+    document.getElementById('burgerHistory')?.classList.add('active');
+    loadHistory7Hari();
+    loadPersentaseBulan();
+  }
+  window.scrollTo(0,0);
+};
+window.switchHistoryTab=(t)=>{
+  document.getElementById('historyTab')?.classList.remove('active');
+  document.getElementById('persenTab')?.classList.remove('active');
+  document.getElementById('tabHistoryBtn')?.classList.remove('btn-primary');
+  document.getElementById('tabHistoryBtn')?.classList.add('btn-outline');
+  document.getElementById('tabPersenBtn')?.classList.remove('btn-primary');
+  document.getElementById('tabPersenBtn')?.classList.add('btn-outline');
+  if(t==='history'){
+    document.getElementById('historyTab')?.classList.add('active');
+    document.getElementById('tabHistoryBtn')?.classList.remove('btn-outline');
+    document.getElementById('tabHistoryBtn')?.classList.add('btn-primary');
+  } else {
+    document.getElementById('persenTab')?.classList.add('active');
+    document.getElementById('tabPersenBtn')?.classList.remove('btn-outline');
+    document.getElementById('tabPersenBtn')?.classList.add('btn-primary');
+  }
+};
+
+// === GREETING BU/PAK ===
+window.updateGreeting=()=>{
+  try{
+    const g=window.currentGuru||{};
+    const gender=(g.gender||g.jenis||'').toString().toUpperCase();
+    const sapaan=gender.startsWith('P') ? 'Bu' : 'Pak';
+    const namaPendek=window.getNamaPendek?window.getNamaPendek(g.nama||''):(g.nama||'').split(' ')[0];
+    const now=new Date();
+    let salam='pagi'; const h=now.getHours();
+    if(h>=11 && h<15) salam='siang';
+    else if(h>=15 && h<18) salam='sore';
+    else if(h>=18) salam='malam';
+    const hari=now.toLocaleDateString('id-ID',{weekday:'long', day:'numeric', month:'short'});
+    // jam kerja
+    let jamKerja='07:00-14:00';
+    try{
+      if(typeof getJenisAbsen==='function'){
+        // ambil dari logic jam kerja hari ini
+        const info=window.getJenisAbsen(now);
+        if(info && info.jamMulai) jamKerja=info.jamMulai;
+      }
+    }catch(e){}
+    const el=document.getElementById('greetingText');
+    const sub=document.getElementById('greetingSub');
+    if(el) el.textContent=`Selamat ${salam}, ${sapaan} ${namaPendek}`;
+    if(sub) sub.textContent=`${hari} • Masuk ${jamKerja}`;
+    // burger
+    const bNama=document.getElementById('burgerNama');
+    const bGID=document.getElementById('burgerGID');
+    const bInisial=document.getElementById('burgerInisial');
+    if(bNama) bNama.textContent=`${sapaan} ${namaPendek}`;
+    if(bGID) bGID.textContent=g.gid||'';
+    if(bInisial) bInisial.textContent=window.getInisial?window.getInisial(g.nama||'G'):'G';
+  }catch(e){ console.log('greeting fail', e); }
+};
+
+// === STATUS HARI INI ===
+window.loadStatusHariIni=async()=>{
+  try{
+    const g=window.currentGuru; if(!g) return;
+    const today=window.getLocalDateStr?window.getLocalDateStr():new Date().toISOString().split('T')[0];
+    const db=window.db; if(!db) return;
+    const {collection, query, where, getDocs} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const q=query(collection(db,"absensi"), where("gid","==",g.gid), where("tanggal","==",today));
+    const snap=await getDocs(q);
+    let masuk=null, pulang=null;
+    snap.forEach(d=>{ const data=d.data(); if(data.jenis_absen==='MASUK' || data.jenis==='MASUK') masuk=data; if(data.jenis_absen==='PULANG' || data.jenis==='PULANG') pulang=data; });
+    const card=document.getElementById('statusHariIniCard');
+    if(card) card.classList.remove('hidden');
+    const tglEl=document.getElementById('statusTanggal');
+    if(tglEl) tglEl.textContent=new Date().toLocaleDateString('id-ID',{weekday:'long', day:'numeric', month:'long'});
+    // masuk
+    const sMasuk=document.getElementById('statusMasuk');
+    const sMasukJam=document.getElementById('statusMasukJam');
+    if(masuk){
+      const jam=new Date(masuk.waktu||masuk.waktu_server||Date.now()).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+      if(sMasuk) sMasuk.textContent=masuk.status||'Sudah';
+      if(sMasukJam) sMasukJam.textContent=jam;
+    } else {
+      if(sMasuk) sMasuk.textContent='Belum';
+      if(sMasukJam) sMasukJam.textContent='-';
+    }
+    const sPulang=document.getElementById('statusPulang');
+    const sPulangJam=document.getElementById('statusPulangJam');
+    if(pulang){
+      const jam=new Date(pulang.waktu||pulang.waktu_server||Date.now()).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+      if(sPulang) sPulang.textContent=pulang.status||'Sudah';
+      if(sPulangJam) sPulangJam.textContent=jam;
+    } else {
+      if(sPulang) sPulang.textContent='Belum';
+      if(sPulangJam) sPulangJam.textContent='-';
+    }
+    // progress
+    let prog=0;
+    if(masuk && !pulang) prog=50;
+    if(masuk && pulang) prog=100;
+    const pFill=document.getElementById('progressFill');
+    const pText=document.getElementById('statusProgressText');
+    if(pFill) pFill.style.width=prog+'%';
+    if(pText) pText.textContent=prog+'%';
+  }catch(e){ console.log('status hari ini fail', e); }
+};
+
+// === LIBUR FULL CARD ===
+window.checkLiburFull=()=>{
+  try{
+    const today=window.getLocalDateStr?window.getLocalDateStr():new Date().toISOString().split('T')[0];
+    const liburMap=window.kalenderLiburMap||{};
+    const day=new Date().getDay();
+    let isLibur=false; let namaLibur='';
+    if(liburMap[today]){ isLibur=true; namaLibur=liburMap[today]; }
+    else if(day===0){ isLibur=true; namaLibur='Minggu'; }
+    const card=document.getElementById('liburFullCard');
+    const reader=document.getElementById('reader');
+    const btnStart=document.getElementById('btnStartCam');
+    const btnStop=document.getElementById('btnStopCam');
+    window.isLiburHariIni=isLibur;
+    window.namaLiburHariIni=namaLibur;
+    if(isLibur){
+      if(card){
+        card.classList.remove('hidden');
+        const titleEl=document.getElementById('liburFullTitle');
+        const descEl=document.getElementById('liburFullDesc');
+        if(titleEl) titleEl.textContent='Libur '+namaLibur;
+        if(descEl) descEl.textContent='Absen dinonaktifkan hari ini • '+namaLibur+' - kamera tetep tampil, scan akan muncul alert';
+      }
+      // Kamera TETEP TAMPIL meski libur, cuma nanti alert pas scan
+      if(reader) reader.style.display='block';
+      if(btnStart) btnStart.style.display='flex';
+    } else {
+      if(card) card.classList.add('hidden');
+      if(reader) reader.style.display='block';
+      if(btnStart) btnStart.style.display='flex';
+    }
+  }catch(e){ console.log('checkLiburFull fail', e); }
+};
+
+// === IZIN BADGE ===
+window.checkIzinBadge=async()=>{
+  try{
+    const g=window.currentGuru; if(!g) return;
+    const today=window.getLocalDateStr?window.getLocalDateStr():new Date().toISOString().split('T')[0];
+    if(typeof window.loadIzinHariIni!=='function') return;
+    const list=await window.loadIzinHariIni(g.gid, today);
+    const cont=document.getElementById('izinBadgeContainer');
+    if(!cont) return;
+    if(!list || list.length===0){ cont.classList.add('hidden'); cont.innerHTML=''; return; }
+    const full=list.find(z=>(z.scope||'FULL')==='FULL');
+    if(full){
+      const badge=window.getIzinBadgeInfo?window.getIzinBadgeInfo(full.jenis):{icon:'📝',label:full.jenis};
+      cont.innerHTML=`<div class="izin-badge izin-full">${badge.icon} Izin ${badge.label} • ${full.keterangan||''} • ${full.tanggal_mulai||today}</div>`;
+      cont.classList.remove('hidden');
+    } else {
+      const pc=list.find(z=>(z.scope||'')==='PULANG');
+      if(pc){
+        const badge=window.getIzinBadgeInfo?window.getIzinBadgeInfo(pc.jenis):{icon:'⚡',label:pc.jenis};
+        cont.innerHTML=`<div class="izin-badge izin-cepat">⚡ Pulang Cepat ${pc.keterangan||''} jam ${pc.jam_mulai||''}</div>`;
+        cont.classList.remove('hidden');
+      } else {
+        cont.classList.add('hidden');
+      }
+    }
+  }catch(e){}
+};
+
+// === HISTORY 7 HARI ===
+window.loadHistory7Hari=async()=>{
+  try{
+    const g=window.currentGuru; if(!g) return;
+    const db=window.db; if(!db) return;
+    const {collection, query, where, getDocs} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    // FIX: hindari composite index - query cuma gid, sort client-side
+    const q=query(collection(db,"absensi"), where("gid","==",g.gid));
+    const snap=await getDocs(q);
+    let rows=[];
+    snap.forEach(d=>{ 
+      const data=d.data();
+      if(data.gid===g.gid) rows.push(data);
+    });
+    // sort tanggal desc client-side
+    rows.sort((a,b)=> (b.tanggal||'').localeCompare(a.tanggal||''));
+    rows=rows.slice(0,30);
+    // group by tanggal
+    const byDate={};
+    rows.forEach(r=>{
+      const t=r.tanggal||'';
+      if(!t) return;
+      if(!byDate[t]) byDate[t]={tanggal:t, masuk:null, pulang:null};
+      if((r.jenis_absen||r.jenis)==='MASUK' && !byDate[t].masuk) byDate[t].masuk=r;
+      if((r.jenis_absen||r.jenis)==='PULANG' && !byDate[t].pulang) byDate[t].pulang=r;
+    });
+    let sortedDates=Object.keys(byDate).sort().reverse().slice(0,7);
+    const listEl=document.getElementById('historyList');
+    if(!listEl) return;
+    if(sortedDates.length===0){ listEl.innerHTML='<div style="text-align:center;color:#94a3b8;padding:20px">Belum ada absen 7 hari terakhir</div>'; return; }
+    let htmlStr='';
+    sortedDates.forEach(tgl=>{
+      const d=byDate[tgl];
+      const dt=new Date(tgl);
+      const label=dt.toLocaleDateString('id-ID',{weekday:'short', day:'numeric', month:'short'});
+      let masukTxt='Belum';
+      let pulangTxt='Belum';
+      try{
+        if(d.masuk){
+          const w=d.masuk.waktu?new Date(d.masuk.waktu):new Date();
+          masukTxt=w.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' '+(d.masuk.status||'Sudah');
+        }
+        if(d.pulang){
+          const w2=d.pulang.waktu?new Date(d.pulang.waktu):new Date();
+          pulangTxt=w2.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' '+(d.pulang.status||'Sudah');
+        }
+      }catch(e){}
+      htmlStr+=`<div class="history-item"><div><div style="font-weight:700;color:#0f355c;font-size:13px">${label}</div><div style="font-size:10px;color:#64748b">${tgl}</div></div><div style="text-align:right"><div style="font-size:11px;font-weight:700;color:#166534">Masuk: ${masukTxt}</div><div style="font-size:11px;color:#0f355c">Pulang: ${pulangTxt}</div></div></div>`;
+    });
+    listEl.innerHTML=htmlStr;
+  }catch(e){ console.log('history fail', e); const el=document.getElementById('historyList'); if(el) el.innerHTML='<div style="color:#ef4444;padding:12px">Gagal load: '+e.message+'<br><small>Coba refresh atau cek koneksi</small></div>'; }
+};
+
+// === PERSENTASE BULAN ===
+window.loadPersentaseBulan=async()=>{
+  try{
+    const g=window.currentGuru; if(!g) return;
+    const db=window.db; if(!db) return;
+    const now=new Date();
+    const firstDay=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01';
+    const today=window.getLocalDateStr?window.getLocalDateStr():now.toISOString().split('T')[0];
+    const {collection, query, where, getDocs} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    // FIX: hindari composite index - query cuma gid, filter tanggal client-side
+    const q=query(collection(db,"absensi"), where("gid","==",g.gid));
+    const snap=await getDocs(q);
+    let total=0, hadir=0, telat=0;
+    snap.forEach(d=>{
+      const data=d.data();
+      const tgl=data.tanggal||'';
+      if(tgl>=firstDay && tgl<=today){
+        if((data.jenis_absen||data.jenis)==='MASUK'){
+          total++;
+          if((data.status||'').toLowerCase().includes('telat')) telat++;
+          else hadir++;
+        }
+      }
+    });
+    // izin - juga tanpa index
+    let izin=0;
+    try{
+      const qIzin=query(collection(db,"izin"), where("gid","==",g.gid));
+      const sIzin=await getDocs(qIzin);
+      sIzin.forEach(dd=>{
+        const di=dd.data();
+        const tm=di.tanggal_mulai||'';
+        if(tm>=firstDay) izin++;
+      });
+    }catch(e){ console.log('izin count fail', e); }
+    const persenHadir= total>0? Math.round(hadir/total*100):0;
+    const persenTelat= total>0? Math.round(telat/total*100):0;
+    const bulanLabel=now.toLocaleDateString('id-ID',{month:'long', year:'numeric'});
+    const lbl=document.getElementById('persenBulanLabel');
+    if(lbl) lbl.textContent=bulanLabel;
+    const donutTotal=document.getElementById('donutTotal');
+    if(donutTotal) donutTotal.textContent=persenHadir+'%';
+    const donut=document.getElementById('donutChart');
+    if(donut){
+      const hadirDeg=persenHadir;
+      const telatDeg=persenTelat;
+      const izinDeg=izin>0?Math.min(10, Math.round(izin/total*100||10)):0;
+      donut.style.background=`conic-gradient(#22c55e 0% ${hadirDeg}%, #f59e0b ${hadirDeg}% ${hadirDeg+telatDeg}%, #3b82f6 ${hadirDeg+telatDeg}% ${hadirDeg+telatDeg+izinDeg}%, #e2e8f0 ${hadirDeg+telatDeg+izinDeg}% 100%)`;
+    }
+    const stats=document.getElementById('persenStats');
+    if(stats){
+      stats.innerHTML=`
+        <div style="background:#dcfce7;border:1px solid #bbf7d0;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#166534;font-weight:800">HADIR TEPAT</div><div style="font-weight:800;color:#166534;font-size:16px;margin-top:2px">${hadir}</div><div style="font-size:10px;color:#166534">${persenHadir}%</div></div>
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#92400e;font-weight:800">TELAT</div><div style="font-weight:800;color:#92400e;font-size:16px;margin-top:2px">${telat}</div><div style="font-size:10px;color:#92400e">${persenTelat}%</div></div>
+        <div style="background:#dbeafe;border:1px solid #bfdbfe;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#1e40af;font-weight:800">IZIN</div><div style="font-weight:800;color:#1e40af;font-size:16px;margin-top:2px">${izin}</div></div>
+        <div style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#475569;font-weight:800">TOTAL HARI</div><div style="font-weight:800;color:#0f172a;font-size:16px;margin-top:2px">${total}</div></div>
+      `;
+    }
+  }catch(e){ console.log('persen fail', e); }
+};
+
+// === BEEP + GETAR ===
+window.playBeep=()=>{
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(); const g=ctx.createGain();
+    o.type='sine'; o.frequency.value=880; o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.3, ctx.currentTime); o.start(); g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime+0.3); o.stop(ctx.currentTime+0.3);
+  }catch(e){}
+  try{ if(navigator.vibrate) navigator.vibrate(200); }catch(e){}
+};
+
+// Hook after login
+const origDoLogin=window.doLogin;
+let loginHookAdded=false;
+setTimeout(()=>{
+  // Override doLogin to add our upgrades after success
+  const checkGuruInterval=setInterval(()=>{
+    if(window.currentGuru){
+      clearInterval(checkGuruInterval);
+      updateGreeting();
+      loadStatusHariIni();
+      checkLiburFull();
+      checkIzinBadge();
+      // show burger button
+      document.getElementById('burgerBtn')?.classList.remove('hidden');
+    }
+  },1000);
+},2000);
+
+// Patch html5-qrcode success to add beep
+let lastBeep=0;
+const originalOnScanSuccess=window.onScanSuccess;
+window.addEventListener('DOMContentLoaded', ()=>{
+  // Try to hook html5-qrcode callback via mutation
+  const origStartCamera=window.startCamera;
+  if(origStartCamera){
+    window.startCamera=async function(){
+      const res=await origStartCamera.apply(this, arguments);
+      // after start, try to wrap
+      try{
+        const reader=document.getElementById('reader');
+        // html5-qrcode internal will call our global function, we add beep in qrResult observer
+        const observer=new MutationObserver(()=>{
+          const qrRes=document.getElementById('qrResult');
+          if(qrRes && qrRes.textContent && qrRes.textContent.includes('G-')){
+            const now=Date.now();
+            if(now-lastBeep>2000){ lastBeep=now; playBeep(); }
+          }
+        });
+        observer.observe(document.body,{childList:true, subtree:true});
+      }catch(e){}
+      return res;
+    };
+  }
+});
+
+// Also beep on manual scan button
+const scanBtn=document.getElementById('scanBtn');
+if(scanBtn){
+  scanBtn.addEventListener('click', ()=>{
+    setTimeout(()=>{ playBeep(); }, 200);
+  });
+}
+
+// Override global show result to beep
+window.addEventListener('load', ()=>{
+  // If there's a function that handles QR decoded
+  const oldMulaiScan=window.mulaiScan;
+  if(oldMulaiScan){
+    window.mulaiScan=async function(){
+      const now=Date.now();
+      if(now-lastBeep>2000){ playBeep(); lastBeep=now; }
+      return await oldMulaiScan.apply(this, arguments);
+    };
+  }
+});
+</script>
 
 </body>
 </html>
