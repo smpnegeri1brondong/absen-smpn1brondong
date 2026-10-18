@@ -215,7 +215,7 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
       <div style="display:flex;flex-direction:column;align-items:center;gap:16px">
         <div style="position:relative">
           <div id="donutChart" class="donut-wrap"></div>
-          <div class="donut-center"><div id="donutTotal" style="font-weight:800;font-size:20px;color:#0f355c">0%</div><div style="font-size:10px;color:#64748b">Hadir</div></div>
+          <div class="donut-center"><div id="donutTotal" style="font-weight:800;font-size:20px;color:#0f355c">0%</div><div id="donutSub" style="font-size:10px;color:#64748b">Hadir</div></div>
         </div>
         <div id="persenStats" style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
       </div>
@@ -1779,7 +1779,7 @@ window.loadHistory7Hari=async()=>{
   }catch(e){ console.log('history fail', e); const el=document.getElementById('historyList'); if(el) el.innerHTML='<div style="color:#ef4444;padding:12px">Gagal load: '+e.message+'<br><small>Coba refresh atau cek koneksi</small></div>'; }
 };
 
-// === PERSENTASE BULAN ===
+// === PERSENTASE BULAN - 4 WARNA + HARI BUKA SAMPAI HARI INI + IZIN LOGIC FINAL ===
 window.loadPersentaseBulan=async()=>{
   try{
     const g=window.currentGuru; if(!g) return;
@@ -1788,57 +1788,144 @@ window.loadPersentaseBulan=async()=>{
     const firstDay=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01';
     const today=window.getLocalDateStr?window.getLocalDateStr():now.toISOString().split('T')[0];
     const {collection, query, where, getDocs} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-    // FIX: hindari composite index - query cuma gid, filter tanggal client-side
+    
+    // Helper: generate dates from firstDay to today
+    function getDatesInRange(startStr, endStr){
+      const arr=[];
+      const s=new Date(startStr);
+      const e=new Date(endStr);
+      for(let d=new Date(s); d<=e; d.setDate(d.getDate()+1)){
+        const ys=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+        arr.push(ys);
+      }
+      return arr;
+    }
+    const allDates=getDatesInRange(firstDay, today);
+    const liburMap=window.kalenderLiburMap||{};
+    
+    // Hari buka = Senin-Jumat dan bukan di kalender_libur
+    const kerjaDates=[];
+    allDates.forEach(ds=>{
+      const dt=new Date(ds);
+      const day=dt.getDay(); // 0 Minggu, 6 Sabtu
+      if(day===0 || day===6) return; // weekend skip
+      if(liburMap[ds]) return; // libur nasional/custom skip
+      kerjaDates.push(ds);
+    });
+    const totalKerja=kerjaDates.length;
+    
+    // Fetch absensi
     const q=query(collection(db,"absensi"), where("gid","==",g.gid));
     const snap=await getDocs(q);
-    let total=0, hadir=0, telat=0;
+    const masukMap={}; // tanggal -> data MASUK
+    const pulangMap={}; // tanggal -> data PULANG
     snap.forEach(d=>{
       const data=d.data();
       const tgl=data.tanggal||'';
-      if(tgl>=firstDay && tgl<=today){
-        if((data.jenis_absen||data.jenis)==='MASUK'){
-          total++;
-          if((data.status||'').toLowerCase().includes('telat')) telat++;
-          else hadir++;
-        }
+      if(!tgl) return;
+      if(tgl<firstDay || tgl>today) return;
+      const jenis=(data.jenis_absen||data.jenis||'').toUpperCase();
+      if(jenis==='MASUK'){
+        // simpan yang terbaru kalau ada dobel
+        if(!masukMap[tgl]) masukMap[tgl]=data;
+      } else if(jenis==='PULANG'){
+        if(!pulangMap[tgl]) pulangMap[tgl]=data;
       }
     });
-    // izin - juga tanpa index
-    let izin=0;
+    
+    // Fetch izin
+    let izinFullList=[];
+    let izinMasukList=[];
+    let izinPulangList=[];
     try{
       const qIzin=query(collection(db,"izin"), where("gid","==",g.gid));
       const sIzin=await getDocs(qIzin);
       sIzin.forEach(dd=>{
         const di=dd.data();
-        const tm=di.tanggal_mulai||'';
-        if(tm>=firstDay) izin++;
+        if((di.status||'DISETUJUI')!=='DISETUJUI') return;
+        const mulai=di.tanggal_mulai||di.tanggal||'';
+        const selesai=di.tanggal_selesai||mulai;
+        if(!mulai) return;
+        // cek overlap dengan bulan ini
+        if(selesai < firstDay || mulai > today) return;
+        const scope=(di.scope||'FULL').toUpperCase();
+        if(scope==='FULL') izinFullList.push({...di, tanggal_mulai:mulai, tanggal_selesai:selesai});
+        else if(scope==='MASUK') izinMasukList.push({...di, tanggal_mulai:mulai, tanggal_selesai:selesai});
+        else if(scope==='PULANG') izinPulangList.push({...di, tanggal_mulai:mulai, tanggal_selesai:selesai});
       });
-    }catch(e){ console.log('izin count fail', e); }
-    const persenHadir= total>0? Math.round(hadir/total*100):0;
-    const persenTelat= total>0? Math.round(telat/total*100):0;
+    }catch(e){ console.log('izin fetch fail', e); }
+    
+    function isTanggalInRange(tgl, mulai, selesai){
+      const s=selesai||mulai;
+      return tgl>=mulai && tgl<=s;
+    }
+    
+    let tepat=0, telat=0, izin=0, tidak=0;
+    
+    kerjaDates.forEach(tgl=>{
+      // 1. Cek izin FULL dulu - kalau ada, langsung izin
+      const adaFull=izinFullList.some(z=> isTanggalInRange(tgl, z.tanggal_mulai, z.tanggal_selesai));
+      if(adaFull){ izin++; return; }
+      
+      // 2. Cek izin MASUK - harus sudah absen masuk hari itu
+      const adaIzinMasuk=izinMasukList.some(z=> isTanggalInRange(tgl, z.tanggal_mulai, z.tanggal_selesai));
+      if(adaIzinMasuk && masukMap[tgl]){ izin++; return; }
+      
+      // 3. Cek izin PULANG - harus sudah absen pulang hari itu
+      const adaIzinPulang=izinPulangList.some(z=> isTanggalInRange(tgl, z.tanggal_mulai, z.tanggal_selesai));
+      if(adaIzinPulang && pulangMap[tgl]){ izin++; return; }
+      
+      // 4. Tidak ada izin, cek absen
+      const m=masukMap[tgl];
+      if(!m){ tidak++; return; }
+      
+      const status=(m.status||'').toLowerCase();
+      const kategori=(m.kategori_absen||m.kategori||'').toUpperCase();
+      const telatMenit=parseInt(m.telat_menit||0);
+      const isTelat = status.includes('telat') || kategori==='TELAT' || telatMenit>0;
+      if(isTelat) telat++;
+      else tepat++;
+    });
+    
+    const persenTepat = totalKerja>0 ? Math.round(tepat/totalKerja*100) : 0;
+    const persenTelat = totalKerja>0 ? Math.round(telat/totalKerja*100) : 0;
+    const persenIzin = totalKerja>0 ? Math.round(izin/totalKerja*100) : 0;
+    const persenTidak = totalKerja>0 ? Math.round(tidak/totalKerja*100) : 0;
+    const persenHadir = totalKerja>0 ? Math.round((tepat+telat+izin)/totalKerja*100) : 0;
+    
     const bulanLabel=now.toLocaleDateString('id-ID',{month:'long', year:'numeric'});
     const lbl=document.getElementById('persenBulanLabel');
-    if(lbl) lbl.textContent=bulanLabel;
+    if(lbl) lbl.textContent='Persentase Bulan '+bulanLabel;
     const donutTotal=document.getElementById('donutTotal');
     if(donutTotal) donutTotal.textContent=persenHadir+'%';
+    const donutSub=document.getElementById('donutSub');
+    if(donutSub) donutSub.textContent='Hadir';
     const donut=document.getElementById('donutChart');
     if(donut){
-      const hadirDeg=persenHadir;
-      const telatDeg=persenTelat;
-      const izinDeg=izin>0?Math.min(10, Math.round(izin/total*100||10)):0;
-      donut.style.background=`conic-gradient(#22c55e 0% ${hadirDeg}%, #f59e0b ${hadirDeg}% ${hadirDeg+telatDeg}%, #3b82f6 ${hadirDeg+telatDeg}% ${hadirDeg+telatDeg+izinDeg}%, #e2e8f0 ${hadirDeg+telatDeg+izinDeg}% 100%)`;
+      // 4 warna: hijau tepat, kuning telat, biru izin, merah tidak
+      const t=persenTepat;
+      const te=persenTelat;
+      const iz=persenIzin;
+      const ti=persenTidak;
+      donut.style.background=`conic-gradient(#22c55e 0% ${t}%, #f59e0b ${t}% ${t+te}%, #3b82f6 ${t+te}% ${t+te+iz}%, #ef4444 ${t+te+iz}% ${t+te+iz+ti}% )`;
     }
     const stats=document.getElementById('persenStats');
     if(stats){
       stats.innerHTML=`
-        <div style="background:#dcfce7;border:1px solid #bbf7d0;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#166534;font-weight:800">HADIR TEPAT</div><div style="font-weight:800;color:#166534;font-size:16px;margin-top:2px">${hadir}</div><div style="font-size:10px;color:#166534">${persenHadir}%</div></div>
-        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#92400e;font-weight:800">TELAT</div><div style="font-weight:800;color:#92400e;font-size:16px;margin-top:2px">${telat}</div><div style="font-size:10px;color:#92400e">${persenTelat}%</div></div>
-        <div style="background:#dbeafe;border:1px solid #bfdbfe;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#1e40af;font-weight:800">IZIN</div><div style="font-weight:800;color:#1e40af;font-size:16px;margin-top:2px">${izin}</div></div>
-        <div style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#475569;font-weight:800">TOTAL HARI</div><div style="font-weight:800;color:#0f172a;font-size:16px;margin-top:2px">${total}</div></div>
+        <div style="background:#dcfce7;border:1px solid #bbf7d0;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#166534;font-weight:800">HADIR TEPAT</div><div style="font-weight:800;color:#166534;font-size:18px;margin-top:2px">${tepat}</div><div style="font-size:11px;color:#166534">${persenTepat}%</div></div>
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#92400e;font-weight:800">TELAT</div><div style="font-weight:800;color:#92400e;font-size:18px;margin-top:2px">${telat}</div><div style="font-size:11px;color:#92400e">${persenTelat}%</div></div>
+        <div style="background:#dbeafe;border:1px solid #bfdbfe;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#1e40af;font-weight:800">IZIN</div><div style="font-weight:800;color:#1e40af;font-size:18px;margin-top:2px">${izin}</div><div style="font-size:11px;color:#1e40af">${persenIzin}%</div></div>
+        <div style="background:#fee2e2;border:1px solid #fecaca;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#991b1b;font-weight:800">TIDAK ABSEN</div><div style="font-weight:800;color:#991b1b;font-size:18px;margin-top:2px">${tidak}</div><div style="font-size:11px;color:#991b1b">${persenTidak}%</div></div>
+        <div style="grid-column: span 2;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#475569;font-weight:800">TOTAL HARI KERJA (s/d hari ini)</div><div style="font-weight:800;color:#0f172a;font-size:18px;margin-top:2px">${totalKerja}</div><div style="font-size:10px;color:#64748b">1-${today.split('-')[2]} ${bulanLabel} • weekday - libur</div></div>
       `;
+      stats.style.display='grid';
+      stats.style.gridTemplateColumns='1fr 1fr';
+      stats.style.gap='8px';
     }
+    console.log('Persentase', {totalKerja, tepat, telat, izin, tidak, persenHadir});
   }catch(e){ console.log('persen fail', e); }
 };
+
 
 // === BEEP + GETAR ===
 window.playBeep=()=>{
