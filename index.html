@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#0f355c"/>
-<link rel="apple-touch-icon" href="logo-snebin-v3.png"/>
+<link rel="apple-touch-icon" href="logo-snebin-v2.png"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="SNEB.in"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>SNEB.in - SMPN 1 Brondong</title>
-<link rel="icon" href="logo-smp2.png?v=11">
+<link rel="icon" href="logo-snebin-v2.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -79,7 +79,7 @@ body{margin:0;font-family:Inter,system-ui;background:#f8fafc;color:#0f172a}
   <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:28px;align-items:start">
     <div>
       <h1 style="font-size:46px;line-height:0.9;font-weight:800;color:#0f355c;margin:0">SNEB.in<br/>SMPN 1<br/>Brondong</h1>
-      <p style="color:#475569;font-size:13px;line-height:1.6;max-width:420px;margin-top:14px">Absensi QR Berbasis Lokasi | ID Privat & Terenkripsi<br/>Sekali cetak untuk ID Card, validasi otomatis hanya dalam radius yang telah ditentukan.</p>
+      <p style="color:#475569;font-size:13px;line-height:1.6;max-width:420px;margin-top:14px">Absensi Scan QR Berbasis Lokasi | ID Privat & Terenkripsi<br/>Validasi otomatis dalam radius yang telah ditentukan.</p>
       <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
         <a class="btn btn-primary" style="height:44px;padding:0 20px" href="halaman-absen.html">Masuk Sebagai GTK →</a>
         <a class="btn btn-outline" style="height:44px" href="admin-absen.html">Panel Admin</a>
@@ -120,21 +120,21 @@ body{margin:0;font-family:Inter,system-ui;background:#f8fafc;color:#0f172a}
     <div>
       <div style="font-size:22px;font-weight:800;letter-spacing:1px;color:#0f355c">CARA KERJA SISTEM</div>
     </div>
-    <div style="font-size:11px;color:#64748b;max-width:300px;line-height:1.5">Dirancang untuk GTK - Cukup bawa HP sendiri, tidak perlu tukar perangkat, hanya absen di area SMPN 1 Brondong.</div>
+    <div style="font-size:11px;color:#64748b;max-width:300px;line-height:1.5">Dirancang untuk semua GTK - Cukup bawa HP sendiri, tidak perlu tukar perangkat, absen hanya tercatat ketika di dalam area SMPN 1 Brondong.</div>
   </div>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
     <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:18px;position:relative">
       <div style="position:absolute;top:14px;right:14px;font-size:10px;color:#cbd5e1;font-weight:700">01</div>
       <div style="width:36px;height:36px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:16px">👤</div>
       <div style="font-weight:800;color:#0f355c;margin-top:14px;font-size:13px">Login dengan ID Privat</div>
-      <div style="font-size:11px;color:#64748b;margin-top:6px;line-height:1.5">Setiap GTK dapat ID unik permanen hanya diketahui GTK & admin. Tidak bisa ditebak, tidak bisa duplikat.</div>
+      <div style="font-size:11px;color:#64748b;margin-top:6px;line-height:1.5">Setiap GTK mendapat ID unik yang hanya diketahui masing-masing GTK & admin. Tidak bisa ditebak, tidak bisa duplikat.</div>
       <div style="margin-top:12px"><span style="font-size:9px;background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 8px;border-radius:999px;font-weight:700;color:#475569">🆔 ID Unik • Privat</span></div>
     </div>
     <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:18px;position:relative">
       <div style="position:absolute;top:14px;right:14px;font-size:10px;color:#cbd5e1;font-weight:700">02</div>
       <div style="width:36px;height:36px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:16px">📱</div>
       <div style="font-weight:800;color:#0f355c;margin-top:14px;font-size:13px">Scan QR di ID Card dengan HP sendiri</div>
-      <div style="font-size:11px;color:#64748b;margin-top:6px;line-height:1.5">Arahkan kamera ke QR di kartu identitas. Tidak perlu HP sekolah - pakai HP pribadi GTK.</div>
+      <div style="font-size:11px;color:#64748b;margin-top:6px;line-height:1.5">Arahkan kamera ke QR. Scan otomatis - pakai HP pribadi GTK.</div>
       <div style="margin-top:12px"><span style="font-size:9px;background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 8px;border-radius:999px;font-weight:700;color:#475569">📱 BYOD • No Device Sharing</span></div>
     </div>
     <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:18px;position:relative">
