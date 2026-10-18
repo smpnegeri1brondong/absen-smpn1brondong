@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#0f355c"/>
-<link rel="apple-touch-icon" href="logo-snebin-v3.png"/>
+<link rel="apple-touch-icon" href="logo-snebin.png?v=9"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="SNEB.in"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -320,7 +320,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div id="laporanCards" style="display:none;margin-top:12px"></div>
 </div>
 <div id="panelGuru" class="hidden">
-<div class="card" style="margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center"><div style="font-weight:800;color:#0f355c">Daftar GTK + QR Privat</div><div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap"><input id="searchGuru" class="input" placeholder="Cari nama / GID..." style="width:200px;height:36px"/><button class="btn btn-outline" style="height:36px;width:auto;padding:0 12px;font-size:11px" onclick="openTambahGTK()">+ Tambah GTK Baru</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="loadPasswords()">Load</button></div><div id="totalGuruInfo" style="font-size:11px;color:#64748b;width:100%">44 GTK</div></div>
+<div class="card" style="margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center"><div style="font-weight:800;color:#0f355c">Daftar GTK + QR Privat</div><div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap"><input id="searchGuru" class="input" placeholder="Cari nama / GID..." style="width:200px;height:36px"/><button class="btn btn-outline" style="height:36px;width:auto;padding:0 12px;font-size:11px" onclick="openTambahGTK()">+ Tambah GTK Baru</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 12px;font-size:11px;background:#0f355c;color:white" onclick="exportGuruGID()">📥 Export GID</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 12px;font-size:11px;background:#16a34a;color:white" onclick="bulkUpdateGTKNames()">🔄 Update 43 Nama+Gender</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="loadPasswords()">Load</button></div><div id="totalGuruInfo" style="font-size:11px;color:#64748b;width:100%">44 GTK</div></div>
 
 <div id="modalTambahGTK" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px">
   <div class="card" style="width:100%;max-width:480px;background:white;border-radius:20px;padding:20px;max-height:90vh;overflow:auto">
@@ -332,11 +332,21 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
       <div style="font-size:13px;font-weight:700;margin-bottom:6px">Nama Lengkap <span style="color:red">*</span></div>
       <input id="newNama" class="input" placeholder="Contoh: Budi Santoso, S.Pd" />
     </div>
-    <div style="margin-top:12px">
-      <div style="font-size:13px;font-weight:700;margin-bottom:6px">NIP (isi - jika honorer)</div>
-      <input id="newNIP" class="input" placeholder="18 digit NIP atau - " oninput="autoFillGIDPass()" onblur="autoFillGIDPass()" />
-      <div id="autoInfo" style="font-size:11px;color:#0f355c;margin-top:6px;background:#f0f9ff;padding:6px 8px;border-radius:8px;border:1px dashed #bae6fd">Ketik NIP → GID & password auto dibuat</div>
+    <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px">NIP (isi - jika honorer)</div>
+        <input id="newNIP" class="input" placeholder="18 digit NIP atau - " oninput="autoFillGIDPass()" onblur="autoFillGIDPass()" />
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px">Jenis Kelamin <span style="color:red">*</span></div>
+        <select id="newGender" class="input" style="height:48px">
+          <option value="">Pilih...</option>
+          <option value="L">Laki-laki (Pak)</option>
+          <option value="P">Perempuan (Bu)</option>
+        </select>
+      </div>
     </div>
+    <div id="autoInfo" style="font-size:11px;color:#0f355c;margin-top:8px;background:#f0f9ff;padding:6px 8px;border-radius:8px;border:1px dashed #bae6fd">Ketik NIP → GID & password auto dibuat • Gender untuk sapaan Bu/Pak (tidak ditampilkan)</div>
     <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div>
         <div style="font-size:13px;font-weight:700;margin-bottom:6px">GID Auto</div>
@@ -518,6 +528,192 @@ function getDefaultPassword(nip){
   return "snebron"+digits;
 }
 const firebaseConfig={apiKey:"AIzaSyCSi5QKL-MapUUdGLV4OuiXupXa3XmRKvg",authDomain:"smpn1-brondong-absen.firebaseapp.com",projectId:"smpn1-brondong-absen",storageBucket:"smpn1-brondong-absen.firebasestorage.app",messagingSenderId:"174884842248",appId:"1:174884842248:web:8625540d5f3ff8b7f45abd"};
+// === BULK UPDATE 43 GTK DARI EXCEL UPDATE ===
+
+window.exportGuruGID = ()=>{
+  try{
+    if(!gurus || gurus.length===0){ alert('GTK belum terload'); return; }
+    let sorted=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));
+    let rows = sorted.map(g=>({
+      'No': g.no||'',
+      'GID': g.gid||'',
+      'Nama': g.nama||'',
+      'NIP': g.nip||'',
+      'Jenis': g.gender||g.jenis||'',
+      'Password_Default': g.password||''
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{wch:5},{wch:12},{wch:35},{wch:20},{wch:8},{wch:20}];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Daftar GTK + GID");
+    const tgl = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(wb, 'Daftar-GTK-GID-'+tgl+'.xlsx');
+    console.table(sorted.map(g=>({No:g.no,GID:g.gid,Nama:g.nama,NIP:g.nip})));
+    alert('✅ Export '+sorted.length+' GTK + GID ke Excel .xlsx');
+  }catch(e){ alert(e.message); }
+};
+
+window.moveGuruTop = async(gid)=>{
+  try{
+    if(!confirm('Pindah ke paling atas?')) return;
+    let sorted=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));
+    const idx=sorted.findIndex(x=>x.gid===gid);
+    if(idx<=0) return;
+    const moving=sorted.splice(idx,1)[0];
+    sorted.unshift(moving);
+    sorted.forEach((g,i)=>{ g.no=i+1; });
+    gurus.forEach(g=>{ const f=sorted.find(x=>x.gid===g.gid); if(f) g.no=f.no; });
+    try{
+      const {doc, setDoc}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      const d=window.db||db;
+      if(d){
+        for(const gg of sorted){
+          try{ await setDoc(doc(d,"gurus",gg.gid), {no:gg.no}, {merge:true}); }catch(e){}
+        }
+      }
+    }catch(e){ console.log('top fail', e); }
+    renderGurus(document.getElementById('searchGuru')?.value||'');
+    if(typeof renderLaporanBaru==='function') renderLaporanBaru();
+  }catch(e){ alert(e.message); }
+};
+window.moveGuruUp = async(gid)=>{
+  try{
+    let sorted=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));
+    const idx=sorted.findIndex(x=>x.gid===gid);
+    if(idx<=0) return;
+    [sorted[idx-1], sorted[idx]]=[sorted[idx], sorted[idx-1]];
+    sorted.forEach((g,i)=>{ g.no=i+1; });
+    gurus.forEach(g=>{ const f=sorted.find(x=>x.gid===g.gid); if(f) g.no=f.no; });
+    try{
+      const {doc, setDoc}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      const d=window.db||db;
+      if(d){
+        for(const gg of [sorted[idx-1], sorted[idx]]){
+          try{ await setDoc(doc(d,"gurus",gg.gid), {no:gg.no}, {merge:true}); }catch(e){}
+        }
+      }
+    }catch(e){}
+    renderGurus(document.getElementById('searchGuru')?.value||'');
+    if(typeof renderLaporanBaru==='function') renderLaporanBaru();
+  }catch(e){ alert(e.message); }
+};
+window.moveGuruDown = async(gid)=>{
+  try{
+    let sorted=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));
+    const idx=sorted.findIndex(x=>x.gid===gid);
+    if(idx<0 || idx>=sorted.length-1) return;
+    [sorted[idx], sorted[idx+1]]=[sorted[idx+1], sorted[idx]];
+    sorted.forEach((g,i)=>{ g.no=i+1; });
+    gurus.forEach(g=>{ const f=sorted.find(x=>x.gid===g.gid); if(f) g.no=f.no; });
+    try{
+      const {doc, setDoc}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      const d=window.db||db;
+      if(d){
+        for(const gg of [sorted[idx], sorted[idx+1]]){
+          try{ await setDoc(doc(d,"gurus",gg.gid), {no:gg.no}, {merge:true}); }catch(e){}
+        }
+      }
+    }catch(e){}
+    renderGurus(document.getElementById('searchGuru')?.value||'');
+    if(typeof renderLaporanBaru==='function') renderLaporanBaru();
+  }catch(e){ alert(e.message); }
+};
+window.moveGuruBottom = async(gid)=>{
+  try{
+    if(!confirm('Pindah ke paling bawah?')) return;
+    let sorted=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));
+    const idx=sorted.findIndex(x=>x.gid===gid);
+    if(idx<0 || idx===sorted.length-1) return;
+    const moving=sorted.splice(idx,1)[0];
+    sorted.push(moving);
+    sorted.forEach((g,i)=>{ g.no=i+1; });
+    gurus.forEach(g=>{ const f=sorted.find(x=>x.gid===g.gid); if(f) g.no=f.no; });
+    try{
+      const {doc, setDoc}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      const d=window.db||db;
+      if(d){
+        for(const gg of sorted){
+          try{ await setDoc(doc(d,"gurus",gg.gid), {no:gg.no}, {merge:true}); }catch(e){}
+        }
+      }
+    }catch(e){ console.log('bottom fail', e); }
+    renderGurus(document.getElementById('searchGuru')?.value||'');
+    if(typeof renderLaporanBaru==='function') renderLaporanBaru();
+  }catch(e){ alert(e.message); }
+};
+
+
+const BULK_GTK_UPDATE = [
+{gid:"G-83107", nama:"Husnul Anam, S.Pd, M.Pd", nip:"196906101998021004", gender:"L", jenis:"L"},
+{gid:"G-20839", nama:"Drs. Khoim Khoirul A, M.Pd", nip:"196807161998021004", gender:"L", jenis:"L"},
+{gid:"G-94652", nama:"Drs. Zainuddin, M.Pd", nip:"196805221997031002", gender:"L", jenis:"L"},
+{gid:"G-72600", nama:"Drs. Joko Sutomo", nip:"196710211999031003", gender:"L", jenis:"L"},
+{gid:"G-32712", nama:"Ishnafiyah, S.Ag", nip:"197507151999032008", gender:"P", jenis:"P"},
+{gid:"G-79374", nama:"Evi Irawati, S.Pd", nip:"197302112000122004", gender:"P", jenis:"P"},
+{gid:"G-10058", nama:"Hilmishobah, S.Pd, M.Pd", nip:"197109082003121003", gender:"L", jenis:"L"},
+{gid:"G-58661", nama:"Anis Mufadhilah, S.Pd", nip:"197010282007012012", gender:"P", jenis:"P"},
+{gid:"G-59237", nama:"Muhamad Nur Cahyo, S. Pd", nip:"197106092007011019", gender:"L", jenis:"L"},
+{gid:"G-40409", nama:"M. Khusen, S.Pd", nip:"197111042008011009", gender:"L", jenis:"L"},
+{gid:"G-18622", nama:"Asri Pujiutami, S.Pd", nip:"198501182010012015", gender:"P", jenis:"P"},
+{gid:"G-60160", nama:"Moh. Safii, S.Kom", nip:"197607052011011006", gender:"L", jenis:"L"},
+{gid:"G-62543", nama:"Fitri Komariyah, S.Pd", nip:"197508012009022001", gender:"P", jenis:"P"},
+{gid:"G-22804", nama:"Sudibyanto, S.Pd", nip:"197804242008011017", gender:"L", jenis:"L"},
+{gid:"G-15682", nama:"Nikmatus Solichah, S.Ag", nip:"197403092014062001", gender:"P", jenis:"P"},
+{gid:"G-25556", nama:"Mahriwati, S.Pd", nip:"197408312021212003", gender:"P", jenis:"P"},
+{gid:"G-37728", nama:"Yusuf Budiharjo, S.Pd", nip:"198206072022211002", gender:"L", jenis:"L"},
+{gid:"G-59221", nama:"Teguh Wahyu Widayat, S. Pd", nip:"198305012023211008", gender:"L", jenis:"L"},
+{gid:"G-23021", nama:"Mamluhah, S.Pd", nip:"198310192023212010", gender:"P", jenis:"P"},
+{gid:"G-63923", nama:"Sakiman, SE", nip:"197010242024211002", gender:"L", jenis:"L"},
+{gid:"G-16452", nama:"Slamet Mamik H, S.Pd", nip:"197902122024211001", gender:"L", jenis:"L"},
+{gid:"G-90272", nama:"Maghfiroh (B), S.Pd", nip:"198204152024212005", gender:"P", jenis:"P"},
+{gid:"G-13652", nama:"Selvi Putri Cornivia, S.Pd", nip:"199812312024212016", gender:"P", jenis:"P"},
+{gid:"G-82588", nama:"Dwi Chandra Puspita A, S.Pd", nip:"199906212024212016", gender:"P", jenis:"P"},
+{gid:"G-27700", nama:"Nanda Wijayanti, S.Pd", nip:"200007272025212022", gender:"P", jenis:"P"},
+{gid:"G-18758", nama:"Bunga Cahyaning Atie, S.Pd", nip:"200108222025212006", gender:"P", jenis:"P"},
+{gid:"G-35462", nama:"Toni Wijayanto, S.Kom", nip:"198210242023211005", gender:"L", jenis:"L"},
+{gid:"G-34817", nama:"Maghfiroh (S), S.Pd", nip:"-", gender:"P", jenis:"P"},
+{gid:"G-13489", nama:"Abdullah Faqih, S.Pdi. M.Ag", nip:"-", gender:"L", jenis:"L"},
+{gid:"G-39875", nama:"Muhamad Yunus Anis, S.Pd", nip:"-", gender:"L", jenis:"L"},
+{gid:"G-93715", nama:"Imarotul Hasanah, S.Pd", nip:"19800615210012003", gender:"P", jenis:"P"},
+{gid:"G-62114", nama:"Nurul Hidayati, S.Pd", nip:"197810052009022005", gender:"P", jenis:"P"},
+{gid:"G-70331", nama:"Mutholiah", nip:"197111172009012001", gender:"P", jenis:"P"},
+{gid:"G-56461", nama:"Nyamin", nip:"197205042025211004", gender:"L", jenis:"L"},
+{gid:"G-78122", nama:"Wartiyaningsih, S.Pd", nip:"199308122025212060", gender:"P", jenis:"P"},
+{gid:"G-14014", nama:"Muzahidin, S.Pd", nip:"198801042025211108", gender:"L", jenis:"L"},
+{gid:"G-88075", nama:"Arum Rahmana, S.Pd", nip:"199210192025212086", gender:"P", jenis:"P"},
+{gid:"G-24520", nama:"R. Arif Nur Cahyono, S.Pus", nip:"198004262025211045", gender:"L", jenis:"L"},
+{gid:"G-81582", nama:"Solkan", nip:"-", gender:"L", jenis:"L"},
+{gid:"G-35965", nama:"Fatiha Sabila, SE", nip:"-", gender:"P", jenis:"P"},
+{gid:"G-72720", nama:"Ahmad Marzuq Al Himni, S. Kom", nip:"-", gender:"L", jenis:"L"},
+{gid:"G-25987", nama:"Dedy Ustman", nip:"-", gender:"L", jenis:"L"},
+{gid:"G-41909", nama:"Helmy Hartiningsih", nip:"-", gender:"P", jenis:"P"}
+];
+
+window.bulkUpdateGTKNames = async()=>{
+  if(!confirm('Update 43 GTK: benerin nama + gender Bu/Pak dari Excel 18_update2.xlsx?\n\nGender hanya untuk sapaan, tidak ditampilkan.')) return;
+  try{
+    const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d=window.db|| (typeof db!=='undefined'?db:null);
+    if(!d){ alert('DB belum siap'); return; }
+    let ok=0;
+    for(const g of BULK_GTK_UPDATE){
+      try{
+        await setDoc(doc(d,"gurus",g.gid), {
+          gid:g.gid, GID:g.gid,
+          nama:g.nama, Nama:g.nama,
+          nip:g.nip, NIP:g.nip,
+          gender:g.gender, Gender:g.gender,
+          jenis:g.jenis, Jenis:g.jenis,
+          updated_at:new Date().toISOString()
+        }, {merge:true});
+        ok++;
+      }catch(e){ console.log('fail', g.gid, e); }
+    }
+    alert('✅ Bulk update selesai: '+ok+'/'+BULK_GTK_UPDATE.length+' GTK\n\nNama bener + gender Bu/Pak sudah terpasang.\nSilakan reload halaman absen untuk cek sapaan.');
+    if(typeof renderGurus==='function') renderGurus();
+  }catch(e){ alert(e.message); }
+};
+
 let app,db,auth,allAbsen=[];
 try{app=initializeApp(firebaseConfig);db=getFirestore(app);window.db=db;auth=getAuth(app);document.getElementById('authConfigInfo').innerHTML=`✅ Terhubung ke <b>${firebaseConfig.projectId}</b><br>Auth OK • Silakan login`;onAuthStateChanged(auth,(user)=>{if(user){document.getElementById('adminLoginScreen').classList.add('hidden');document.getElementById('adminContent').classList.remove('hidden');document.getElementById('authBadge').textContent=`✅ ${user.email}`;document.getElementById('authBadge').classList.remove('hidden');document.getElementById('logoutBtn').classList.remove('hidden');document.getElementById('headerTabs')?.classList.remove('hidden');document.getElementById('burgerBtn')?.classList.remove('hidden');document.getElementById('authInfo').textContent=`✅ ${user.email}`;document.getElementById('authUid').textContent=`UID: ${user.uid.slice(0,16)}...`;document.getElementById('lastLoginInfo').textContent=`Login: ${user.metadata.lastSignInTime||''}`;initMap();initGuruSelect();loadGurusFromFirestore().then(()=>{ renderGurus(); });loadPasswords();loadRekap();}else{document.getElementById('adminLoginScreen').classList.remove('hidden');document.getElementById('adminContent').classList.add('hidden');document.getElementById('authBadge').classList.add('hidden');document.getElementById('logoutBtn').classList.add('hidden');document.getElementById('headerTabs')?.classList.add('hidden');document.getElementById('burgerBtn')?.classList.add('hidden');document.getElementById('mobileMenu')?.classList.add('hidden');document.getElementById('mobileMenu')?.classList.remove('show');}});}catch(e){document.getElementById('authConfigInfo').innerHTML=`❌ ${e.message}`;}
 setTimeout(()=>{ if(typeof loadGurusFromFirestore==='function') loadGurusFromFirestore(); }, 1000);
@@ -1371,15 +1567,19 @@ window.updateGuru=updateGuru;
 
 
 function simpanGTKBaru(){
-  const nama=document.getElementById('newNamaLengkap').value.trim();
-  const nipRaw=document.getElementById('newNIPBaru').value.trim();
-  const nip=nipRaw||'-';
-  let gid=document.getElementById('newGIDBaru').value.trim();
-  let passInput=document.getElementById('newPassBaru').value.trim();
+  const namaEl = document.getElementById('newNama') || document.getElementById('newNamaLengkap');
+  const nipEl = document.getElementById('newNIP') || document.getElementById('newNIPBaru');
+  const gidEl = document.getElementById('newGID') || document.getElementById('newGIDBaru');
+  const passEl = document.getElementById('newPassPreview') || document.getElementById('newPassBaru');
+  const genderEl = document.getElementById('newGender');
+  const nama = (namaEl?.value||'').trim();
+  const nipRaw = (nipEl?.value||'').trim();
+  const nip = nipRaw||'-';
+  let gid = (gidEl?.value||'').trim();
+  let passInput = (passEl?.value||'').trim();
+  let gender = (genderEl?.value||'').trim().toUpperCase();
   if(!nama){ alert('Nama wajib diisi'); return; }
-  // LOGIKA BARU:
-  // - GID selalu acak 5 digit, gak ngikut NIP / password
-  // - Password: kalau ada NIP ambil 4 digit akhir NIP, kalau honorer (-) random 4 digit
+  if(!gender || !['L','P'].includes(gender)){ alert('Pilih Jenis Kelamin untuk sapaan Bu/Pak (tidak ditampilkan)'); return; }
   function genRandomGID(){
     let ng;
     do{ ng='G-'+Math.floor(10000+Math.random()*90000); }while(typeof gurus!=='undefined' && gurus.find(g=>g.gid===ng));
@@ -1389,9 +1589,7 @@ function simpanGTKBaru(){
     const d=(s||'').replace(/\D/g,'');
     return d.slice(-4);
   }
-  // GID: kalau user kosongin input → selalu random acak (termasuk honorer)
   if(!gid){ gid=genRandomGID(); }
-  // Password: kalau user kosongin
   if(!passInput){
     if(nip!=='-' && last4Digits(nip).length===4){
       passInput='snebron'+last4Digits(nip);
@@ -1405,21 +1603,35 @@ function simpanGTKBaru(){
     try{
       const LS='CUSTOM_GURUS_V5';
       let customs=[]; try{ customs=JSON.parse(localStorage.getItem(LS)||'[]'); }catch(e){ customs=[]; }
-      customs.push({gid:gid, nama:nama, nip:nip, password:pass, isNew:true});
+      customs.push({gid:gid, nama:nama, nip:nip, password:pass, gender:gender, isNew:true});
       localStorage.setItem(LS, JSON.stringify(customs));
-      if(typeof gurus!=='undefined'){ gurus.push({no:gurus.length+1, nama:nama, nip:nip, gid:gid, password:pass}); }
-      // sync to Firestore collection gurus agar muncul di halaman-absen.html
+      if(typeof gurus!=='undefined'){ gurus.push({no:gurus.length+1, nama:nama, nip:nip, gid:gid, password:pass, gender:gender, jenis:gender}); }
       try{
         const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
         const d=window.db|| (typeof db!=='undefined'?db:null);
-        if(d){ await setDoc(doc(d,"gurus",gid), {gid:gid, nama:nama, Nama:nama, nip:nip, NIP:nip, password:pass, GID:gid, created_at:new Date().toISOString()}, {merge:true}); }
+        if(d){ 
+          await setDoc(doc(d,"gurus",gid), {
+            gid:gid, GID:gid,
+            nama:nama, Nama:nama,
+            nip:nip, NIP:nip,
+            password:pass,
+            gender:gender, Gender:gender,
+            jenis:gender, Jenis:gender,
+            created_at:new Date().toISOString()
+          }, {merge:true}); 
+        }
       }catch(e){ console.log('firestore gurus sync', e); }
       closeTambahGTK();
-      document.getElementById('newNamaLengkap').value='';
-      document.getElementById('newNIPBaru').value='';
-      document.getElementById('newGIDBaru').value='';
-      document.getElementById('newPassBaru').value='snebron'+Math.floor(1000+Math.random()*9000);
-      alert('✅ Simpan & Sinkron berhasil - GID '+gid);
+      if(document.getElementById('newNama')) document.getElementById('newNama').value='';
+      if(document.getElementById('newNamaLengkap')) document.getElementById('newNamaLengkap').value='';
+      if(document.getElementById('newNIP')) document.getElementById('newNIP').value='';
+      if(document.getElementById('newNIPBaru')) document.getElementById('newNIPBaru').value='';
+      if(document.getElementById('newGID')) document.getElementById('newGID').value='';
+      if(document.getElementById('newGIDBaru')) document.getElementById('newGIDBaru').value='';
+      if(document.getElementById('newPassPreview')) document.getElementById('newPassPreview').value='snebron'+Math.floor(1000+Math.random()*9000);
+      if(document.getElementById('newPassBaru')) document.getElementById('newPassBaru').value='snebron'+Math.floor(1000+Math.random()*9000);
+      if(document.getElementById('newGender')) document.getElementById('newGender').value='';
+      alert('✅ Simpan & Sinkron berhasil - GID '+gid+' Gender '+gender+' (untuk Bu/Pak)');
       if(typeof renderGurus==='function') renderGurus(document.getElementById('searchGuru')?.value||'');
     }catch(e){ alert(e.message); }
   })();
@@ -1436,7 +1648,7 @@ window.simpanGTKBaru=simpanGTKBaru;
 window.openTambahGTK=openTambahGTK;
 window.closeTambahGTK=closeTambahGTK;
 
-function renderGurus(filter=''){const grid=document.getElementById('guruGrid');if(!grid)return;grid.innerHTML='';let list=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));let fullList=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));if(filter){const f=filter.toLowerCase();list=gurus.filter(g=>g.nama.toLowerCase().includes(f)||g.gid.toLowerCase().includes(f)).sort((a,b)=>(a.no||9999)-(b.no||9999));}document.getElementById('totalGuruInfo').textContent=list.length+' GTK';list.forEach((g,i)=>{const isHonorer=g.nip==='-'||!g.nip;const custom=customPassMap[g.gid];const idxGlobal=fullList.findIndex(x=>x.gid===g.gid);const isFirst=idxGlobal===0;const isLast=idxGlobal===fullList.length-1;const div=document.createElement('div');div.className='card';div.style.display='flex';div.style.flexDirection='column';div.style.gap='12px';const qrId='qr-'+i+'-'+g.gid;div.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:6px 10px"><div style="display:flex;align-items:center;gap:8px"><div style="font-weight:800;background:#0f355c;color:white;min-width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;padding:0 6px">#${g.no||idxGlobal+1}</div><div style="font-size:11px;color:#64748b;font-weight:700">${g.jabatan?g.jabatan:''}</div></div><div style="display:flex;gap:4px"><button title="Ke paling atas ⤒" style="height:32px;min-width:32px;padding:0 8px;border-radius:8px;border:1px solid #e2e8f0;background:white;font-weight:800;cursor:pointer;font-size:12px" onclick="moveGuruTop('${g.gid}')" ${isFirst?'disabled':''}>⤒</button><button title="Naik ↑" style="height:32px;min-width:32px;padding:0 8px;border-radius:8px;border:1px solid #e2e8f0;background:white;font-weight:800;cursor:pointer;font-size:14px" onclick="moveGuruUp('${g.gid}')" ${isFirst?'disabled':''}>↑</button><button title="Turun ↓" style="height:32px;min-width:32px;padding:0 8px;border-radius:8px;border:1px solid #e2e8f0;background:white;font-weight:800;cursor:pointer;font-size:14px" onclick="moveGuruDown('${g.gid}')" ${isLast?'disabled':''}>↓</button><button title="Ke paling bawah ⤓" style="height:32px;min-width:32px;padding:0 8px;border-radius:8px;border:1px solid #e2e8f0;background:white;font-weight:800;cursor:pointer;font-size:12px" onclick="moveGuruBottom('${g.gid}')" ${isLast?'disabled':''}>⤓</button></div></div><div style="display:flex;gap:12px"><div id="${qrId}" style="width:84px;height:84px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer" title="Klik untuk preview QR"></div><div style="flex:1"><div style="font-weight:800;color:#0f355c;font-size:14px">${g.nama} ${isHonorer?'<span style="background:#fef3c7;color:#92400e;font-size:9px;padding:2px 6px;border-radius:999px">HONORER</span>':''}</div><div style="font-size:11px;color:#64748b;margin-top:2px">NIP: ${g.nip||'-'} • ${g.gid}</div><div style="margin-top:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="font-size:9px;color:#94a3b8;font-weight:700">DEFAULT</div><div style="font-family:monospace;font-weight:800;font-size:13px">${g.password}</div>${custom && custom.password_custom && custom.password_custom!==g.password ? `<div style="margin-top:6px;border-top:1px solid #e2e8f0;padding-top:6px"><div style="font-size:9px;color:#dc2626;font-weight:700">CUSTOM</div><div style="font-family:monospace;font-weight:800;color:#dc2626;font-size:13px">${custom.password_custom}</div></div>` : ''}</div></div></div>
+function renderGurus(filter=''){const grid=document.getElementById('guruGrid');if(!grid)return;grid.innerHTML='';let list=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));if(filter){const f=filter.toLowerCase();list=gurus.filter(g=>g.nama.toLowerCase().includes(f)||g.gid.toLowerCase().includes(f));}document.getElementById('totalGuruInfo').textContent=list.length+' GTK';list.forEach((g,i)=>{const isHonorer=g.nip==='-'||!g.nip;const custom=customPassMap[g.gid];const div=document.createElement('div');div.className='card';div.style.display='flex';div.style.flexDirection='column';div.style.gap='12px';const qrId='qr-'+i+'-'+g.gid;div.innerHTML=`<div style="display:flex;gap:12px"><div id="${qrId}" style="width:84px;height:84px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer" title="Klik untuk preview QR"></div><div style="flex:1"><div style="font-weight:800;color:#0f355c;font-size:14px">${g.nama} ${isHonorer?'<span style="background:#fef3c7;color:#92400e;font-size:9px;padding:2px 6px;border-radius:999px">HONORER</span>':''}</div><div style="font-size:11px;color:#64748b;margin-top:2px">NIP: ${g.nip||'-'} • ${g.gid}</div><div style="margin-top:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="font-size:9px;color:#94a3b8;font-weight:700">DEFAULT</div><div style="font-family:monospace;font-weight:800;font-size:13px">${g.password}</div>${custom && custom.password_custom && custom.password_custom!==g.password ? `<div style="margin-top:6px;border-top:1px solid #e2e8f0;padding-top:6px"><div style="font-size:9px;color:#dc2626;font-weight:700">CUSTOM</div><div style="font-family:monospace;font-weight:800;color:#dc2626;font-size:13px">${custom.password_custom}</div></div>` : ''}</div></div></div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
   <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="directDownloadQR('${g.gid}','${g.nama}')">⬇️ Download QR</button>
   <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="copyDataQR('${g.gid}','${g.nama}','${g.nip}')">📋 Copy Data QR</button>
@@ -1445,94 +1657,7 @@ function renderGurus(filter=''){const grid=document.getElementById('guruGrid');i
   <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="copyPass('${g.gid}')">📋 Copy Pass</button>
   <button style="height:40px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;color:#0f355c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px" onclick="openEditGuru('${g.gid}')">✏️ Edit</button>
   <button style="height:40px;border-radius:12px;border:1px solid #fecaca;background:#fee2e2;font-weight:700;color:#991b1b;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;grid-column:span 2" onclick="hapusGuru('${g.gid}')">🗑️ Hapus GTK</button>
-</div>`;;grid.appendChild(div);setTimeout(()=>{const el=document.getElementById(qrId);if(!el)return;el.innerHTML='';new QRCode(el,{text:`${g.gid}`,width:84,height:84,colorDark:"#0f355c",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M}); el.style.cursor='pointer'; el.title='Klik untuk download QR'; el.onclick=()=>downloadQR(g.gid,g.nama); },100);});// === OPSI B: URUTAN JABATAN ↑↓⤒ (tidak sentuh map) ===
-window.moveGuruUp = async(gid)=>{
-  try{
-    const sorted=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));
-    const idx=sorted.findIndex(x=>x.gid===gid);
-    if(idx<=0) return;
-    const curr=sorted[idx]; const prev=sorted[idx-1];
-    const tmpNo=curr.no; curr.no=prev.no; prev.no=tmpNo;
-    const g1=gurus.find(x=>x.gid===curr.gid); if(g1) g1.no=curr.no;
-    const g2=gurus.find(x=>x.gid===prev.gid); if(g2) g2.no=prev.no;
-    try{
-      const {doc, setDoc}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-      const d=window.db||db; if(d){
-        await setDoc(doc(d,"gurus",curr.gid), {no:curr.no}, {merge:true});
-        await setDoc(doc(d,"gurus",prev.gid), {no:prev.no}, {merge:true});
-      }
-    }catch(e){ console.log('up fail', e); }
-    renderGurus(document.getElementById('searchGuru')?.value||'');
-    if(typeof renderLaporanBaru==='function') renderLaporanBaru();
-  }catch(e){ alert(e.message); }
-};
-window.moveGuruDown = async(gid)=>{
-  try{
-    const sorted=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));
-    const idx=sorted.findIndex(x=>x.gid===gid);
-    if(idx<0 || idx>=sorted.length-1) return;
-    const curr=sorted[idx]; const next=sorted[idx+1];
-    const tmpNo=curr.no; curr.no=next.no; next.no=tmpNo;
-    const g1=gurus.find(x=>x.gid===curr.gid); if(g1) g1.no=curr.no;
-    const g2=gurus.find(x=>x.gid===next.gid); if(g2) g2.no=next.no;
-    try{
-      const {doc, setDoc}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-      const d=window.db||db; if(d){
-        await setDoc(doc(d,"gurus",curr.gid), {no:curr.no}, {merge:true});
-        await setDoc(doc(d,"gurus",next.gid), {no:next.no}, {merge:true});
-      }
-    }catch(e){ console.log('down fail', e); }
-    renderGurus(document.getElementById('searchGuru')?.value||'');
-    if(typeof renderLaporanBaru==='function') renderLaporanBaru();
-  }catch(e){ alert(e.message); }
-};
-window.moveGuruTop = async(gid)=>{
-  try{
-    if(!confirm('Pindah ke paling atas (#1)?')) return;
-    let sorted=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));
-    const idx=sorted.findIndex(x=>x.gid===gid);
-    if(idx<=0) return;
-    const moving=sorted.splice(idx,1)[0];
-    sorted.unshift(moving);
-    sorted.forEach((g,i)=>{ g.no=i+1; });
-    gurus.forEach(g=>{ const f=sorted.find(x=>x.gid===g.gid); if(f) g.no=f.no; });
-    try{
-      const {doc, setDoc}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-      const d=window.db||db; if(d){
-        for(const gg of sorted){
-          try{ await setDoc(doc(d,"gurus",gg.gid), {no:gg.no}, {merge:true}); }catch(e){}
-        }
-      }
-    }catch(e){ console.log('top fail', e); }
-    renderGurus(document.getElementById('searchGuru')?.value||'');
-    if(typeof renderLaporanBaru==='function') renderLaporanBaru();
-  }catch(e){ alert(e.message); }
-};
-window.moveGuruBottom = async(gid)=>{
-  try{
-    if(!confirm('Pindah ke paling bawah?')) return;
-    let sorted=[...gurus].sort((a,b)=>(a.no||9999)-(b.no||9999));
-    const idx=sorted.findIndex(x=>x.gid===gid);
-    if(idx<0 || idx===sorted.length-1) return;
-    const moving=sorted.splice(idx,1)[0];
-    sorted.push(moving);
-    sorted.forEach((g,i)=>{ g.no=i+1; });
-    gurus.forEach(g=>{ const f=sorted.find(x=>x.gid===g.gid); if(f) g.no=f.no; });
-    try{
-      const {doc, setDoc}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-      const d=window.db||db;
-      if(d){
-        for(const gg of sorted){
-          try{ await setDoc(doc(d,"gurus",gg.gid), {no:gg.no}, {merge:true}); }catch(e){}
-        }
-      }
-    }catch(e){ console.log('bottom fail', e); }
-    renderGurus(document.getElementById('searchGuru')?.value||'');
-    if(typeof renderLaporanBaru==='function') renderLaporanBaru();
-  }catch(e){ alert(e.message); }
-};
-
-grid.querySelectorAll('button[data-act="reset"]').forEach(b=>{b.onclick=async()=>{const gid=b.dataset.gid;if(!confirm('Reset '+gid+'?'))return;try{await deleteDoc(doc(db,"users",gid));alert('✅ Reset!');delete customPassMap[gid];renderGurus(document.getElementById('searchGuru').value);}catch(e){alert(e.message);}};});grid.querySelectorAll('button[data-act="copy"]').forEach(b=>{b.onclick=()=>{const g=gurus.find(x=>x.gid===b.dataset.gid);const c=customPassMap[b.dataset.gid];const t=c?c.password_custom:g.password;navigator.clipboard.writeText(t).then(()=>alert('Copied: '+t));};});}
+</div>`;;grid.appendChild(div);setTimeout(()=>{const el=document.getElementById(qrId);if(!el)return;el.innerHTML='';new QRCode(el,{text:`${g.gid}`,width:84,height:84,colorDark:"#0f355c",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M}); el.style.cursor='pointer'; el.title='Klik untuk download QR'; el.onclick=()=>downloadQR(g.gid,g.nama); },100);});grid.querySelectorAll('button[data-act="reset"]').forEach(b=>{b.onclick=async()=>{const gid=b.dataset.gid;if(!confirm('Reset '+gid+'?'))return;try{await deleteDoc(doc(db,"users",gid));alert('✅ Reset!');delete customPassMap[gid];renderGurus(document.getElementById('searchGuru').value);}catch(e){alert(e.message);}};});grid.querySelectorAll('button[data-act="copy"]').forEach(b=>{b.onclick=()=>{const g=gurus.find(x=>x.gid===b.dataset.gid);const c=customPassMap[b.dataset.gid];const t=c?c.password_custom:g.password;navigator.clipboard.writeText(t).then(()=>alert('Copied: '+t));};});}
 document.getElementById('searchGuru').oninput=()=>{renderGurus(document.getElementById('searchGuru').value);};
 async function loadRekap(){const grid=document.getElementById('laporanBody');grid.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px">Memuat...</td></tr>';try{const q=query(collection(db,"absensi"),orderBy("waktu","desc"),limit(1000));const snap=await getDocs(q);allAbsen=[];snap.forEach(d=>{const data=d.data();data._id=d.id;allAbsen.push(data);});applyFilter();document.getElementById('rekapInfo').textContent=`${allAbsen.length} data dimuat`;}catch(e){grid.innerHTML=`<tr><td colspan="9" style="color:red">${e.message}</td></tr>`;}}
 window.loadRekap=loadRekap;
@@ -1684,9 +1809,7 @@ window.exportExcel=()=>{
       const selesai = rec.tanggal_selesai || mulai;
       let tglInfo = '';
       if(mulai){ tglInfo = mulai===selesai ? mulai : mulai+' s/d '+selesai; }
-      const jam = safeJam(rec);
-      const jamPart = (jam && jam!=='-') ? jam : '';
-      return (jamPart ? jamPart+' • ' : '') + ket + (tglInfo ? ' • '+tglInfo : '');
+      return ket + (tglInfo ? ' • '+tglInfo : '');
     } else if(!masuk && !pulang) return '-';
     else if(masuk && masuk.is_koreksi) return masuk.keterangan||'Dikoreksi admin';
     else if(masuk && !pulang) return 'Sudah masuk '+safeJam(masuk)+', belum pulang';
@@ -1762,32 +1885,16 @@ window.exportCSV=async()=>{
     const telatText = masuk ? formatTelat(telatMasuk) : '-';
     const statusMasuk = labelPlain(masuk);
     const statusPulang = labelPlain(pulang);
-    function keteranganPlainCSV(masuk, pulang){
-      const isLiburMasuk = masuk && ((masuk.kategori_absen||'').toUpperCase().includes('LIBUR') || masuk.is_libur);
-      const isLiburPulang = pulang && ((pulang.kategori_absen||'').toUpperCase().includes('LIBUR') || pulang.is_libur);
-      const isIzinMasuk = masuk && (masuk.is_izin || ['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes((masuk.kategori_absen||'').toUpperCase()));
-      const isIzinPulang = pulang && (pulang.is_izin || ['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes((pulang.kategori_absen||'').toUpperCase()));
-      if(isLiburMasuk || isLiburPulang){
-        const nama = (masuk&&masuk.liburNama) || (pulang&&pulang.liburNama) || (masuk&&masuk.label_absen) || (pulang&&pulang.label_absen) || 'Libur';
-        return nama;
-      } else if(isIzinMasuk || isIzinPulang){
-        const rec = isIzinMasuk ? masuk : pulang;
-        const ket = rec.keterangan || rec.izinKeterangan || rec.label_absen || rec.izinJenis || 'Izin';
-        const mulai = rec.tanggal_mulai || rec.tanggal || '';
-        const selesai = rec.tanggal_selesai || mulai;
-        let tglInfo = '';
-        if(mulai){ tglInfo = mulai===selesai ? mulai : mulai+' s/d '+selesai; }
-        const jam = safeJam(rec);
-        const jamPart = (jam && jam!=='-') ? jam : '';
-        return (jamPart ? jamPart+' • ' : '') + ket + (tglInfo ? ' • '+tglInfo : '');
-      } else if(!masuk && !pulang) return '-';
-      else if(masuk && masuk.is_koreksi) return masuk.keterangan||'Dikoreksi admin';
-      else if(masuk && !pulang) return 'Sudah masuk '+safeJam(masuk)+', belum pulang';
-      else if(!masuk && pulang) return 'Pulang '+safeJam(pulang);
-      else if(masuk && pulang) return safeJam(masuk)+' - '+safeJam(pulang);
-      return '-';
+    let ket='';
+    if(masuk && pulang) ket=safeJam(masuk)+' - '+safeJam(pulang);
+    else if(masuk && !pulang) ket='Sudah masuk '+safeJam(masuk)+', belum pulang';
+    else if(!masuk && pulang) ket='Pulang '+safeJam(pulang);
+    else {
+      const kat=(masuk?.kategori_absen||pulang?.kategori_absen||'').toUpperCase();
+      if(kat.includes('LIBUR')) ket=masuk?.label_absen||pulang?.label_absen||'Libur';
+      else if(masuk?.keterangan) ket=masuk.keterangan;
+      else ket='-';
     }
-    let ket=keteranganPlainCSV(masuk, pulang);
     csv+=`"${g.no||idx+1}","${g.nama}","${g.nip||'-'}","${statusMasuk}","${telatText}","${statusPulang}","${ket}"\n`;
   });
   const blob=new Blob([csv],{type:'text/csv'});
@@ -2590,9 +2697,7 @@ window.renderLaporanBaru = function(){
         if(mulai===selesai) tglInfo = mulai;
         else tglInfo = mulai + ' s/d ' + selesai;
       }
-      const jamRec = (rec && rec.waktu) ? (function(r){ try{ const d=new Date(r.waktu); return d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return '-'; } })(rec) : '';
-      const jamPart = (jamRec && jamRec!=='-') ? jamRec : '';
-      keterangan = (jamPart ? jamPart+' • ' : '') + ket + (tglInfo ? ' • ' + tglInfo : '');
+      keterangan = ket + (tglInfo ? ' • ' + tglInfo : '');
     } else if(!masuk && !pulang) keterangan='-';
     else if(masuk && masuk.is_koreksi) keterangan=masuk.keterangan||'Dikoreksi admin';
     else if(masuk && !pulang) keterangan='Sudah masuk '+jamMasuk+', belum pulang';
