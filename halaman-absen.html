@@ -763,7 +763,7 @@ window.cekLokasi=()=>{
   navigator.geolocation.getCurrentPosition(p=>{
     lastPos=p; const d=hitungJarak(p.coords.latitude,p.coords.longitude,CURRENT_LAT,CURRENT_LNG); lastDistance=d;
     s.textContent='Lokasi Terdeteksi'; const jarakText=formatJarak(d);
-    t.innerHTML=`${jarakText} dari sekolah (${PLUS})`; b.textContent=d<=RADIUS?`Di Dalam ${RADIUS}m ✅`:`Di Luar ${jarakText} ❌`; b.className=d<=RADIUS?'badge-valid':'badge-invalid';
+    t.innerHTML=`${jarakText} dari sekolah`; b.textContent=d<=RADIUS?`Di Dalam ${RADIUS}m ✅`:`Di Luar ${jarakText} ❌`; b.className=d<=RADIUS?'badge-valid':'badge-invalid';
     if(markerUser&&map) map.removeLayer(markerUser);
     if(lineToDevice&&map) map.removeLayer(lineToDevice);
     const ic=L.divIcon({html:'<div style="width:18px;height:18px;background:#2563eb;border:3px solid white;border-radius:50%"></div>',iconSize:[18,18],className:''});
