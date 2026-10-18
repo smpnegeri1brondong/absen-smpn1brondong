@@ -1241,7 +1241,9 @@ async function prosesAbsenOtomatis(){
       msg=`<b>${currentGuru.nama}</b><br><br>Masih jam <b>${jamStr}</b><br>Belum waktunya pulang<br><br><span style="background:#ffedd5;color:#9a3412;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">⏳ Belum bisa absen, coba lagi nanti</span>`;
     } else if(jenis==='LIBUR'){
       title='INI HARI LIBUR HEYY';
-      msg=`<b>${currentGuru.nama}</b><br><br>Terlalu Rajin nih mas<br>${jamInfo.pesan}<br><br>Absen kamu <b>TETAP TERCATAT</b> di laporan sebagai <b>${jamInfo.label}</b><br><br>Jam: <b>${jamStr}</b><br><br><span style="background:#e0f2fe;color:#0f355c;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">Libuuurrrrrrrrrr</span>`;
+      const isP=(currentGuru.gender||'').toString().toUpperCase().startsWith('P');
+      const panggilanLibur=isP?'mbak':'mas';
+      msg=`<b>${currentGuru.nama}</b><br><br>Terlalu Rajin nih ${panggilanLibur}<br>${jamInfo.pesan}<br><br><span style="background:#e0f2fe;color:#0f355c;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">Libuuurrrrrrrrrr</span>`;
     } else if(kat==='DILUAR_JAM_KERJA' || kat==='DILUAR'){
       title='🌙 PULANG DI LUAR JAM KERJA';
       msg=`<b>${currentGuru.nama}</b><br><br>Absen pulang jam <b>${jamStr}</b><br>Udah di luar jam kerja ini<br><br>Jarak: ${jarakInfo}<br><br><span style="background:#fee2e2;color:#991b1b;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800">📌 Di Luar Jam Kerja</span>`;
