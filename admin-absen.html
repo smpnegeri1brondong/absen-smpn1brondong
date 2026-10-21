@@ -907,15 +907,11 @@ function isTanggalInRange(tgl, mulai, selesai){
 function getIzinForDate(gid, tanggalStr){
   const list = window.izinList || [];
   return list.filter(z=>{
-    if(!z) return false;
-    const zgid=(z.gid||'').trim();
-    if(zgid!==gid) return false;
-    if((z.status||'DISETUJUI').toUpperCase()!=='DISETUJUI') return false;
-    const mulai=(z.tanggal_mulai||z.tanggal||'').trim();
-    const selesai=(z.tanggal_selesai||mulai||'').trim();
-    const tgl=(tanggalStr||'').trim();
-    if(!mulai) return false;
-    return isTanggalInRange(tgl,mulai,selesai)||tgl===mulai||tgl===selesai;
+    if(z.gid !== gid) return false;
+    if((z.status||'DISETUJUI') !== 'DISETUJUI') return false;
+    const mulai = z.tanggal_mulai || z.tanggal;
+    const selesai = z.tanggal_selesai || mulai;
+    return isTanggalInRange(tanggalStr, mulai, selesai);
   });
 }
 
@@ -1035,7 +1031,7 @@ window.renderIzinList = function(){
   }
   listEl.innerHTML = filtered.map(z=>{
     const badge = getIzinBadgeInfo(z.jenis);
-    const scopeLabel = z.scope==='FULL' ? 'FULL Seharian (Blok)' : ((z.scope||'').toUpperCase().includes('MASUK') ? 'MASUK Aja' : 'PULANG Aja');
+    const scopeLabel = z.scope==='FULL' ? 'FULL Seharian (Blok)' : (z.scope==='MASUK' ? 'MASUK Aja' : 'PULANG Aja');
     const tglLabel = z.tanggal_mulai===z.tanggal_selesai ? z.tanggal_mulai : `${z.tanggal_mulai} s/d ${z.tanggal_selesai} (${Math.ceil((new Date(z.tanggal_selesai)-new Date(z.tanggal_mulai))/(1000*60*60*24))+1} hari)`;
     return `<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
       <div style="flex:1">
@@ -2502,9 +2498,9 @@ function parseAbsenGTK(gid, tanggalStr){
     if(typeof getIzinForDate==='function'){
       const izinArr = getIzinForDate(gid, tanggalStr);
       if(izinArr && izinArr.length>0){
-        const fullIzin = izinArr.find(z=> (z.scope||'FULL').toUpperCase().includes('FULL'));
-        const masukIzin = izinArr.find(z=> (z.scope||'').toUpperCase().includes('MASUK'));
-        const pulangIzin = izinArr.find(z=> (z.scope||'').toUpperCase().includes('PULANG'));
+        const fullIzin = izinArr.find(z=> (z.scope||'FULL')==='FULL');
+        const masukIzin = izinArr.find(z=> z.scope==='MASUK');
+        const pulangIzin = izinArr.find(z=> z.scope==='PULANG');
         const jenisToBadge = (j)=>{ const u=(j||'').toUpperCase(); if(u==='SAKIT') return 'SAKIT'; if(u==='DINAS_LUAR') return 'DINAS_LUAR'; if(u==='URUSAN_KELUARGA') return 'URUSAN_KELUARGA'; return 'IZIN_LAIN'; };
         // FULL blok total
         if(fullIzin){
