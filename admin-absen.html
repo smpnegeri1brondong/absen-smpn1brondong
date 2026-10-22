@@ -296,7 +296,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div style="margin-top:12px;display:grid;gap:8px"><button class="btn btn-primary" style="height:40px" onclick="loadRekap()">🔄 Refresh Laporan</button><button class="btn btn-outline" style="height:40px" onclick="loadPasswords()">🔑 Load Password Custom</button></div>
 </div>
 <div id="panelLaporan">
-<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="font-weight:800;color:#0f355c">📊 Laporan Absen GTK <span id="liveBadge">🟢 Live - auto refresh aktif</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" style="height:36px;width:auto;padding:0 16px" onclick="exportExcel()">📥 Excel</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="exportCSV()">CSV</button><button class="btn" style="height:36px;width:auto;padding:0 16px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b" onclick="clearTest()">🗑️ Hapus Test</button></div></div>
+<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="font-weight:800;color:#0f355c;display:flex;align-items:center;gap:8px;flex-wrap:wrap">📊 Laporan Absen GTK <span id="liveBadge">🟢 Live - auto refresh aktif</span> <span id="pulangCepatBadge" class="hidden" style="background:#fef9c3;border:1px solid #fde68a;color:#854d0e;padding:4px 10px;border-radius:999px;font-size:10px;font-weight:800;display:inline-flex;align-items:center;gap:4px">⚡ Pulang Cepat</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" style="height:36px;width:auto;padding:0 16px" onclick="exportExcel()">📥 Excel</button><button class="btn btn-outline" style="height:36px;width:auto;padding:0 16px" onclick="exportCSV()">CSV</button><button class="btn" style="height:36px;width:auto;padding:0 16px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b" onclick="clearTest()">🗑️ Hapus Test</button></div></div>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:12px">
 <input id="filterTanggal" type="date" class="input" style="height:36px"/><select id="filterGuruSelect" class="input" style="height:36px"><option value="">Semua GTK</option></select>
 <select id="filterKategori" class="input" style="height:36px"><option value="">Semua Kategori</option><option value="TEPAT_WAKTU">TEPAT_WAKTU</option><option value="TELAT">TELAT</option><option value="PULANG_SEBELUM_WAKTUNYA">PULANG_SEBELUM_WAKTUNYA</option><option value="BELUM_WAKTUNYA_PULANG">BELUM_WAKTUNYA_PULANG</option><option value="SAKIT">SAKIT</option><option value="DINAS_LUAR">DINAS_LUAR</option><option value="URUSAN_KELUARGA">URUSAN_KELUARGA</option><option value="IZIN_LAIN">IZIN_LAIN</option><option value="LIBUR_SABTU">LIBUR_SABTU</option><option value="LIBUR_MINGGU">LIBUR_MINGGU</option><option value="LIBUR_NASIONAL">LIBUR_NASIONAL</option><option value="PULANG_CEPAT">PULANG_CEPAT</option><option value="BELUM_WAKTUNYA_PULANG_CEPAT">BELUM_WAKTUNYA_PULANG_CEPAT</option><option value="PULANG_SEBELUM_WAKTUNYA_CEPAT">PULANG_SEBELUM_CEPAT</option><option value="DILUAR_JAM_KERJA">DILUAR_JAM_KERJA</option></select>
@@ -748,6 +748,50 @@ document.getElementById('forgotBtn').onclick=async()=>{
 // === FITUR BARU: LIBUR & PULANG CEPAT CRUD ===
 window.kalenderLiburMap=window.kalenderLiburMap||{};
 window.kalenderLiburList=window.kalenderLiburList||[];
+window.pulangCepatMap=window.pulangCepatMap||{};
+window.pulangCepatList=window.pulangCepatList||[];
+
+
+function normalizeJamPC(t){
+  if(t===undefined || t===null || t==="") return "";
+  let s=String(t).trim();
+  // kalau sudah HH:MM
+  if(s.includes(":")){
+    if(s.includes("T")) s=s.split("T")[1]||s;
+    return s.slice(0,5);
+  }
+  // kalau angka menit 630, 780, 930 dll -> convert ke jam
+  let num = parseInt(s,10);
+  if(!isNaN(num) && num>=0 && num<1440){
+    const h = Math.floor(num/60);
+    const m = num%60;
+    return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0");
+  }
+  // kalau angka jam 13, 10 dll
+  if(!isNaN(num) && num>=0 && num<24){
+    return String(num).padStart(2,"0")+":00";
+  }
+  return s.slice(0,5);
+}
+function updatePulangCepatBadge(tanggalStr){
+  try{
+    const badge=document.getElementById("pulangCepatBadge");
+    if(!badge) return;
+    const t= (typeof normalizeTanggal==="function" ? normalizeTanggal(tanggalStr) : tanggalStr) || (typeof getTanggalLaporan==="function"? getTanggalLaporan():"");
+    const data = (window.pulangCepatMap||{})[t];
+    if(data){
+      const raw = data.mulai||data.pulang_mulai||data.pulang_mulai_str||data.mulaiStr||"";
+      const jamMulai = normalizeJamPC(raw);
+      badge.textContent = "⚡Pulang Cepat Aktif : "+(jamMulai||"");
+      badge.title = "Pulang Cepat Aktif: "+(data.keterangan||"")+" jam "+jamMulai;
+      badge.classList.remove("hidden");
+      badge.style.display="inline-flex";
+    } else {
+      badge.classList.add("hidden");
+      badge.style.display="none";
+    }
+  }catch(e){}
+}
 async function loadLibur(){
   try{
     const listEl=document.getElementById('liburList');
@@ -756,6 +800,18 @@ async function loadLibur(){
     const arr=[];
     snap.forEach(d=>{ const data=d.data(); arr.push({id:d.id, tanggal:data.tanggal||d.id, keterangan:data.keterangan||data.nama||'Libur'}); });
     arr.sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
+    // === FIX INDICATOR PULANG CEPAT ===
+    try{
+      window.pulangCepatMap={};
+      window.pulangCepatList=arr;
+      arr.forEach(x=>{
+        const tgl = (typeof normalizeTanggal==="function"? normalizeTanggal(x.tanggal): x.tanggal);
+        window.pulangCepatMap[tgl]={keterangan:x.keterangan||"Rapat", mulai:x.mulai||"", selesai:x.selesai||"", id:x.id};
+      });
+      const curTgl = (typeof getTanggalLaporan==="function"? getTanggalLaporan():"");
+      if(curTgl) updatePulangCepatBadge(curTgl);
+    }catch(e){ console.log("pulangCepatMap fail", e); }
+    
     // === FIX: populate map untuk deteksi libur di laporan ===
     try{
       window.kalenderLiburMap={};
@@ -840,6 +896,18 @@ async function loadPulangCepat(){
     const arr=[];
     snap.forEach(d=>{ const data=d.data(); arr.push({id:d.id, tanggal:data.tanggal||d.id, keterangan:data.keterangan||'Rapat Dinas', mulai:data.pulang_mulai, selesai:data.pulang_selesai}); });
     arr.sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
+    // === FIX INDICATOR PULANG CEPAT ===
+    try{
+      window.pulangCepatMap={};
+      window.pulangCepatList=arr;
+      arr.forEach(x=>{
+        const tgl = (typeof normalizeTanggal==="function"? normalizeTanggal(x.tanggal): x.tanggal);
+        window.pulangCepatMap[tgl]={keterangan:x.keterangan||"Rapat", mulai:x.mulai||"", selesai:x.selesai||"", id:x.id};
+      });
+      const curTgl = (typeof getTanggalLaporan==="function"? getTanggalLaporan():"");
+      if(curTgl) updatePulangCepatBadge(curTgl);
+    }catch(e){ console.log("pulangCepatMap fail", e); }
+    
     function fmtMenit(v){
       if(v==null) return '-';
       if(typeof v==='string' && v.includes(':')) return v;
@@ -898,22 +966,30 @@ setTimeout(()=>{ if(typeof db!=='undefined' && db){ loadLibur(); loadPulangCepat
 window.izinList = window.izinList || [];
 window.izinMapByGID = window.izinMapByGID || {}; // gid -> list
 
-function isTanggalInRange(tgl, mulai, selesai){
-  if(!tgl || !mulai) return false;
-  const s = selesai || mulai;
-  return tgl >= mulai && tgl <= s;
-}
 
+function isTanggalInRange(tgl, mulai, selesai){
+  const tt=normalizeTanggal(tgl);
+  const mm=normalizeTanggal(mulai);
+  const ss=normalizeTanggal(selesai||mulai);
+  if(!tt||!mm) return false;
+  return tt>=mm && tt<=ss;
+}
 function getIzinForDate(gid, tanggalStr){
-  const list = window.izinList || [];
+  const list=window.izinList||[];
+  const t=normalizeTanggal(tanggalStr);
+  const gidU=String(gid||'').trim().toUpperCase();
   return list.filter(z=>{
-    if(z.gid !== gid) return false;
-    if((z.status||'DISETUJUI') !== 'DISETUJUI') return false;
-    const mulai = z.tanggal_mulai || z.tanggal;
-    const selesai = z.tanggal_selesai || mulai;
-    return isTanggalInRange(tanggalStr, mulai, selesai);
+    const zgid=String(z.gid||'').trim().toUpperCase();
+    if(gidU!==zgid) return false;
+    const st=String(z.status||'').trim().toUpperCase();
+    const okStatus = st.includes('SETUJU') || st.includes('APPROV') || st==='DISETUJUI' || st==='APPROVED';
+    if(!okStatus) return false;
+    const mulai=normalizeTanggal(z.tanggal_mulai||z.tanggal);
+    const selesai=normalizeTanggal(z.tanggal_selesai||z.tanggal_mulai||z.tanggal);
+    return isTanggalInRange(t, mulai, selesai);
   });
 }
+
 
 function getIzinBadgeInfo(jenis){
   const j = (jenis||'').toUpperCase();
@@ -952,6 +1028,7 @@ async function loadIzin(){
     window.izinMapByGID = map;
     console.log('✅ izin loaded', arr.length);
     renderIzinList();
+    try{ if(typeof renderLaporanBaru==='function'){ renderLaporanBaru(); } }catch(e){}
     // populate guru select if empty
     try{
       const sel = document.getElementById('izinGuruSelect');
@@ -1003,6 +1080,7 @@ async function startIzinLiveSync(){
         window.izinMapByGID = map;
         console.log('📝 izin live sync', arr.length);
         renderIzinList();
+        try{ if(typeof renderLaporanBaru==='function'){ renderLaporanBaru(); } }catch(e){}
         if(typeof renderLaporanBaru==='function' && document.getElementById('filterTanggal')?.value){
           renderLaporanBaru();
         }
@@ -1067,21 +1145,24 @@ window.simpanIzin = async()=>{
     const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
     const isEdit = !!window.editingIzinId;
     const id = isEdit ? window.editingIzinId : `${gid}_${mulai}_${scope}_${Date.now()}`;
-    await setDoc(doc(db, "izin", id), {
+    const payload={
       gid: gid,
       nama: nama,
       jenis: jenis,
       scope: scope,
       tanggal: mulai,
-      tanggal_mulai: mulai,
-      tanggal_selesai: selesai,
+      tanggal_mulai: normalizeTanggal(mulai),
+      tanggal_selesai: normalizeTanggal(selesai),
       keterangan: ket,
       status: 'DISETUJUI',
-      created_at: isEdit ? undefined : new Date().toISOString(),
       updated_at: new Date().toISOString(),
       edited: isEdit ? true : false,
-      created_by: isEdit ? undefined : 'admin'
-    }, {merge:true});
+    };
+    if(!isEdit){
+      payload.created_at = new Date().toISOString();
+      payload.created_by = 'admin';
+    }
+    await setDoc(doc(db, "izin", id), payload, {merge:true});
     alert(`${isEdit?'✅ Izin di-update':'✅ Izin '+jenis+' '+scope+' untuk '+nama} ${mulai}${mulai!==selesai?' s/d '+selesai:''} tersimpan!`);
     document.getElementById('izinKeterangan').value='';
     window.editingIzinId=null;
@@ -1659,8 +1740,46 @@ function renderGurus(filter=''){const grid=document.getElementById('guruGrid');i
   <button style="height:40px;border-radius:12px;border:1px solid #fecaca;background:#fee2e2;font-weight:700;color:#991b1b;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;grid-column:span 2" onclick="hapusGuru('${g.gid}')">🗑️ Hapus GTK</button>
 </div>`;;grid.appendChild(div);setTimeout(()=>{const el=document.getElementById(qrId);if(!el)return;el.innerHTML='';new QRCode(el,{text:`${g.gid}`,width:84,height:84,colorDark:"#0f355c",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M}); el.style.cursor='pointer'; el.title='Klik untuk download QR'; el.onclick=()=>downloadQR(g.gid,g.nama); },100);});grid.querySelectorAll('button[data-act="reset"]').forEach(b=>{b.onclick=async()=>{const gid=b.dataset.gid;if(!confirm('Reset '+gid+'?'))return;try{await deleteDoc(doc(db,"users",gid));alert('✅ Reset!');delete customPassMap[gid];renderGurus(document.getElementById('searchGuru').value);}catch(e){alert(e.message);}};});grid.querySelectorAll('button[data-act="copy"]').forEach(b=>{b.onclick=()=>{const g=gurus.find(x=>x.gid===b.dataset.gid);const c=customPassMap[b.dataset.gid];const t=c?c.password_custom:g.password;navigator.clipboard.writeText(t).then(()=>alert('Copied: '+t));};});}
 document.getElementById('searchGuru').oninput=()=>{renderGurus(document.getElementById('searchGuru').value);};
-async function loadRekap(){const grid=document.getElementById('laporanBody');grid.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px">Memuat...</td></tr>';try{const q=query(collection(db,"absensi"),orderBy("waktu","desc"),limit(1000));const snap=await getDocs(q);allAbsen=[];snap.forEach(d=>{const data=d.data();data._id=d.id;allAbsen.push(data);});applyFilter();document.getElementById('rekapInfo').textContent=`${allAbsen.length} data dimuat`;}catch(e){grid.innerHTML=`<tr><td colspan="9" style="color:red">${e.message}</td></tr>`;}}
+async function loadRekap(){
+  const grid=document.getElementById('rekapBody') || document.getElementById('laporanBody');
+  if(!grid){ console.log('rekapBody not found - skip'); return; }
+  grid.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px">Memuat...</td></tr>';
+  try{
+    const {collection, query, where, orderBy, limit, getDocs} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d=window.db|| (typeof db!=='undefined'?db:null);
+    if(!d){ grid.innerHTML='<tr><td colspan="9">DB belum siap</td></tr>'; return; }
+    const tgl=normalizeTanggal(getTanggalLaporan());
+    let snap;
+    try{
+      // LOAD RECENT 1000, JANGAN WHERE STRICT KARENA FORMAT TANGGAL DI DB BISA BEDA (dd/mm vs yyyy-mm-dd)
+      const q=query(collection(d,"absensi"), orderBy("waktu","desc"), limit(1000));
+      snap=await getDocs(q);
+    }catch(e){
+      try{
+        const q=query(collection(d,"absensi"), where("tanggal","==",tgl));
+        snap=await getDocs(q);
+      }catch(e2){
+        const q2=query(collection(d,"absensi"), orderBy("waktu","desc"), limit(1000));
+        snap=await getDocs(q2);
+      }
+    }
+    allAbsen=[]; window.allAbsen=[];
+    snap.forEach(docSnap=>{
+      const data=docSnap.data(); data._id=docSnap.id;
+      if(!data.tanggal && data.waktu){ try{ data.tanggal=normalizeTanggal(new Date(data.waktu).toISOString()); }catch(err){} }
+      else { try{ data.tanggal=normalizeTanggal(data.tanggal); }catch(err){} }
+      allAbsen.push(data); window.allAbsen.push(data);
+    });
+    // JANGAN TIMPA allAbsen DENGAN FILTERED - BIARKAN parseAbsenGTK YANG FILTER PER GID
+    // Jadi history tanggal lama tetap ada 43 baris Belum Absen
+    if(typeof applyFilter==='function') applyFilter();
+    else if(document.getElementById('rekapBody')) renderLaporanBaru();
+    const info=document.getElementById('rekapInfo'); if(info) info.textContent=`${allAbsen.length} data dimuat • ${tgl}`;
+  }catch(e){ grid.innerHTML=`<tr><td colspan="9" style="color:red">${e.message}</td></tr>`; }
+}
+
 window.loadRekap=loadRekap;
+
 
 window.updateBulkBar=()=>{
   const checked=document.querySelectorAll('.chk-laporan:checked');
@@ -1685,7 +1804,7 @@ window.hapusTerpilih=async()=>{
   try{ for(const id of ids){ await deleteDoc(doc(db,"absensi",id)); } alert('✅ '+ids.length+' dihapus'); allAbsen=allAbsen.filter(a=>!ids.includes(a._id)); applyFilter(); }catch(e){ alert(e.message); }
 };
 
-function applyFilter(){const tgl=document.getElementById('filterTanggal').value;const gid=document.getElementById('filterGuruSelect').value;const kategori=document.getElementById('filterKategori').value;const jenis=document.getElementById('filterJenis').value;const status=document.getElementById('filterStatus').value;const search=document.getElementById('searchLaporan').value.toLowerCase();let filtered=allAbsen;if(tgl){filtered=filtered.filter(d=>{const dt=new Date(d.waktu);return dt.toISOString().split('T')[0]===tgl;});}if(gid){filtered=filtered.filter(d=>d.gid===gid);}if(kategori){filtered=filtered.filter(d=>(d.kategori_absen||'')===kategori);}if(jenis){filtered=filtered.filter(d=>(d.jenis_absen||'')===jenis);}if(status){filtered=filtered.filter(d=>d.status===status);}if(search){filtered=filtered.filter(d=> (d.nama||'').toLowerCase().includes(search) || (d.gid||'').toLowerCase().includes(search) );}const body=document.getElementById('laporanBody');if(filtered.length===0){body.innerHTML='<tr><td colspan="9" style="text-align:center;color:#94a3b8">Tidak ada data sesuai filter</td></tr>';}else{body.innerHTML='';filtered.forEach(data=>{const dt=new Date(data.waktu);const jam=dt.toLocaleTimeString('id-ID');const tglStr=dt.toLocaleDateString('id-ID');const kat=data.kategori_absen||'TEPAT_WAKTU';const badgeKat=kat==='TEPAT_WAKTU'?'badge-tepat':kat==='TELAT'?'badge-telat':'badge-diluar';const tr=document.createElement('tr');tr.innerHTML=`<td><div style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" class="chk-laporan" value="${data._id}" onchange="updateBulkBar()" style="margin-top:4px;width:16px;height:16px"><div><div style="font-weight:700">${tglStr}</div><div style="font-size:10px;color:#64748b">${jam}</div></div></div></td><td style="font-weight:700;color:#0f355c">${data.nama||'-'}</td><td><span style="font-size:10px;background:#f1f5f9;border:1px solid #e2e8f0;padding:2px 6px;border-radius:999px">${data.gid}</span></td><td><span class="badge" style="background:#f8fafc">${data.jenis_absen||'-'}</span></td><td><span class="badge ${badgeKat}">${data.label_absen||kat}</span></td><td><span class="badge ${data.status==='VALID'?'badge-tepat':'badge-diluar'}">${data.status||'-'}</span></td><td>${data.jarak_meter||0}m</td><td>${data.telat_menit?data.telat_menit+' menit':'-'}</td><td style="font-size:10px">${data.plus_code||''}</td>`;body.appendChild(tr);});}document.getElementById('totalAbsen').textContent=filtered.length;document.getElementById('totalTepat').textContent=filtered.filter(d=> (d.kategori_absen||'TEPAT_WAKTU')==='TEPAT_WAKTU').length;document.getElementById('totalTelat').textContent=filtered.filter(d=>d.kategori_absen==='TELAT').length;
+function applyFilter(){ try{ if(typeof window.renderLaporanBaru==='function') return window.renderLaporanBaru(); }catch(e){ console.log('applyFilter fallback', e); } const tgl=document.getElementById('filterTanggal')?.value||'';const gid=document.getElementById('filterGuruSelect')?.value||'';const kategori=document.getElementById('filterKategori')?.value||'';const jenis=document.getElementById('filterJenis')?.value||'';const status=document.getElementById('filterStatus')?.value||'';const search=(document.getElementById('searchLaporan')?.value||'').toLowerCase();let filtered=allAbsen;if(tgl){filtered=filtered.filter(d=>{const dt=new Date(d.waktu);return dt.toISOString().split('T')[0]===tgl;});}if(gid){filtered=filtered.filter(d=>d.gid===gid);}if(kategori){filtered=filtered.filter(d=>(d.kategori_absen||'')===kategori);}if(jenis){filtered=filtered.filter(d=>(d.jenis_absen||'')===jenis);}if(status){filtered=filtered.filter(d=>d.status===status);}if(search){filtered=filtered.filter(d=> (d.nama||'').toLowerCase().includes(search) || (d.gid||'').toLowerCase().includes(search) );}const body=document.getElementById('laporanBody');if(filtered.length===0){body.innerHTML='<tr><td colspan="9" style="text-align:center;color:#94a3b8">Tidak ada data sesuai filter</td></tr>';}else{body.innerHTML='';filtered.forEach(data=>{const dt=new Date(data.waktu);const jam=dt.toLocaleTimeString('id-ID');const tglStr=dt.toLocaleDateString('id-ID');const kat=data.kategori_absen||'TEPAT_WAKTU';const badgeKat=kat==='TEPAT_WAKTU'?'badge-tepat':kat==='TELAT'?'badge-telat':'badge-diluar';const tr=document.createElement('tr');tr.innerHTML=`<td><div style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" class="chk-laporan" value="${data._id}" onchange="updateBulkBar()" style="margin-top:4px;width:16px;height:16px"><div><div style="font-weight:700">${tglStr}</div><div style="font-size:10px;color:#64748b">${jam}</div></div></div></td><td style="font-weight:700;color:#0f355c">${data.nama||'-'}</td><td><span style="font-size:10px;background:#f1f5f9;border:1px solid #e2e8f0;padding:2px 6px;border-radius:999px">${data.gid}</span></td><td><span class="badge" style="background:#f8fafc">${data.jenis_absen||'-'}</span></td><td><span class="badge ${badgeKat}">${data.label_absen||kat}</span></td><td><span class="badge ${data.status==='VALID'?'badge-tepat':'badge-diluar'}">${data.status||'-'}</span></td><td>${data.jarak_meter||0}m</td><td>${data.telat_menit?data.telat_menit+' menit':'-'}</td><td style="font-size:10px">${data.plus_code||''}</td>`;body.appendChild(tr);});}document.getElementById('totalAbsen').textContent=filtered.length;document.getElementById('totalTepat').textContent=filtered.filter(d=> (d.kategori_absen||'TEPAT_WAKTU')==='TEPAT_WAKTU').length;document.getElementById('totalTelat').textContent=filtered.filter(d=>d.kategori_absen==='TELAT').length;
 document.getElementById('totalDiluar').textContent=filtered.filter(d=>d.kategori_absen==='DILUAR_JAM_KERJA').length;
   // === CARD VIEW GENERATION for HP like image_07ed30.png ===
   try{
@@ -2356,7 +2475,44 @@ window.getJenisAbsen=(d)=>{
   }
 };
 window.allAbsen = window.allAbsen || [];
-function getTanggalLaporan(){ const el=document.getElementById('filterTanggal'); if(el&&el.value) return el.value; return new Date().toISOString().split('T')[0]; }
+
+// === FIX STEP2 WIB + normalizeTanggal ===
+function getTanggalWIB(){
+  try{
+    return new Date().toLocaleDateString('en-CA', {timeZone:'Asia/Jakarta'});
+  }catch(e){
+    const d=new Date(); const off=7*60;
+    const utc=d.getTime() + d.getTimezoneOffset()*60000;
+    return new Date(utc+off*60000).toISOString().split('T')[0];
+  }
+}
+function normalizeTanggal(t){
+  if(!t) return '';
+  let s=String(t).trim();
+  if(!s) return '';
+  if(s.includes('T')) s=s.split('T')[0];
+  if(s.includes(' ')) s=s.split(' ')[0];
+  if(s.includes('/')){
+    const p=s.split('/');
+    if(p.length===3){
+      let d=p[0].padStart(2,'0'), m=p[1].padStart(2,'0'), y=p[2];
+      if(y.length===2) y='20'+y;
+      return `${y}-${m}-${d}`;
+    }
+  }
+  if(s.includes('-') && s.split('-')[0].length!==4 && s.split('-').length===3){
+    const p=s.split('-');
+    const maybeDDMM = p[0].length<=2 && p[1].length<=2 && p[2].length===4;
+    if(maybeDDMM) return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+  }
+  return s.slice(0,10);
+}
+function getTanggalLaporan(){
+  const el=document.getElementById('filterTanggal');
+  if(el && el.value) return normalizeTanggal(el.value);
+  return getTanggalWIB();
+}
+
 function getLabelJamKerja(tanggalStr){
   try{
     let d;
@@ -2384,6 +2540,7 @@ function getLabelJamKerja(tanggalStr){
   }
 }
 function updateJamLabel(){
+  try{ const tglInner=getTanggalLaporan(); if(typeof updatePulangCepatBadge==="function") updatePulangCepatBadge(tglInner); }catch(e){}
   const tgl=getTanggalLaporan();
   const label=getLabelJamKerja(tgl);
   // update rekapInfo if exists and has data count
@@ -2408,11 +2565,13 @@ function updateJamLabel(){
 }
 
 function parseAbsenGTK(gid, tanggalStr){
+  const target = (typeof normalizeTanggal==='function'? normalizeTanggal(tanggalStr): tanggalStr);
   const list = allAbsen.filter(d=>{
     if(d.gid!==gid) return false;
     let tgl=d.tanggal||'';
     if(!tgl && d.waktu){ try{ tgl=new Date(d.waktu).toISOString().split('T')[0]; }catch(e){} }
-    return tgl===tanggalStr;
+    tgl = (typeof normalizeTanggal==='function'? normalizeTanggal(tgl): tgl);
+    return tgl===target;
   });
   // === SPLIT LOGIC BARU: 15:30-23:59 = PULANG diluar jam kerja, 00:00-05:59 = BELUM_BUKA (abaikan) ===
   const diluarLama = list.filter(x=>{
@@ -2498,14 +2657,15 @@ function parseAbsenGTK(gid, tanggalStr){
     if(typeof getIzinForDate==='function'){
       const izinArr = getIzinForDate(gid, tanggalStr);
       if(izinArr && izinArr.length>0){
-        const fullIzin = izinArr.find(z=> (z.scope||'FULL')==='FULL');
-        const masukIzin = izinArr.find(z=> z.scope==='MASUK');
-        const pulangIzin = izinArr.find(z=> z.scope==='PULANG');
-        const jenisToBadge = (j)=>{ const u=(j||'').toUpperCase(); if(u==='SAKIT') return 'SAKIT'; if(u==='DINAS_LUAR') return 'DINAS_LUAR'; if(u==='URUSAN_KELUARGA') return 'URUSAN_KELUARGA'; return 'IZIN_LAIN'; };
+        const normScope = (s)=> String(s||'FULL').trim().toUpperCase();
+        const fullIzin = izinArr.find(z=> normScope(z.scope).includes('FULL'));
+        const masukIzin = izinArr.find(z=> normScope(z.scope).includes('MASUK'));
+        const pulangIzin = izinArr.find(z=> normScope(z.scope).includes('PULANG'));
+        const jenisToBadge = (j)=>{ const u=(j||'').toUpperCase(); if(u.includes('SAKIT')) return 'SAKIT'; if(u.includes('DINAS')) return 'DINAS_LUAR'; if(u.includes('KELUARGA')) return 'URUSAN_KELUARGA'; return 'IZIN_LAIN'; };
         // FULL blok total
         if(fullIzin){
           const jenis = jenisToBadge(fullIzin.jenis);
-          const fake = {kategori_absen:jenis, label_absen: fullIzin.jenis, jenis_absen:'IZIN', is_izin:true, is_izin_full:true, izinJenis:fullIzin.jenis, izinScope:'FULL', keterangan:fullIzin.keterangan||'', tanggal:tanggalStr, tanggal_mulai:fullIzin.tanggal_mulai, tanggal_selesai:fullIzin.tanggal_selesai};
+          const fake = {kategori_absen:jenis, label_absen: fullIzin.jenis, jenis_absen:'IZIN', is_izin:true, is_izin_full:true, is_fake:true, izinJenis:fullIzin.jenis, izinScope:'FULL', keterangan:fullIzin.keterangan||'', tanggal:tanggalStr, tanggal_mulai:normalizeTanggal(fullIzin.tanggal_mulai), tanggal_selesai:normalizeTanggal(fullIzin.tanggal_selesai), waktu: tanggalStr+'T07:00:00'};
           return {masuk:fake, pulang:fake};
         }
         // MASUK scope: override masuk jika ada, atau buat fake jika belum absen
@@ -2516,7 +2676,7 @@ function parseAbsenGTK(gid, tanggalStr){
             const overridden = {...masuk, kategori_absen:jenis, label_absen: masukIzin.jenis, is_izin:true, is_izin_masuk:true, izinJenis:masukIzin.jenis, izinScope:'MASUK', keterangan:masukIzin.keterangan||masuk.keterangan||'', tanggal:tanggalStr};
             masuk = overridden;
           } else {
-            const fakeMasuk = {kategori_absen:jenis, label_absen: masukIzin.jenis, jenis_absen:'MASUK', is_izin:true, is_izin_masuk:true, izinJenis:masukIzin.jenis, izinScope:'MASUK', keterangan:masukIzin.keterangan||'', tanggal:tanggalStr, tanggal_mulai:masukIzin.tanggal_mulai, tanggal_selesai:masukIzin.tanggal_selesai};
+            const fakeMasuk = {kategori_absen:jenis, label_absen: masukIzin.jenis, jenis_absen:'MASUK', is_izin:true, is_izin_masuk:true, is_fake:true, izinJenis:masukIzin.jenis, izinScope:'MASUK', keterangan:masukIzin.keterangan||'', tanggal:tanggalStr, tanggal_mulai:masukIzin.tanggal_mulai, tanggal_selesai:masukIzin.tanggal_selesai};
             masuk = fakeMasuk;
           }
         }
@@ -2527,7 +2687,7 @@ function parseAbsenGTK(gid, tanggalStr){
             const overridden = {...pulang, kategori_absen:jenis, label_absen: pulangIzin.jenis, is_izin:true, is_izin_pulang:true, izinJenis:pulangIzin.jenis, izinScope:'PULANG', keterangan:pulangIzin.keterangan||pulang.keterangan||'', tanggal:tanggalStr};
             pulang = overridden;
           } else {
-            const fakePulang = {kategori_absen:jenis, label_absen: pulangIzin.jenis, jenis_absen:'PULANG', is_izin:true, is_izin_pulang:true, izinJenis:pulangIzin.jenis, izinScope:'PULANG', keterangan:pulangIzin.keterangan||'', tanggal:tanggalStr, tanggal_mulai:pulangIzin.tanggal_mulai, tanggal_selesai:pulangIzin.tanggal_selesai};
+            const fakePulang = {kategori_absen:jenis, label_absen: pulangIzin.jenis, jenis_absen:'PULANG', is_izin:true, is_izin_pulang:true, is_fake:true, izinJenis:pulangIzin.jenis, izinScope:'PULANG', keterangan:pulangIzin.keterangan||'', tanggal:tanggalStr, tanggal_mulai:pulangIzin.tanggal_mulai, tanggal_selesai:pulangIzin.tanggal_selesai};
             pulang = fakePulang;
           }
         }
@@ -2555,15 +2715,16 @@ function badgeStatus(rec, withUjiCobaBadge){
   const jenis=(rec.jenis_absen||'').toUpperCase();
   const izinJenis=(rec.izinJenis||rec.kategori_absen||'').toUpperCase();
   let base='';
-  if(rec.is_koreksi) base='<span class="badge" style="background:#dbeafe;color:#1e40af;border-color:#bfdbfe">✏️ '+(rec.label_absen||rec.kategori_absen||'Koreksi')+'</span>';
-  else if(kat.includes('LIBUR')) base='<span class="badge badge-libur">🏖️ '+(rec.label_absen||'Libur')+'</span>';
-  else if(rec.is_izin || kat==='SAKIT' || kat==='DINAS_LUAR' || kat==='URUSAN_KELUARGA' || kat==='IZIN_LAIN'){
-    if(kat==='SAKIT' || izinJenis==='SAKIT') base='<span class="badge badge-sakit">🩺 Sakit</span>';
-    else if(kat==='DINAS_LUAR' || izinJenis==='DINAS_LUAR') base='<span class="badge badge-dinas">✈️ Dinas Luar</span>';
-    else if(kat==='URUSAN_KELUARGA' || izinJenis==='URUSAN_KELUARGA') base='<span class="badge badge-keluarga">👨‍👩‍👧 Urusan Keluarga</span>';
+  if(kat.includes('LIBUR')) base='<span class="badge badge-libur">🏖️ '+(rec.label_absen||'Libur')+'</span>';
+  else if(rec.is_izin || ['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes(kat) || izinJenis.includes('SAKIT') || izinJenis.includes('DINAS') || izinJenis.includes('KELUARGA')){
+    if(kat==='SAKIT' || izinJenis.includes('SAKIT')) base='<span class="badge badge-sakit">🩺 Sakit</span>';
+    else if(kat==='DINAS_LUAR' || izinJenis.includes('DINAS')) base='<span class="badge badge-dinas">✈️ Dinas Luar</span>';
+    else if(kat==='URUSAN_KELUARGA' || izinJenis.includes('KELUARGA')) base='<span class="badge badge-keluarga">👨‍👩‍👧 Urusan Keluarga</span>';
     else base='<span class="badge badge-izin">📝 '+(rec.label_absen||'Izin')+'</span>';
-  }
-  else if(kat.includes('BELUM')) base='<span class="badge badge-belum">⏳ Belum Waktunya Pulang</span>';
+    if(rec.is_fake) base+=' <span style="font-size:9px;color:#64748b">(izin, belum scan)</span>';
+  } else if(rec.is_koreksi){
+    base='<span class="badge" style="background:#dbeafe;color:#1e40af;border-color:#bfdbfe">✏️ '+(rec.label_absen||rec.kategori_absen||'Koreksi')+'</span>';
+  } else if(kat.includes('BELUM')) base='<span class="badge badge-belum">⏳ Belum Waktunya Pulang</span>';
   else if(kat.includes('SEBELUM')) base='<span class="badge badge-awal">⏳ Pulang Sebelum Waktunya</span>';
   else if(kat.includes('DILUAR')) base='<span class="badge badge-diluar">⛔ Di Luar Jam Kerja</span>';
   else if(kat.includes('TEPAT') && jenis.includes('MASUK')) base='<span class="badge badge-tepat">✅ Masuk Tepat Waktu</span>';
@@ -2571,16 +2732,14 @@ function badgeStatus(rec, withUjiCobaBadge){
   else if(kat.includes('TEPAT') && jenis.includes('PULANG')) base='<span class="badge badge-tepat">✅ Pulang</span>';
   else if(kat.includes('TEPAT')) base='<span class="badge badge-tepat">✅ '+(rec.label_absen||'Tepat Waktu')+'</span>';
   else base='<span class="badge" style="background:#f1f5f9;color:#334155">'+(rec.label_absen||rec.kategori_absen||'-')+'</span>';
-  // === OPSI A: badge kecil merah di bawah status masuk/pulang saat uji coba ON & LUAR_RADIUS ===
   if(withUjiCobaBadge){
     try{
-      const status = (rec.status||'').toUpperCase();
-      const isLuar = status==='LUAR_RADIUS' || (rec.jarak_meter && rec.jarak_meter > RADIUS);
-      const ujiOn = (typeof MODE_UJI_COBA!=='undefined' && MODE_UJI_COBA) || (window.MODE_UJI_COBA) || localStorage.getItem('MODE_UJI_COBA')==='1';
-      if(isLuar && ujiOn){
-        const jarakTxt = rec.jarak_text || (rec.jarak_meter ? (rec.jarak_meter>=1000 ? (rec.jarak_meter/1000).toFixed(1)+' KM' : rec.jarak_meter+'m') : '');
-        const jarakInfo = jarakTxt ? jarakTxt : (rec.jarak_meter ? rec.jarak_meter+'m' : '');
-        base += '<div style="margin-top:4px"><span style="background:#fee2e2;border:1px solid #fecaca;color:#991b1b;padding:2px 6px;border-radius:999px;font-size:8px;font-weight:800">⚠️ Luar '+jarakInfo+'</span></div>';
+      const status=(rec.status||'').toUpperCase();
+      const isLuar=status==='LUAR_RADIUS' || (rec.jarak_meter && rec.jarak_meter > (typeof RADIUS!=='undefined'?RADIUS:40));
+      const ujiOn=(typeof MODE_UJI_COBA!=='undefined' && MODE_UJI_COBA) || window.MODE_UJI_COBA || localStorage.getItem('MODE_UJI_COBA')==='1';
+      if(isLuar && ujiOn && !rec.is_fake && !rec.is_izin){
+        const jarakTxt=rec.jarak_text || (rec.jarak_meter ? (rec.jarak_meter>=1000 ? (rec.jarak_meter/1000).toFixed(1)+' KM' : rec.jarak_meter+'m') : '');
+        base+='<div style="margin-top:4px"><span style="background:#fee2e2;border:1px solid #fecaca;color:#991b1b;padding:2px 6px;border-radius:999px;font-size:8px;font-weight:800">⚠️ Luar '+jarakTxt+'</span></div>';
       }
     }catch(e){}
   }
@@ -2591,6 +2750,8 @@ function badgeStatusWithUji(rec){ return badgeStatus(rec, true); }
 window.renderLaporanBaru = function(){
   const body=document.getElementById('rekapBody'); if(!body) return;
   const tanggalStr=getTanggalLaporan();
+  try{ if(typeof updatePulangCepatBadge==="function") updatePulangCepatBadge(tanggalStr); }catch(e){}
+
   const jamLabel=getLabelJamKerja(tanggalStr); // dinamis Jumat vs Senin-Kamis
   updateJamLabel();
   const searchEl=document.getElementById('searchLaporan');
@@ -2684,20 +2845,35 @@ window.renderLaporanBaru = function(){
     const isLiburPulang = pulang && ((pulang.kategori_absen||'').toUpperCase().includes('LIBUR') || pulang.is_libur);
     const isIzinMasuk = masuk && (masuk.is_izin || ['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes((masuk.kategori_absen||'').toUpperCase()));
     const isIzinPulang = pulang && (pulang.is_izin || ['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes((pulang.kategori_absen||'').toUpperCase()));
+    function fmtJam(rec){ if(!rec) return '-'; if(rec.is_fake){ return rec.waktu ? new Date(rec.waktu).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' (izin, belum scan)' : '(izin, belum scan)'; } try{ return new Date(rec.waktu).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return '-'; } }
     if(isLiburMasuk || isLiburPulang){
       const nama = (masuk&&masuk.liburNama) || (pulang&&pulang.liburNama) || (masuk&&masuk.label_absen) || (pulang&&pulang.label_absen) || 'Libur';
       keterangan = nama;
     } else if(isIzinMasuk || isIzinPulang){
-      const rec = isIzinMasuk ? masuk : pulang;
-      const ket = rec.keterangan || rec.izinKeterangan || rec.label_absen || rec.izinJenis || 'Izin';
-      const mulai = rec.tanggal_mulai || rec.tanggal || '';
-      const selesai = rec.tanggal_selesai || mulai;
-      let tglInfo = '';
-      if(mulai){
-        if(mulai===selesai) tglInfo = mulai;
-        else tglInfo = mulai + ' s/d ' + selesai;
+      const jamM = masuk ? fmtJam(masuk) : '';
+      const jamP = pulang ? fmtJam(pulang) : '';
+      const ketM = (masuk&&masuk.keterangan)||'';
+      const ketP = (pulang&&pulang.keterangan)||'';
+      const ket = ketM || ketP || (masuk&&masuk.label_absen) || (pulang&&pulang.label_absen) || 'Izin';
+      if(masuk && pulang){
+        keterangan = `Masuk jam ${jamM} | Pulang izin ${pulang.izinJenis||pulang.label_absen||ket} jam ${jamP} ${ketM||ketP?'• '+(ketM||ketP):''}`.replace('  ',' ').trim();
+        if(isIzinMasuk && isIzinPulang){
+          keterangan = `Masuk izin ${masuk.izinJenis||masuk.label_absen} jam ${jamM} | Pulang izin ${pulang.izinJenis||pulang.label_absen} jam ${jamP} ${ket?'• '+ket:''}`.trim();
+          if(masuk.is_fake && pulang.is_fake) keterangan = `Masuk izin ${masuk.izinJenis} (izin, belum scan) | Pulang izin ${pulang.izinJenis} (izin, belum scan) • ${ket}`.trim();
+        } else if(masuk && !pulang.is_izin){
+          keterangan = `Masuk jam ${jamM} | Pulang jam ${jamP} ${ket?'• '+ket:''}`.trim();
+        } else if(isIzinMasuk && !isIzinPulang){
+          keterangan = `Masuk izin ${masuk.izinJenis} jam ${jamM} | Pulang jam ${jamP} ${ket?'• '+ket:''}`.trim();
+          if(masuk.is_fake) keterangan = `Masuk izin ${masuk.izinJenis} (izin, belum scan) | Pulang jam ${jamP} ${ket?'• '+ket:''}`.trim();
+        } else {
+          keterangan = `Masuk jam ${jamM} | Pulang izin ${pulang.izinJenis} jam ${jamP} ${ket?'• '+ket:''}`.trim();
+          if(pulang.is_fake) keterangan = `Masuk jam ${jamM} | Pulang izin ${pulang.izinJenis} (izin, belum scan) ${ket?'• '+ket:''}`.trim();
+        }
+      } else if(masuk){
+        keterangan = isIzinMasuk ? (masuk.is_fake ? `Masuk izin ${masuk.izinJenis||masuk.label_absen} (izin, belum scan) ${ketM?'• '+ketM:''}` : `Masuk izin ${masuk.izinJenis||masuk.label_absen} jam ${jamM} ${ketM?'• '+ketM:''}`) : `Masuk jam ${jamM}`;
+      } else if(pulang){
+        keterangan = isIzinPulang ? (pulang.is_fake ? `Pulang izin ${pulang.izinJenis||pulang.label_absen} (izin, belum scan) ${ketP?'• '+ketP:''}` : `Pulang izin ${pulang.izinJenis||pulang.label_absen} jam ${jamP} ${ketP?'• '+ketP:''}`) : `Pulang jam ${jamP}`;
       }
-      keterangan = ket + (tglInfo ? ' • ' + tglInfo : '');
     } else if(!masuk && !pulang) keterangan='-';
     else if(masuk && masuk.is_koreksi) keterangan=masuk.keterangan||'Dikoreksi admin';
     else if(masuk && !pulang) keterangan='Sudah masuk '+jamMasuk+', belum pulang';
@@ -2738,22 +2914,46 @@ window.renderLaporanBaru = function(){
 };
 
 window.renderRekap = window.renderLaporanBaru;
-window.applyFilter = window.renderLaporanBaru;
+window.applyFilter = window.renderLaporanBaru; window.applyFilterSafe = window.renderLaporanBaru;
 async function loadAbsensiRealtime(){
   try{
-    const {collection, query, orderBy, limit, onSnapshot} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const {collection, query, where, orderBy, limit, onSnapshot} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
     const d = window.db || (typeof db!=='undefined'?db:null);
     if(!d) return;
-    const q = query(collection(d, "absensi"), orderBy("waktu","desc"), limit(500));
+    const tglNorm = normalizeTanggal(getTanggalLaporan());
+    let q;
+    try{
+      q = query(collection(d, "absensi"), where("tanggal","==", tglNorm));
+    }catch(e){
+      q = query(collection(d, "absensi"), orderBy("waktu","desc"), limit(500));
+    }
     onSnapshot(q, (snap)=>{
       window.allAbsen=[]; allAbsen=[];
-      snap.forEach(docSnap=>{ const data=docSnap.data(); data._id=docSnap.id; allAbsen.push(data); window.allAbsen.push(data); });
+      snap.forEach(docSnap=>{
+        const data=docSnap.data(); data._id=docSnap.id;
+        if(!data.tanggal && data.waktu){ try{ data.tanggal=normalizeTanggal(new Date(data.waktu).toISOString()); }catch(err){} }
+        // jika query fallback global, filter tanggal di client
+        if(tglNorm && data.tanggal && normalizeTanggal(data.tanggal)!==tglNorm){
+          // allow kalau query where gagal, tapi tetap filter
+          if(snap.size>400) { /* skip filter if fallback limit case will be handled */ }
+          else { if(normalizeTanggal(data.tanggal)!==tglNorm) return; }
+        }
+        // fallback check: kalau masih tidak match karena query where, tapi kita sudah where, biarkan
+        if(q && q._query && q._query.filters){ /* where query already filtered */ }
+        allAbsen.push(data); window.allAbsen.push(data);
+      });
+      // dedup if fallback returned banyak: keep only tglNorm if exists
+      if(tglNorm){
+        const filtered = allAbsen.filter(a=> normalizeTanggal(a.tanggal||'')===tglNorm);
+        if(filtered.length>0){ window.allAbsen=filtered; allAbsen=filtered; }
+      }
       const info=document.getElementById('rekapInfo');
-      if(info){ const lbl=getLabelJamKerja(getTanggalLaporan()); info.textContent=allAbsen.length+' absensi tercatat • Live auto-refresh • '+lbl.text; }
+      if(info){ const lbl=getLabelJamKerja(tglNorm); info.textContent=allAbsen.length+' absensi tercatat • Live '+tglNorm+' • '+lbl.text; }
       if(document.getElementById('rekapBody')) renderLaporanBaru();
     });
   }catch(e){ console.log('load absensi realtime fail', e.message); }
 }
+
 window.openKoreksi=(gid,nama,tanggal)=>{
   document.getElementById('koreksiGID').value=gid;
   document.getElementById('koreksiNama').textContent=nama+' ('+gid+')';
