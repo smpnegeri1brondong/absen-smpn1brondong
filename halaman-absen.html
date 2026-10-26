@@ -185,8 +185,8 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
   <button id="btnLogin" class="btn btn-primary" style="margin-top:18px;height:52px;font-size:14px;box-shadow:0 6px 16px rgba(15,53,92,.25)" onclick="doLogin(); return false;">Masuk →</button>
 
 
-  <button id="btnLoginSidik" onclick="loginSidikJari()" style="display:none;margin-top:12px;width:100%;height:52px;border-radius:14px;background:white;border:1.5px solid #0f355c;color:#0f355c;font-weight:800;font-size:14px;cursor:pointer;align-items:center;justify-content:center;gap:8px">👆 Login dengan Sidik Jari</button>
-  <div id="sidikHint" style="display:none;text-align:center;font-size:10px;color:#64748b;margin-top:6px">Sidik jari tersimpan di HP ini. Gagal? Pakai password di atas.</div>
+  <button id="btnLoginSidik" onclick="loginSidikJari()" style="display:flex;margin-top:12px;width:100%;height:52px;border-radius:14px;background:white;border:1.5px solid #0f355c;color:#0f355c;font-weight:800;font-size:14px;cursor:pointer;align-items:center;justify-content:center;gap:8px">👆 Login dengan Sidik Jari</button>
+  <div id="sidikHint" style="display:block;text-align:center;font-size:10px;color:#64748b;margin-top:6px">Sidik jari tersimpan di HP ini. Gagal? Pakai password di atas.</div>
 
   <div style="margin-top:14px;background:linear-gradient(180deg,#f8fafc,#f1f5f9);border:1px solid #e2e8f0;border-radius:14px;padding:12px 12px;display:flex;gap:10px;align-items:start">
     <div style="width:28px;height:28px;border-radius:8px;background:white;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;flex-shrink:0">💡</div><div style="font-size:11px;color:#475569;line-height:1.5"><b style="color:#0f355c">Lupa password?</b> Hubungi Admin. Default: <code style="background:white;border:1px solid #e2e8f0;padding:1px 6px;border-radius:6px;font-weight:700">snebron + 4 digit angka</code></div>
@@ -2344,12 +2344,12 @@ setTimeout(()=>{
 
 <script>
 // === LOGIN SIDIK JARI (WebAuthn Passkey) - di file asli ===
-window.isWebAuthnSupported = () => { return window.PublicKeyCredential && window.isSecureContext; };
+window.isWebAuthnSupported = () => { return !!window.PublicKeyCredential; };
 window.showSidikButton = function(){
   try{
     const btn=document.getElementById('btnLoginSidik');
     const hint=document.getElementById('sidikHint');
-    if(btn && window.isWebAuthnSupported()){
+    if(btn){
       btn.style.display='flex';
       if(hint){
         const saved = localStorage.getItem('SNEB_PASSKEY_GID');
@@ -2382,7 +2382,7 @@ window.registerSidikJari = async function(){
     });
     if(cred){
       localStorage.setItem('SNEB_PASSKEY_GID', gid);
-      localStorage.setItem('SNEB_PASSKEY_ID', btoa(String.fromCharCode(...new Uint8Array(cred.rawId))));
+      let rawIdStr=''; const rawArr=new Uint8Array(cred.rawId); for(let i=0;i<rawArr.length;i++) rawIdStr+=String.fromCharCode(rawArr[i]); localStorage.setItem('SNEB_PASSKEY_ID', btoa(rawIdStr));
       alert('✅ Sidik jari aktif! Besok login cukup klik "Login dengan Sidik Jari".');
       window.showSidikButton();
     }
@@ -2413,22 +2413,13 @@ window.loginSidikJari = async function(){
   }catch(e){ alert('Sidik jari gagal / dibatalkan. Coba lagi atau pakai password.'); console.log('login passkey fail', e); }
 };
 
-// Setelah login password sukses, tawarkan daftar sidik jari
-const origDoLogin = window.doLogin;
-if(origDoLogin){
-  // Hook: setelah doLogin, jika sukses dan belum ada passkey, tawarkan daftar setelah 1.5 detik
-  // Kita override dengan wrapper yang memanggil orig lalu cek
-  // Simpler: interval cek currentGuru
-  setInterval(()=>{
-    if(window.currentGuru && !localStorage.getItem('SNEB_PASSKEY_GID') && window.isWebAuthnSupported()){
-      // Hanya tawarkan sekali per login
-      if(!window._passkeyOffered){
-        window._passkeyOffered=true;
-        setTimeout(()=>{ window.registerSidikJari(); }, 2000);
-      }
-    }
-  }, 3000);
-}
+// Setelah login password sukses, tawarkan daftar sidik jari (cek tiap 3 detik)
+setInterval(()=>{
+  if(window.currentGuru && !localStorage.getItem('SNEB_PASSKEY_GID') && window.isWebAuthnSupported() && !window._passkeyOffered){
+    window._passkeyOffered=true;
+    setTimeout(()=>{ window.registerSidikJari(); }, 2000);
+  }
+}, 3000);
 </script>
 
 </body>
