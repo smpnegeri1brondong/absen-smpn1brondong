@@ -2418,6 +2418,7 @@ window.loginSidikJari = async function(){
           if(gg) pwd=gg.password||'';
         }
         if(passEl) passEl.value=pwd;
+        if(!pwd){ alert('Password belum tersimpan. Login pakai password dulu sekali, lalu coba sidik jari lagi.'); return; }
         if(typeof window.doLogin==='function'){ window.doLogin(); return; }
         // Fallback: kalau doLogin belum ada, tunggu GURUS ke-load lalu coba lagi
         setTimeout(()=>{ if(typeof window.doLogin==='function') window.doLogin(); else location.reload(); }, 1000);
@@ -2433,6 +2434,33 @@ setInterval(()=>{
     setTimeout(()=>{ window.registerSidikJari(); }, 2000);
   }
 }, 3000);
+</script>
+
+
+<script>
+// Simpan password tiap kali login password sukses, biar sidik jari punya passwordnya
+(function(){
+  const orig = window.doLogin;
+  if(orig && !window._doLoginHooked){
+    window._doLoginHooked=true;
+    window.doLogin = function(){
+      try{
+        const gidEl=document.getElementById('gidInput');
+        const passEl=document.getElementById('passInput');
+        const gid = gidEl ? gidEl.value.trim().toUpperCase() : '';
+        const pwd = passEl ? passEl.value.trim() : '';
+        const res = orig();
+        // Kalau login sukses (currentGuru ke-set), simpan pwdnya
+        setTimeout(()=>{
+          if(window.currentGuru && gid && pwd){
+            try{ localStorage.setItem('SNEB_PASSKEY_PWD_'+gid, pwd); localStorage.setItem('SNEB.in_PASS_'+gid, pwd); }catch(e){}
+          }
+        }, 300);
+        return res;
+      }catch(e){ return orig(); }
+    };
+  }
+})();
 </script>
 
 </body>
