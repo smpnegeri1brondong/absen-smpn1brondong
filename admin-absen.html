@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <style>
 body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}*{box-sizing:border-box}
 .header{height:64px;background:white;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:9999}
@@ -207,13 +207,13 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 </head>
 <body>
 <header class="header" style="gap:12px">
-<div class="logo-box">
+<a href="index.html" class="logo-box" style="text-decoration:none;cursor:pointer" title="Ke Halaman Utama">
   <div class="logo-img" style="width:40px;height:40px;border-radius:12px;background:white;border:1px solid #e2e8f0;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="logo-smp2.png?v=9" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'; this.parentElement.style.fontWeight='800'" alt="SNEB.in" style="width:100%;height:100%;object-fit:contain"/></div>
 <div>
   <div style="font-weight:800;color:#0f355c;font-size:13px;letter-spacing:0.3px">SNEB.in</div>
 <div style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.5px">Panel Admin</div>
 </div>
-</div>
+</a>
 
 <nav id="headerTabs" class="header-tabs hidden" style="display:flex;gap:8px;align-items:center">
   <button id="tabLaporanHeader" class="btn-tab active" onclick="switchTab('laporan')">📊 Laporan</button>
@@ -304,11 +304,12 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <input id="searchLaporan" class="input" placeholder="Cari nama..." style="height:36px"/>
 </div>
 <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="height:36px;flex:1" onclick="loadRekap()">🔄 Tampilkan</button><button class="btn btn-outline" style="height:36px;width:120px" onclick="resetFilter()">Reset</button></div>
-<div style="margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#94a3b8">TOTAL</div><div id="totalAbsen" style="font-weight:800;font-size:18px">0</div></div>
-<div style="background:#dcfce7;border:1px solid #bbf7d0;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#166534">TEPAT WAKTU</div><div id="totalTepat" style="font-weight:800;font-size:18px;color:#166534">0</div></div>
-<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#92400e">TELAT</div><div id="totalTelat" style="font-weight:800;font-size:18px;color:#92400e">0</div></div>
-<div style="background:#fee2e2;border:1px solid #fecaca;border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#991b1b">DILUAR JAM</div><div id="totalDiluar" style="font-weight:800;font-size:18px;color:#991b1b">0</div></div>
+<div style="margin-top:12px;display:grid;grid-template-columns:repeat(5,1fr);gap:6px">
+<div style="background:white;border:1px solid #e2e8f0;border-radius:10px;padding:8px 4px;text-align:center"><div style="font-size:9px;color:#94a3b8;font-weight:700">TOTAL</div><div id="totalAbsen" style="font-weight:800;font-size:16px">0</div></div>
+<div style="background:#dcfce7;border:1px solid #bbf7d0;border-radius:10px;padding:8px 4px;text-align:center"><div style="font-size:9px;color:#166534;font-weight:700">TEPAT WAKTU</div><div id="totalTepat" style="font-weight:800;font-size:16px;color:#166534">0</div></div>
+<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:8px 4px;text-align:center"><div style="font-size:9px;color:#92400e;font-weight:700">TELAT</div><div id="totalTelat" style="font-weight:800;font-size:16px;color:#92400e">0</div></div>
+<div style="background:#dbeafe;border:1px solid #bfdbfe;border-radius:10px;padding:8px 4px;text-align:center"><div style="font-size:9px;color:#1e40af;font-weight:700">IZIN</div><div id="totalIzin" style="font-weight:800;font-size:16px;color:#1e40af">0</div></div>
+<div style="background:#fee2e2;border:1px solid #fecaca;border-radius:10px;padding:8px 4px;text-align:center"><div style="font-size:9px;color:#991b1b;font-weight:700">BELUM ABSEN</div><div id="totalDiluar" style="font-weight:800;font-size:16px;color:#991b1b">0</div></div>
 </div>
 </div>
 
@@ -1853,8 +1854,84 @@ document.getElementById('filterJenis').onchange=()=>{ if(typeof renderLaporanBar
 document.getElementById('searchLaporan').oninput=()=>{ if(typeof renderLaporanBaru==='function') renderLaporanBaru(); };
 
 window.resetFilter=()=>{const ids=['filterTanggal','filterGuruSelect','filterKategori','filterJenis','searchLaporan']; ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; }); if(typeof renderLaporanBaru==='function') renderLaporanBaru(); else if(typeof applyFilter==='function') applyFilter();};
-window.exportExcel=()=>{
+window.exportExcel=async()=>{
   const tanggalStr=getTanggalLaporan();
+  // === PERSENTASE PER GTK (bulan berjalan s/d tanggal export) ===
+  const persenMap={};
+  try{
+    const {collection, query, where, getDocs} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d2 = window.db || (typeof db!=='undefined'?db:null);
+    if(d2){
+      const y=tanggalStr.slice(0,4), m=tanggalStr.slice(5,7);
+      const firstDayStr = `${y}-${m}-01`;
+      const todayStr = tanggalStr;
+      // hari kerja s/d hari itu
+      const kerjaDates=[];
+      const dt = new Date(parseInt(y), parseInt(m)-1, 1);
+      const liburMap = window.kalenderLiburMap || {};
+      for(let day=1; day<=parseInt(todayStr.slice(8,10)); day++){
+        const dObj = new Date(parseInt(y), parseInt(m)-1, day);
+        const wd = dObj.getDay();
+        if(wd===0 || wd===6) continue;
+        const tStr = `${y}-${m}-${String(day).padStart(2,'0')}`;
+        if(liburMap[tStr]) continue;
+        kerjaDates.push(tStr);
+      }
+      const totalHariKerja = kerjaDates.length;
+      for(const g of gurus){
+        try{
+          const snapAbs = await getDocs(query(collection(d2,"absensi"), where("gid","==", g.gid)));
+          const absByDate={};
+          snapAbs.forEach(docSnap=>{
+            const data=docSnap.data();
+            let tgl = data.tanggal||'';
+            if(!tgl && data.waktu){ try{ tgl=new Date(data.waktu).toISOString().split('T')[0]; }catch(e){} }
+            tgl = (typeof normalizeTanggal==='function'? normalizeTanggal(tgl): tgl);
+            if(!tgl || tgl<firstDayStr || tgl>todayStr) return;
+            if(!kerjaDates.includes(tgl)) return;
+            if(!absByDate[tgl]) absByDate[tgl]={masuk:null, pulang:null};
+            const jenis=(data.jenis_absen||'').toUpperCase();
+            if(jenis.includes('MASUK')) absByDate[tgl].masuk=data;
+            if(jenis.includes('PULANG')) absByDate[tgl].pulang=data;
+          });
+          const snapIzin = await getDocs(query(collection(d2,"izin"), where("gid","==", g.gid)));
+          const izinList=[];
+          snapIzin.forEach(docSnap=>{
+            const di=docSnap.data();
+            if((di.status||'DISETUJUI')!=='DISETUJUI') return;
+            const mulai = normalizeTanggal(di.tanggal_mulai||di.tanggal||'');
+            const selesai = normalizeTanggal(di.tanggal_selesai||mulai);
+            if(!mulai) return;
+            if(selesai < firstDayStr || mulai > todayStr) return;
+            izinList.push({...di, tanggal_mulai:mulai, tanggal_selesai:selesai});
+          });
+          let hadir=0, izinCnt=0;
+          kerjaDates.forEach(tgl=>{
+            const abs = absByDate[tgl];
+            let izinFull=null, izinMasuk=null, izinPulang=null;
+            izinList.forEach(iz=>{
+              if(tgl>=iz.tanggal_mulai && tgl<=iz.tanggal_selesai){
+                const scope=(iz.scope||'FULL').toUpperCase();
+                if(scope.includes('FULL')) izinFull=iz;
+                else if(scope.includes('MASUK')) izinMasuk=iz;
+                else if(scope.includes('PULANG')) izinPulang=iz;
+              }
+            });
+            if(izinFull){ izinCnt++; }
+            else if(abs && abs.masuk){ hadir++; }
+            else if(abs && abs.pulang && izinPulang){ izinCnt++; }
+            else if(izinMasuk && abs && abs.masuk){ hadir++; }
+            else if(izinMasuk){ izinCnt++; }
+            else if(izinPulang){ izinCnt++; }
+          });
+          const pMasuk = totalHariKerja>0? Math.round(hadir/totalHariKerja*100):0;
+          const pIzin = totalHariKerja>0? Math.round(izinCnt/totalHariKerja*100):0;
+          persenMap[g.gid] = `Masuk ${pMasuk}%, Izin ${pIzin}%`;
+        }catch(e){ persenMap[g.gid]=`Masuk 0%, Izin 0%`; }
+      }
+    }
+  }catch(e){ console.log('persen excel fail', e); }
+
   const jamLabel=getLabelJamKerja(tanggalStr);
   const modeOn = (typeof MODE_UJI_COBA!=='undefined' && MODE_UJI_COBA) || window.MODE_UJI_COBA || localStorage.getItem('MODE_UJI_COBA')==='1';
   const modeText = modeOn ? 'Mode Uji Coba ON - Luar radius tercatat (badge kecil merah)' : 'Mode Produksi - Luar radius diblok (TIDAK TERCATAT)';
@@ -1937,14 +2014,26 @@ window.exportExcel=()=>{
     return '-';
   }
   // Header info untuk Excel
+  // === PULANG CEPAT HEADER ROW 6 ===
+  let pulangCepatInfo = [];
+  try{
+    const pcData = (window.pulangCepatMap||{})[tanggalStr];
+    if(pcData){
+      const jamPC = (typeof normalizeJamPC==='function'? normalizeJamPC(pcData.mulai||pcData.pulang_mulai||'') : (pcData.mulai||''));
+      const ketPC = pcData.keterangan||'';
+      pulangCepatInfo = ['Pulang Cepat : ' + jamPC + (ketPC ? ' (' + ketPC + ')' : ''), null, 'Pulang Cepat : ' + jamPC + (ketPC ? ' (' + ketPC + ')' : '')];
+      // Simpler: single merged row
+      pulangCepatInfo = ['Pulang Cepat : ' + jamPC + (ketPC ? ' (' + ketPC + ')' : '')];
+    }
+  }catch(e){}
   const headerInfo = [
     ['Laporan Absen GTK - SMPN 1 Brondong'],
-    ['Tanggal:', hariTgl + ' ('+tanggalStr+')'],
-    ['Jam Kerja:', jamLabel.text],
-    ['Mode:', modeText],
-    ['Total GTK:', parsedList.length + ' dari '+gurus.length],
-    [],
-    ['No','Nama','NIP','Status Masuk','Telat','Status Pulang','Keterangan']
+    ['Tanggal:', null, hariTgl + ' ('+tanggalStr+')'],
+    ['Jam Kerja:', null, jamLabel.text],
+    ['Mode:', null, modeText],
+    ['Total GTK:', null, parsedList.length + ' dari '+gurus.length],
+    pulangCepatInfo.length? pulangCepatInfo : [],
+    ['No','Nama','NIP','Status Masuk','Telat','Status Pulang','Keterangan','Persentase Masuk']
   ];
   const rows = parsedList.map((item, idx)=>{
     const g=item.guru;
@@ -1969,6 +2058,7 @@ window.exportExcel=()=>{
         }
       }
     }catch(e){}
+    const persenTxt = persenMap[g.gid] || 'Masuk 0%, Izin 0%';
     return {
       'No': g.no||idx+1,
       'Nama': g.nama,
@@ -1976,15 +2066,76 @@ window.exportExcel=()=>{
       'Status Masuk': statusMasuk,
       'Telat': telatText,
       'Status Pulang': statusPulang,
-      'Keterangan': ketFinal
+      'Keterangan': ketFinal,
+      'Persentase Masuk': persenTxt
     };
   });
   // Gabung header + data
+  // === REKAP BAWAH ===
+  let totalMasukExcel=0, totalIzinFullExcel=0, totalTidakAbsenExcel=0;
+  parsedList.forEach(item=>{
+    const m=item.masuk, p=item.pulang;
+    const isIzinFull = (m && m.is_izin_full) || (p && p.is_izin_full);
+    if(isIzinFull) totalIzinFullExcel++;
+    else if(m) totalMasukExcel++;
+    else totalTidakAbsenExcel++;
+  });
+  const rekapRows = [
+    [],
+    ['REKAP'],
+    ['Total Masuk (Tepat + Telat):', null, totalMasukExcel],
+    ['Total Izin (FULL saja):', null, totalIzinFullExcel],
+    ['Total Tidak Absen:', null, totalTidakAbsenExcel],
+    ['Total GTK:', null, parsedList.length]
+  ];
   const ws = XLSX.utils.json_to_sheet([]);
   XLSX.utils.sheet_add_aoa(ws, headerInfo, {origin:0});
   XLSX.utils.sheet_add_json(ws, rows, {origin: headerInfo.length, skipHeader:true});
+  XLSX.utils.sheet_add_aoa(ws, rekapRows, {origin: headerInfo.length + rows.length});
   // Set lebar kolom
-  ws['!cols'] = [{wch:5},{wch:25},{wch:20},{wch:20},{wch:15},{wch:20},{wch:35}];
+  ws['!cols'] = [{wch:5},{wch:25},{wch:20},{wch:20},{wch:15},{wch:20},{wch:35},{wch:22}];
+  // === MERGE A:B untuk label header & rekap biar gak kepotong ===
+  try{
+    const merges=[];
+    // Header rows 2-5 (Excel 1-based): A2:B2, A3:B3, A4:B4, A5:B5
+    for(let r=2; r<=5; r++){ merges.push({s:{r:r-1,c:0}, e:{r:r-1,c:1}}); }
+    // Row 6 Pulang Cepat merge A6:H6 if exists
+    if(pulangCepatInfo.length){ merges.push({s:{r:5,c:0}, e:{r:5,c:7}}); }
+    // Rekap rows: REKAP ada di headerInfo.length + rows.length + 1 (0-based) -> +1 for empty row
+    const rekapStartRow = headerInfo.length + rows.length + 2; // Excel 1-based untuk baris 'Total Masuk'
+    for(let i=0; i<4; i++){ merges.push({s:{r:rekapStartRow-1+i,c:0}, e:{r:rekapStartRow-1+i,c:1}}); }
+    ws['!merges']=merges;
+  }catch(e){ console.log('merge fail', e); }
+  // === WARNA STATUS ===
+  try{
+    const startRow = headerInfo.length; // 0-indexed? sheet rows are 0-based for aoa, json adds after
+    // In XLSX, headerInfo length = 7 rows (0-6), data starts at row 7 (index 7) => Excel row 8
+    // We need to color Status Masuk col D (4) and Status Pulang col F (6)
+    parsedList.forEach((item, idx)=>{
+      const r = headerInfo.length + idx; // 0-based
+      const excelRow = r+1; // 1-based for cell address
+      const m=item.masuk, p=item.pulang;
+      function fillFor(rec){
+        if(!rec) return null;
+        const kat=(rec.kategori_absen||'').toUpperCase();
+        if(rec.is_izin_full || kat==='SAKIT' || kat==='DINAS_LUAR' || kat==='URUSAN_KELUARGA' || kat==='IZIN_LAIN') return {fgColor:{rgb:"FFBFDBFE"}, patternType:"solid"};
+        if(kat.includes('TEPAT')) return {fgColor:{rgb:"FFDCFCE7"}, patternType:"solid"};
+        if(kat.includes('TELAT')) return {fgColor:{rgb:"FFFEF3C7"}, patternType:"solid"};
+        if(rec.is_izin) return {fgColor:{rgb:"FFBFDBFE"}, patternType:"solid"};
+        return null;
+      }
+      const fillM = fillFor(m);
+      const fillP = fillFor(p);
+      if(fillM){
+        const cell = 'D'+excelRow;
+        if(ws[cell]) ws[cell].s = {fill: fillM, font:{bold:true}};
+      }
+      if(fillP){
+        const cell = 'F'+excelRow;
+        if(ws[cell]) ws[cell].s = {fill: fillP, font:{bold:true}};
+      }
+    });
+  }catch(e){ console.log('excel color fail', e); }
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,"Laporan "+tanggalStr);
   XLSX.writeFile(wb,`laporan-absen-`+tanggalStr+`.xlsx`);
@@ -2814,6 +2965,7 @@ window.renderLaporanBaru = function(){
     const t2=document.getElementById('totalTepat'); if(t2) t2.textContent='0';
     const t3=document.getElementById('totalTelat'); if(t3) t3.textContent='0';
     const t4=document.getElementById('totalDiluar'); if(t4) t4.textContent='0';
+    const t5=document.getElementById('totalIzin'); if(t5) t5.textContent='0';
     return;
   }
 
@@ -2824,6 +2976,7 @@ window.renderLaporanBaru = function(){
   let countTepat=0;
   let countTelat=0;
   let countSudahMasuk=0;
+  let countIzinFull=0;
 
   parsedList.forEach((item, idx)=>{
     const g=item.guru;
@@ -2886,6 +3039,10 @@ window.renderLaporanBaru = function(){
       if(kat.includes('TEPAT')) countTepat++;
       if(kat.includes('TELAT')) countTelat++;
     }
+    // IZIN FULL only
+    if( (masuk && masuk.is_izin_full) || (pulang && pulang.is_izin_full) ){
+      countIzinFull++;
+    }
 
     const tr=document.createElement('tr');
     tr.innerHTML='<td style="font-weight:800">'+(g.no||idx+1)+'</td><td><div style="font-weight:700">'+g.nama+'</div><div style="font-size:10px;color:#64748b">'+g.gid+'</div></td><td><div>'+badgeStatusWithUji(masuk)+'</div></td><td style="font-weight:700;color:'+(telatMasuk>0?'#d97706':'#64748b')+'">'+telatText+'</td><td><div>'+badgeStatusWithUji(pulang)+'</div></td><td style="font-size:11px">'+keterangan+'</td><td><button style="height:32px;padding:0 10px;border-radius:10px;border:1px solid #e2e8f0;background:white;font-weight:700;font-size:11px;cursor:pointer" onclick="openKoreksi(\''+g.gid+'\',\''+g.nama.replace(/\'/g,"\'")+ '\',\''+tanggalStr+'\')">✏️ Koreksi</button></td>';
@@ -2910,6 +3067,7 @@ window.renderLaporanBaru = function(){
   const elTotal=document.getElementById('totalAbsen'); if(elTotal) elTotal.textContent=countTotal;
   const elTepat=document.getElementById('totalTepat'); if(elTepat) elTepat.textContent=countTepat;
   const elTelat=document.getElementById('totalTelat'); if(elTelat) elTelat.textContent=countTelat;
+  const elIzin=document.getElementById('totalIzin'); if(elIzin) elIzin.textContent=countIzinFull;
   const elDiluar=document.getElementById('totalDiluar'); if(elDiluar) elDiluar.textContent=countTotal-countSudahMasuk;
 };
 
