@@ -969,10 +969,11 @@ function showAbsenScreen(){
     document.getElementById('burgerBtn')?.classList.remove('hidden');
     if(typeof window.updateGreeting==='function') window.updateGreeting();
     if(typeof window.loadStatusHariIni==='function') window.loadStatusHariIni();
+    if(typeof window.loadMiniDashboard==='function') window.loadMiniDashboard();
     if(typeof window.checkLiburFull==='function') window.checkLiburFull();
     if(typeof window.checkIzinBadge==='function') window.checkIzinBadge();
   }catch(e){ console.log('upgrade hook fail', e); }
-  cekJamAbsen(); setInterval(cekJamAbsen,60000);
+  cekJamAbsen(); setInterval(cekJamAbsen,10000);
   const isCustom=localStorage.getItem('SNEB.in_PASS_'+currentGuru.gid);
   // currentPassInfo removed - admin only
   setTimeout(()=>{ initMap(); cekLokasi(); setTimeout(()=>{ if(map) map.invalidateSize(); },1000); },500);
@@ -2315,6 +2316,25 @@ window.openWaAdmin=function(no, adminLabel){
     toggleWaMenu();
   }catch(e){ alert('Gagal buka WA: '+e.message); }
 };
+</script>
+
+
+<script>
+// === FIX BADGE LANGSUNG UPDATE: pantau Status Hari Ini, kalau berubah langsung refresh badge ===
+setTimeout(()=>{
+  const sm=document.getElementById('statusMasuk');
+  const sp=document.getElementById('statusPulang');
+  if(sm){
+    const obs=new MutationObserver(()=>{ if(typeof window.cekJamAbsen==='function') window.cekJamAbsen(); });
+    obs.observe(sm, {childList:true, characterData:true, subtree:true});
+  }
+  if(sp){
+    const obs2=new MutationObserver(()=>{ if(typeof window.cekJamAbsen==='function') window.cekJamAbsen(); });
+    obs2.observe(sp, {childList:true, characterData:true, subtree:true});
+  }
+  // Juga refresh badge tiap 5 detik pertama biar gak nunggu 60 detik
+  for(let i=1;i<=5;i++){ setTimeout(()=>{ if(typeof window.cekJamAbsen==='function') window.cekJamAbsen(); }, i*1500); }
+}, 800);
 </script>
 
 </body>
