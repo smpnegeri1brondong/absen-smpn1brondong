@@ -2404,11 +2404,22 @@ window.loginSidikJari = async function(){
       publicKey: { challenge: challenge, allowCredentials: allowCreds, userVerification:'required', timeout:60000 }
     });
     if(assertion){
-      // Sukses sidik jari -> auto login dengan GID yang tersimpan
       localStorage.setItem('SNEB.in_GID', gid);
-      // Panggil fungsi login yang sudah ada (pake GID) - fallback reload
-      if(typeof window.afterLoginSuccess==='function'){ window.afterLoginSuccess(gid); }
-      else { location.reload(); }
+      // Sama persis kayak doLogin: set currentGuru + showAbsenScreen, jangan reload
+      try{
+        if(typeof GURUS!=='undefined' && GURUS.length>0){
+          const g = GURUS.find(x=>x.gid===gid);
+          if(g){ window.currentGuru=g; if(typeof currentGuru!=='undefined') currentGuru=g; if(typeof showAbsenScreen==='function'){ showAbsenScreen(); return; } }
+        }
+        // Fallback kalau GURUS belum ke-load: tunggu 1 detik lalu coba lagi, baru reload
+        setTimeout(()=>{
+          if(typeof GURUS!=='undefined' && GURUS.length>0){
+            const g2 = GURUS.find(x=>x.gid===gid);
+            if(g2){ window.currentGuru=g2; if(typeof showAbsenScreen==='function') showAbsenScreen(); }
+            else location.reload();
+          } else location.reload();
+        }, 1000);
+      }catch(e){ location.reload(); }
     }
   }catch(e){ alert('Sidik jari gagal / dibatalkan. Coba lagi atau pakai password.'); console.log('login passkey fail', e); }
 };
