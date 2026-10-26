@@ -2074,5 +2074,61 @@ window.addEventListener('load', ()=>{
 });
 </script>
 
+
+<script>
+// === NOTIF REFRESH - DI HALAMAN ABSEN (banner di index, refresh di sini juga) ===
+function scheduleAlarmHalamanAbsen(){
+  try{
+    if(!('Notification' in window)) return;
+    if(Notification.permission!=='granted') return;
+    if(!localStorage.getItem('SNEB_NOTIF')) return;
+    const liburMap = window.kalenderLiburMap || {};
+    const pcMap = window.pulangCepatMap || {};
+    const delayJumat = parseInt(localStorage.getItem('SNEB_DELAY_JUMAT')||'30');
+    for(let i=0;i<7;i++){
+      const d=new Date(); d.setDate(d.getDate()+i);
+      const tglLocal = d.toLocaleDateString('en-CA',{timeZone:'Asia/Jakarta'});
+      const day=d.getDay();
+      if(day===0 || day===6) continue;
+      if(liburMap[tglLocal]) continue;
+      scheduleOneAbsen(tglLocal, 7, 0, '⚠ Silahkan Absen Masuk Untuk Hari Ini! Abaikan Jika Anda Sudah Absen', 'masuk-'+tglLocal);
+      if(pcMap[tglLocal]){
+        let mulaiStr = pcMap[tglLocal].mulai || pcMap[tglLocal].pulang_mulai || '10:30';
+        let hh=parseInt(String(mulaiStr).split(':')[0]), mm=parseInt(String(mulaiStr).split(':')[1]||'0');
+        if(!isNaN(hh)) scheduleOneAbsen(tglLocal, hh, mm, 'Hari Ini Pulang Cepat Nih, Silahkan Absen Sebelum Pulang! Abaikan Jika Anda Sudah Absen', 'pc-'+tglLocal);
+      } else if(day===5){
+        let total = 10*60 + delayJumat;
+        scheduleOneAbsen(tglLocal, Math.floor(total/60), total%60, 'Absen Pulang Sudah Dibuka, Silahkan Absen Sebelum Pulang! Abaikan Jika Anda Sudah Absen', 'pulang-'+tglLocal);
+      } else if(day>=1 && day<=4){
+        scheduleOneAbsen(tglLocal, 13, 55, 'Absen Pulang Sudah Dibuka, Silahkan Absen Sebelum Pulang! Abaikan Jika Anda Sudah Absen', 'pulang-'+tglLocal);
+      }
+    }
+    console.log('✅ Alarm refresh dari halaman absen');
+  }catch(e){ console.log('refresh absen fail', e); }
+}
+function scheduleOneAbsen(tglStr, hh, mm, body, tag){
+  const target = new Date(tglStr+'T'+String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+':00+07:00');
+  const delay = target.getTime() - new Date().getTime();
+  if(delay<=0) return;
+  setTimeout(async()=>{
+    try{
+      if(Notification.permission==='granted'){
+        if('serviceWorker' in navigator){
+          const reg = await navigator.serviceWorker.ready;
+          reg.active.postMessage({type:'SHOW_NOTIF', body: body, tag: tag});
+        }
+      }
+    }catch(e){}
+  }, delay);
+}
+// Refresh tiap kali halaman absen dibuka & tiap kali libur/pulangCepat ke-load
+setTimeout(scheduleAlarmHalamanAbsen, 4000);
+// Hook: kalau pulangCepatMap berubah, refresh lagi
+const origLoadLibur = window.loadLibur;
+if(typeof origLoadLibur==='function'){
+  window.loadLibur = async function(){ const r=await origLoadLibur(); setTimeout(scheduleAlarmHalamanAbsen, 1000); return r; };
+}
+</script>
+
 </body>
 </html>
