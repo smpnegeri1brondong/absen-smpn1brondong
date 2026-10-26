@@ -1,16 +1,16 @@
-const CACHE_NAME = 'sneb-in-v13-FORCE-LOGO-V3';
+const CACHE_NAME = 'sneb-in-v12-FORCE-LOGO-V2';
 const urlsToCache = [
   './',
   './index.html',
   './halaman-absen.html',
   './admin-absen.html',
-  './logo-snebin-v3.png',
+  './logo-snebin-v2.png',
   './logo-smp2.png',
   './manifest.json'
 ];
 
 self.addEventListener('install', e=>{
-  console.log('[SW v13] Installing - FINAL FIX');
+  console.log('[SW v12] Installing - FINAL FIX');
   e.waitUntil(
     caches.open(CACHE_NAME).then(c=>{
       return c.addAll(urlsToCache.map(url=>new Request(url, {cache: 'reload'})))
@@ -21,7 +21,7 @@ self.addEventListener('install', e=>{
 });
 
 self.addEventListener('activate', e=>{
-  console.log('[SW v13] Activating - clean old cache');
+  console.log('[SW v12] Activating - clean old cache');
   e.waitUntil(
     caches.keys().then(keys=>Promise.all(keys.map(k=>{
       if(k!==CACHE_NAME){
@@ -77,4 +77,23 @@ self.addEventListener('fetch', e=>{
       return cached || networkFetch;
     })
   );
+});
+
+
+// === SNEB Notif Alarm 7 hari - merged ===
+self.addEventListener('message', e=>{
+  if(e.data && e.data.type==='SHOW_NOTIF'){
+    self.registration.showNotification('SNEB.in', {
+      body: e.data.body,
+      icon: 'logo-smp2.png',
+      badge: 'logo-smp2.png',
+      vibrate: [200,100,200],
+      tag: e.data.tag || 'sneb-notif',
+      data: {url: e.data.url || 'halaman-absen.html'}
+    });
+  }
+});
+self.addEventListener('notificationclick', e=>{
+  e.notification.close();
+  e.waitUntil(clients.openWindow(e.notification.data.url || 'halaman-absen.html'));
 });
