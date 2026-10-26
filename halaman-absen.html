@@ -95,6 +95,67 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 </nav>
 
 <div class="container">
+  <div id="miniDashboard" style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:12px;margin-bottom:14px;display:none;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+    <div><div style="font-weight:800;font-size:18px;color:#166534" id="dashSudah">-</div><div style="font-size:10px;color:#64748b;font-weight:700">SUDAH ABSEN</div></div>
+    <div><div style="font-weight:800;font-size:18px;color:#b45309" id="dashBelum">-</div><div style="font-size:10px;color:#64748b;font-weight:700">BELUM ABSEN</div></div>
+    <div><div style="font-weight:800;font-size:18px;color:#1e40af" id="dashIzin">-</div><div style="font-size:10px;color:#64748b;font-weight:700">IZIN</div></div>
+    <div style="grid-column:1/-1;font-size:10px;color:#94a3b8">Jumlah GTK yang absen hari ini, ingatkan teman-teman untuk segera absen jika belum</div>
+  </div>
+  <script>
+  window.loadMiniDashboard = async function(){
+    try{
+      const db=window.db; if(!db) return;
+      if(!window.currentGuru) { const dEl=document.getElementById('miniDashboard'); if(dEl) dEl.style.display='none'; return; }
+      // Cek layar: cuma tampil di main absen, bukan di history/login
+      const histEl=document.getElementById('historyScreen');
+      const loginEl=document.getElementById('loginScreen');
+      const mainEl=document.getElementById('mainScreen');
+      const isHistory = histEl && !histEl.classList.contains('hidden') && getComputedStyle(histEl).display!=='none';
+      const isLogin = loginEl && !loginEl.classList.contains('hidden') && getComputedStyle(loginEl).display!=='none';
+      const dashEl=document.getElementById('miniDashboard'); 
+      if(isHistory || isLogin){ if(dashEl) dashEl.style.display='none'; return; }
+      if(dashEl) dashEl.style.display='grid';
+      const {collection, query, where, getDocs} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      const today=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Jakarta'});
+      // Ambil semua guru dari window.gurus atau dari Firestore gtk
+      let guruList = window.gurus || window.guruList || [];
+      if(guruList.length===0){
+        try{ const snapG=await getDocs(collection(db,"gtk")); snapG.forEach(d=>guruList.push({gid:d.id, ...d.data()})); }catch(e){}
+      }
+      if(guruList.length===0){
+        try{ const snapG2=await getDocs(collection(db,"guru")); snapG2.forEach(d=>guruList.push({gid:d.id, ...d.data()})); }catch(e){}
+      }
+      if(guruList.length===0){
+        try{ const snapG3=await getDocs(collection(db,"gurus")); snapG3.forEach(d=>guruList.push({gid:d.id, ...d.data()})); }catch(e){}
+      }
+      const total = guruList.length || 43;
+      // Absensi hari ini
+      const snapA=await getDocs(query(collection(db,"absensi"), where("tanggal","==",today)));
+      const sudahSet=new Set();
+      snapA.forEach(d=>{ const data=d.data(); if(data.gid) sudahSet.add(data.gid); });
+      // Izin hari ini
+      const snapI=await getDocs(collection(db,"izin"));
+      let izinCount=0;
+      const izinSet=new Set();
+      snapI.forEach(d=>{
+        const z=d.data(); if(!z) return;
+        const st=String(z.status||'').toUpperCase(); if(!st.includes('SETUJU')) return;
+        const mulai=z.tanggal_mulai||z.tanggal||''; const selesai=z.tanggal_selesai||mulai;
+        if(today>=mulai && today<=selesai){ izinCount++; if(z.gid) izinSet.add(z.gid); }
+      });
+      const sudah = sudahSet.size;
+      const izin = izinSet.size || izinCount;
+      const belum = Math.max(0, total - sudah - izin);
+      document.getElementById('dashSudah').textContent=sudah;
+      document.getElementById('dashBelum').textContent=belum;
+      document.getElementById('dashIzin').textContent=izin;
+    }catch(e){ console.log('dash fail', e); }
+  };
+  setTimeout(()=>{ if(typeof window.loadMiniDashboard==='function') window.loadMiniDashboard(); }, 1500);
+  setTimeout(()=>{ if(typeof window.loadMiniDashboard==='function') window.loadMiniDashboard(); }, 4000);
+  setInterval(()=>{ if(typeof window.loadMiniDashboard==='function') window.loadMiniDashboard(); }, 60000);
+  </script>
+
 <div id="loginScreen" style="margin:-16px -16px 0; padding:0 16px 24px; background:radial-gradient(120% 80% at 50% 0%, #e0f2fe 0%, #f0f9ff 40%, #f8fafc 100%); min-height:calc(100vh - 64px)">
 <div style="padding:28px 0 18px; text-align:center">
   <div style="display:inline-flex; flex-direction:column; align-items:center; gap:10px">
@@ -144,7 +205,7 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 
 <div id="greetingCard" class="card" style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1px solid #bae6fd">
   <div style="display:flex;justify-content:space-between;align-items:center">
-    <div><div id="greetingText" style="font-weight:800;color:#0f355c;font-size:15px">Selamat pagi, Pak/Bu</div><div id="greetingSub" style="font-size:11px;color:#0369a1;margin-top:2px">Senin, 12 Mei • Masuk 07:00-14:00</div></div>
+    <div><div id="greetingText" style="font-weight:800;color:#0f355c;font-size:15px">Selamat pagi, Pak/Bu</div><div id="greetingSub" style="font-size:11px;color:#0369a1;margin-top:2px">Senin, 12 Mei</div></div>
     <div style="width:36px;height:36px;border-radius:10px;background:white;border:1px solid #bae6fd;display:flex;align-items:center;justify-content:center;font-size:18px">👋</div>
   </div>
 </div>
@@ -714,7 +775,23 @@ window.cekJamAbsen=()=>{
   else if(kat.includes('LIBUR')){ bg='#fee2e2'; border='#fecaca'; color='#991b1b'; }
   else if(info.valid){ bg='#dcfce7'; border='#bbf7d0'; color='#166534'; }
   else { bg='#fee2e2'; border='#fecaca'; color='#991b1b'; }
-  el.innerHTML=`<span style="background:${bg};border:1px solid ${border};color:${color};padding:6px 12px;border-radius:12px;font-size:10px;font-weight:800;display:inline-block;white-space:normal;line-height:1.4;max-width:100%;word-break:break-word">● ${info.label} • ${jamStr}</span>`;
+  // REVISI: cek sudah absen dulu, jangan tampilkan 'Di Luar Jam Kerja' kalau udah absen
+  let labelFinal = info.label;
+  let bgFinal = bg, borderFinal = border, colorFinal = color;
+  try{
+    const masukEl = document.getElementById('statusMasuk');
+    const pulangEl = document.getElementById('statusPulang');
+    const masukTxt = masukEl ? masukEl.textContent.trim() : '';
+    const pulangTxt = pulangEl ? pulangEl.textContent.trim() : '';
+    const sudahMasuk = masukTxt && masukTxt!=='Belum' && !masukTxt.includes('Belum');
+    const sudahPulang = pulangTxt && pulangTxt!=='Belum' && !pulangTxt.includes('Belum');
+    // Fallback dari localStorage / window.todayAbsen if available
+    const hasMasuk = sudahMasuk || (window.todayAbsen && window.todayAbsen.masuk);
+    const hasPulang = sudahPulang || (window.todayAbsen && window.todayAbsen.pulang);
+    if(hasMasuk && hasPulang){ labelFinal='Absen Lengkap'; bgFinal='#dcfce7'; borderFinal='#bbf7d0'; colorFinal='#166534'; }
+    else if(hasMasuk){ labelFinal='Sudah Absen Masuk'; bgFinal='#dcfce7'; borderFinal='#bbf7d0'; colorFinal='#166534'; }
+  }catch(e){}
+  el.innerHTML=`<span style="background:${bgFinal};border:1px solid ${borderFinal};color:${colorFinal};padding:6px 12px;border-radius:12px;font-size:10px;font-weight:800;display:inline-block;white-space:normal;line-height:1.4;max-width:100%;word-break:break-word">● ${labelFinal} • ${jamStr}</span>`;
 };
 
 // === FIX 1: ICON MATA PAKAI SVG, BUKAN EMOJI ===
@@ -1614,7 +1691,7 @@ window.updateGreeting=()=>{
     const el=document.getElementById('greetingText');
     const sub=document.getElementById('greetingSub');
     if(el) el.textContent=`Selamat ${salam}, ${sapaan} ${namaPendek}`;
-    if(sub) sub.textContent=`${hari} • Masuk ${jamKerja}`;
+    if(sub) sub.textContent=`${hari}`;
     // burger
     const bNama=document.getElementById('burgerNama');
     const bGID=document.getElementById('burgerGID');
@@ -1773,7 +1850,6 @@ window.loadHistory7Hari=async()=>{
     snap.forEach(d=>{ 
       const data=d.data();
       if(data.gid!==g.gid) return;
-      // FIX fallback tanggal dari waktu biar dokumen lama tanpa tanggal tetap kebaca
       let t=data.tanggal||'';
       if(!t && data.waktu){
         try{ t=new Date(data.waktu).toISOString().split('T')[0]; data.tanggal=t; }catch(e){}
@@ -1781,6 +1857,35 @@ window.loadHistory7Hari=async()=>{
       if(!t) return;
       rows.push(data);
     });
+    // === FIX UTANG: baca izin juga ===
+    try{
+      const qI=query(collection(db,"izin"), where("gid","==",g.gid));
+      const snapI=await getDocs(qI);
+      snapI.forEach(d=>{
+        const z=d.data(); if(!z) return;
+        const st=String(z.status||'').toUpperCase();
+        if(!st.includes('SETUJU')) return;
+        const mulai=z.tanggal_mulai||z.tanggal||'';
+        const selesai=z.tanggal_selesai||mulai;
+        // expand range
+        let cur=new Date(mulai), end=new Date(selesai);
+        for(let dd=new Date(cur); dd<=end; dd.setDate(dd.getDate()+1)){
+          const tStr=dd.toISOString().split('T')[0];
+          const scope=String(z.scope||z.jenis_izin||'FULL').toUpperCase();
+          const jenis=z.jenis_izin||z.jenis||z.keterangan||'Izin';
+          const isFull = scope==='FULL' || scope.includes('FULL');
+          // Masuk fake
+          rows.push({tanggal:tStr, jenis_absen:'MASUK', waktu:tStr+'T07:00:00', is_izin:true, is_fake:true, is_izin_full:isFull, izinJenis:jenis, kategori_absen:jenis, label_absen:jenis, keterangan:z.keterangan||'', status:'IZIN'});
+          if(isFull){
+            rows.push({tanggal:tStr, jenis_absen:'PULANG', waktu:tStr+'T07:00:00', is_izin:true, is_fake:true, is_izin_full:true, izinJenis:jenis, kategori_absen:jenis, label_absen:jenis, keterangan:z.keterangan||'', status:'IZIN'});
+          } else if(scope==='MASUK'){
+            // hanya masuk yang izin, pulang tetap absen normal (akan di-merge di byDate)
+          } else if(scope==='PULANG'){
+            // hanya pulang izin
+          }
+        }
+      });
+    }catch(e){ console.log('izin history fail', e); }
     // sort tanggal desc client-side
     rows.sort((a,b)=> (b.tanggal||'').localeCompare(a.tanggal||''));
     rows=rows.slice(0,30);
@@ -1806,15 +1911,21 @@ window.loadHistory7Hari=async()=>{
       let pulangTxt='Belum';
       try{
         if(d.masuk){
-          const w=d.masuk.waktu?new Date(d.masuk.waktu):new Date();
-          masukTxt=w.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' '+(d.masuk.status||'Sudah');
+          if(d.masuk.is_izin_full){ masukTxt='Izin '+(d.masuk.izinJenis||'FULL'); }
+          else if(d.masuk.is_izin && d.masuk.is_fake){ masukTxt='Izin '+(d.masuk.izinJenis||'')+' (belum scan)'; }
+          else { const w=d.masuk.waktu?new Date(d.masuk.waktu):new Date(); masukTxt=w.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' '+(d.masuk.status||'Sudah'); }
         }
         if(d.pulang){
-          const w2=d.pulang.waktu?new Date(d.pulang.waktu):new Date();
-          pulangTxt=w2.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' '+(d.pulang.status||'Sudah');
+          if(d.pulang.is_izin_full){ pulangTxt='Izin '+(d.pulang.izinJenis||'FULL'); }
+          else if(d.pulang.is_izin && d.pulang.is_fake){ pulangTxt='Izin '+(d.pulang.izinJenis||'')+' (belum scan)'; }
+          else { const w2=d.pulang.waktu?new Date(d.pulang.waktu):new Date(); pulangTxt=w2.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' '+(d.pulang.status||'Sudah'); }
         }
       }catch(e){}
-      htmlStr+=`<div class="history-item"><div><div style="font-weight:700;color:#0f355c;font-size:13px">${label}</div><div style="font-size:10px;color:#64748b">${tgl}</div></div><div style="text-align:right"><div style="font-size:11px;font-weight:700;color:#166534">Masuk: ${masukTxt}</div><div style="font-size:11px;color:#0f355c">Pulang: ${pulangTxt}</div></div></div>`;
+      if(d.masuk && d.masuk.is_izin_full && d.pulang && d.pulang.is_izin_full){
+        htmlStr+=`<div class="history-item"><div><div style="font-weight:700;color:#0f355c;font-size:13px">${label}</div><div style="font-size:10px;color:#64748b">${tgl}</div></div><div style="text-align:right"><div style="font-size:11px;font-weight:700;color:#1e40af">Izin ${d.masuk.izinJenis||d.masuk.label_absen||'DINAS_LUAR'}</div></div></div>`;
+      } else {
+        htmlStr+=`<div class="history-item"><div><div style="font-weight:700;color:#0f355c;font-size:13px">${label}</div><div style="font-size:10px;color:#64748b">${tgl}</div></div><div style="text-align:right"><div style="font-size:11px;font-weight:700;color:#166534">Masuk: ${masukTxt}</div><div style="font-size:11px;color:#0f355c">Pulang: ${pulangTxt}</div></div></div>`;
+      }
     });
     listEl.innerHTML=htmlStr;
   }catch(e){ console.log('history fail', e); const el=document.getElementById('historyList'); if(el) el.innerHTML='<div style="color:#ef4444;padding:12px">Gagal load: '+e.message+'<br><small>Coba refresh atau cek koneksi</small></div>'; }
@@ -2128,6 +2239,21 @@ const origLoadLibur = window.loadLibur;
 if(typeof origLoadLibur==='function'){
   window.loadLibur = async function(){ const r=await origLoadLibur(); setTimeout(scheduleAlarmHalamanAbsen, 1000); return r; };
 }
+</script>
+
+
+<script>
+// Hide dashboard di login screen, show di dalam aja
+setInterval(()=>{
+  const loginScreen=document.getElementById('loginScreen');
+  const histScreen=document.getElementById('historyScreen');
+  const dash=document.getElementById('miniDashboard');
+  if(!dash) return;
+  const isLoginVisible = loginScreen && !loginScreen.classList.contains('hidden') && getComputedStyle(loginScreen).display!=='none';
+  const isHistVisible = histScreen && !histScreen.classList.contains('hidden') && getComputedStyle(histScreen).display!=='none';
+  if(isLoginVisible || isHistVisible){ dash.style.display='none'; }
+  else if(window.currentGuru){ dash.style.display='grid'; }
+}, 1000);
 </script>
 
 </body>
