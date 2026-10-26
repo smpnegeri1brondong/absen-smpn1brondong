@@ -291,6 +291,44 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div style="display:flex;gap:8px;margin-top:6px"><input id="radiusInput" type="number" min="20" max="70" step="5" value="40" class="input" style="height:40px"/><button id="saveRadiusBtn" type="button" style="height:40px;padding:0 12px;background:#0f355c;color:white;border-radius:12px;display:flex;align-items:center;font-weight:700;border:none;cursor:pointer">m</button></div>
 <div style="font-size:10px;color:#64748b;margin-top:4px">Batas 20m-70m • Default 40m • Silent realtime ke halaman GTK • <span id="radiusLabel">40m</span></div>
 <div style="margin-top:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:10px"><div style="font-size:10px;font-weight:800;color:#9a3412;letter-spacing:.5px">🧪 MODE UJI COBA • TEST DARI RUMAH</div><div style="display:flex;align-items:center;gap:8px;margin-top:8px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="modeUjiCobaToggle" style="width:18px;height:18px;accent-color:#0f355c"/><span style="font-size:12px;font-weight:700">Aktifkan Mode Uji Coba</span></label><span id="modeUjiCobaLabel" style="font-size:9px;background:#fee2e2;color:#991b1b;padding:3px 8px;border-radius:999px;font-weight:700">Produksi - Luar radius diblok</span></div><div style="font-size:9px;color:#a16207;margin-top:6px;line-height:1.4">ON = luar radius tetap tercatat + badge kecil merah <span style="background:#fee2e2;color:#991b1b;padding:1px 4px;border-radius:4px">⚠️ Luar 120m</span> di laporan.<br>OFF = luar radius ❌ TIDAK TERCATAT (mode produksi final)</div><div style="margin-top:8px"><button id="btnSaveUjiCoba" onclick="saveModeUjiCoba()" style="width:100%;height:32px;border-radius:10px;border:none;background:#0f355c;color:white;font-weight:700;font-size:11px;cursor:pointer">💾 Simpan Mode ke Firestore</button></div></div>
+
+<div style="margin-top:12px;background:white;border:1px solid #e2e8f0;border-radius:16px;padding:14px">
+  <div style="font-weight:800;color:#0f355c;font-size:13px">🔔 Setting Notifikasi</div>
+  <div style="font-size:11px;color:#64748b;margin-top:4px">Untuk semua GTK (universal). Weekend & libur gak bunyi.</div>
+  <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+    <input type="checkbox" id="notifAktif" checked style="width:18px;height:18px"/>
+    <label for="notifAktif" style="font-size:12px;font-weight:700">Aktifkan Notif Masuk & Pulang</label>
+  </div>
+  <div style="margin-top:10px;font-size:11px;color:#475569">Pengingat Masuk: <b>07:00</b> (tetap)</div>
+  <div style="margin-top:6px;font-size:11px;color:#475569">Pulang Senin-Kamis: <b>13:55</b> (tetap)</div>
+  <div style="margin-top:10px">
+    <div style="font-size:12px;font-weight:700">Delay Jumat (setelah dibuka 10:00)</div>
+    <input type="number" id="delayJumat" class="input" value="30" min="0" max="120" placeholder="Contoh: 15 / 30 / 45" style="height:36px;margin-top:4px"/>
+  </div>
+  <div style="margin-top:8px">
+    <div style="font-size:12px;font-weight:700">Delay Pulang Cepat</div>
+    <input type="number" id="delayPC" class="input" value="30" min="0" max="120" placeholder="Contoh: 15 / 30 / 45" style="height:36px;margin-top:4px"/>
+  </div>
+  <button onclick="simpanSettingNotif()" style="margin-top:12px;width:100%;height:40px;border-radius:12px;background:#0f355c;color:white;font-weight:800;border:none;cursor:pointer">💾 Simpan Setting Notif</button>
+  <div style="margin-top:6px;font-size:10px;color:#94a3b8">Disimpan ke Firestore settings/notifikasi & localStorage. HP GTK baca setting ini pas buka index.</div>
+</div>
+<script>
+window.simpanSettingNotif = async function(){
+  const aktif = document.getElementById('notifAktif')?.checked ? 1 : 0;
+  let dj = parseInt(document.getElementById('delayJumat')?.value || '30'); if(isNaN(dj)||dj<0) dj=30; if(dj>120) dj=120;
+  let dpc = parseInt(document.getElementById('delayPC')?.value || '30'); if(isNaN(dpc)||dpc<0) dpc=30; if(dpc>120) dpc=120;
+  localStorage.setItem('SNEB_DELAY_JUMAT', dj);
+  localStorage.setItem('SNEB_DELAY_PC', dpc);
+  localStorage.setItem('SNEB_NOTIF_AKTIF', String(aktif));
+  try{
+    const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d = window.db || (typeof db!=='undefined'?db:null);
+    if(d){ await setDoc(doc(d,"settings","notifikasi"), {aktif:aktif, delay_jumat:parseInt(dj), delay_pc:parseInt(dpc), updated_at:new Date().toISOString()}, {merge:true}); }
+  }catch(e){}
+  alert('✅ Setting notif disimpan\nJumat: '+dj+' menit, Pulang Cepat: '+dpc+' menit');
+};
+</script>
+
 <div style="margin-top:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:10px;font-weight:800;color:#94a3b8">TITIK SEKOLAH • GESER MARKER 🏫</div><span style="font-size:9px;background:#dcfce7;color:#166534;padding:2px 6px;border-radius:999px">Draggable</span></div><!-- KOORDINAT DISEMBUNYIKAN SESUAI REQUEST - TETAP UPDATE DI BALIK LAYAR --><div id="schoolCoordDisplay" style="display:none;font-weight:700;font-size:12px;color:#0f355c;margin-top:4px">-6.907563,112.210813</div><div style="font-size:10px;color:#64748b;margin-top:4px">Geser marker / klik map untuk pindah • Koordinat auto-sync</div><div style="display:flex;gap:6px;margin-top:8px"><button id="btnModeRoad" onclick="setMapMode('road')" style="flex:1;height:32px;border-radius:10px;border:1px solid #0f355c;background:#0f355c;color:white;font-weight:700;font-size:11px;cursor:pointer">🗺️ Road</button><button id="btnModeSat" onclick="setMapMode('sat')" style="flex:1;height:32px;border-radius:10px;border:1px solid #0f355c;background:white;color:#0f355c;font-weight:700;font-size:11px;cursor:pointer">🛰️ Satelit</button></div><div style="margin-top:6px"><button onclick="simpanLokasiSekolah()" style="width:100%;height:32px;border-radius:10px;border:none;background:#0f172a;color:white;font-weight:700;font-size:11px;cursor:pointer">💾 Simpan Lokasi ke Firestore</button></div><div id="rekapInfo" style="margin-top:8px;background:white;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font-size:11px;line-height:1.4">Memuat absensi...</div></div>
 <div style="margin-top:12px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden"><div id="mapAdmin"></div></div>
 <div style="margin-top:12px;display:grid;gap:8px"><button class="btn btn-primary" style="height:40px" onclick="loadRekap()">🔄 Refresh Laporan</button><button class="btn btn-outline" style="height:40px" onclick="loadPasswords()">🔑 Load Password Custom</button></div>
@@ -785,6 +823,8 @@ function updatePulangCepatBadge(tanggalStr){
       const jamMulai = normalizeJamPC(raw);
       badge.textContent = "⚡Pulang Cepat Aktif : "+(jamMulai||"");
       badge.title = "Pulang Cepat Aktif: "+(data.keterangan||"")+" jam "+jamMulai;
+      badge.style.cursor='pointer';
+      badge.onclick=()=>{ alert('⚡ Pulang Cepat\n\nJam: '+(jamMulai||'-')+'\nKeterangan: '+(data.keterangan||'-')+'\nTanggal: '+t); };
       badge.classList.remove("hidden");
       badge.style.display="inline-flex";
     } else {
@@ -2105,6 +2145,7 @@ window.exportExcel=async()=>{
     const rekapStartRow = headerInfo.length + rows.length + 2; // Excel 1-based untuk baris 'Total Masuk'
     for(let i=0; i<4; i++){ merges.push({s:{r:rekapStartRow-1+i,c:0}, e:{r:rekapStartRow-1+i,c:1}}); }
     ws['!merges']=merges;
+    ws['!freeze']={xSplit:0, ySplit:7, topLeftCell:'A8', activePane:'bottomLeft', state:'frozen'};
   }catch(e){ console.log('merge fail', e); }
   // === WARNA STATUS ===
   try{
@@ -2138,6 +2179,18 @@ window.exportExcel=async()=>{
   }catch(e){ console.log('excel color fail', e); }
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,"Laporan "+tanggalStr);
+  // Sheet 2: Rekap % Masuk per GTK (bulan berjalan)
+  try{
+    const rekapRows2 = parsedList.map((item, idx)=>{
+      const persenTxt = persenMap[item.guru.gid] || 'Masuk 0%, Izin 0%';
+      return {No: item.guru.no||idx+1, Nama: item.guru.nama, NIP: item.guru.nip||'-', 'Persentase Masuk': persenTxt};
+    });
+    const ws2 = XLSX.utils.json_to_sheet([]);
+    XLSX.utils.sheet_add_aoa(ws2, [['Rekap Persentase Masuk - '+tanggalStr.slice(0,7)], [], ['No','Nama','NIP','Persentase Masuk']], {origin:0});
+    XLSX.utils.sheet_add_json(ws2, rekapRows2, {origin:3, skipHeader:true});
+    ws2['!cols']=[{wch:5},{wch:30},{wch:20},{wch:25}];
+    XLSX.utils.book_append_sheet(wb,ws2,"Rekap % Masuk");
+  }catch(e){ console.log('sheet2 fail', e); }
   XLSX.writeFile(wb,`laporan-absen-`+tanggalStr+`.xlsx`);
 };
 window.exportCSV=async()=>{
@@ -2174,7 +2227,66 @@ window.exportCSV=async()=>{
   a.download=`laporan-`+tanggalStr+`.csv`;
   a.click();
 };
-window.clearTest=async()=>{if(!confirm('Hapus semua data LUAR_RADIUS?'))return;try{const q=query(collection(db,"absensi"));const snap=await getDocs(q);let del=0;for(const d of snap.docs){const data=d.data();if(data.status==='LUAR_RADIUS'||(data.jarak_meter&&data.jarak_meter>100)){await deleteDoc(doc(db,"absensi",d.id));del++;}}alert(`${del} data dihapus`);loadRekap();}catch(e){alert(e.message);}};
+window.clearTest=async()=>{
+  const tglInput = prompt('Hapus Test tanggal berapa?\nFormat: YYYY-MM-DD\nKosongkan = semua tanggal\nContoh: '+getTanggalLaporan(), getTanggalLaporan());
+  if(tglInput===null) return;
+  const tglTarget = tglInput? normalizeTanggal(tglInput):'';
+  if(!confirm('Hapus data LUAR_RADIUS'+(tglTarget? ' tanggal '+tglTarget : ' SEMUA TANGGAL')+'?'))return;
+  try{const q=query(collection(db,"absensi"));const snap=await getDocs(q);let del=0;for(const d of snap.docs){const data=d.data();if(data.status==='LUAR_RADIUS'||(data.jarak_meter&&data.jarak_meter>100)){ if(tglTarget && normalizeTanggal(data.tanggal||'')!==tglTarget) continue; await deleteDoc(doc(db,"absensi",d.id));del++;}}alert(`${del} data dihapus`);loadRekap();}catch(e){alert(e.message);}
+};
+window.jadikanValid=async(gid,tanggal)=>{
+  if(!confirm('Jadikan Valid untuk '+gid+' tanggal '+tanggal+'?\nData LUAR_RADIUS akan diubah jadi TEPAT/TELAT sesuai jam.')) return;
+  try{
+    const {collection, query, where, getDocs, updateDoc, doc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d = window.db || (typeof db!=='undefined'?db:null);
+    const snap = await getDocs(query(collection(d,"absensi"), where("gid","==",gid)));
+    let cnt=0;
+    for(const ds of snap.docs){
+      const data=ds.data();
+      if(normalizeTanggal(data.tanggal||'')!==normalizeTanggal(tanggal)) continue;
+      const isLuar = (data.status||'').toUpperCase()==='LUAR_RADIUS' || (data.jarak_meter && data.jarak_meter>100);
+      if(!isLuar) continue;
+      const jenis=(data.jenis_absen||'').toUpperCase();
+      let kat='TEPAT_WAKTU';
+      if(jenis.includes('MASUK')){
+        const dt=new Date(data.waktu); const menit=dt.getHours()*60+dt.getMinutes();
+        const isJumat = new Date(tanggal).getDay()===5;
+        const batas = isJumat? 435 : 435;
+        if(menit>batas){ kat='TELAT'; } else { kat='TEPAT_WAKTU'; }
+      }
+      await updateDoc(doc(d,"absensi",ds.id), {status:'VALID', kategori_absen:kat, label_absen:kat.replace(/_/g,' '), jarak_meter:0, keterangan:(data.keterangan||'')+' (Divalidasi admin - GPS error)'});
+      cnt++;
+    }
+    alert('✅ '+cnt+' data dijadikan Valid');
+    if(typeof loadRekap==='function') loadRekap();
+  }catch(e){ alert('Gagal: '+(e.message||e)); }
+};
+window.resetAbsen=async(gid,nama,tanggal)=>{
+  const pilihan = prompt('Reset absen '+nama+' ('+tanggal+')\n\nKetik:\n1 = Reset Masuk saja\n2 = Reset Pulang saja\n3 = Reset Keduanya', '3');
+  if(pilihan===null) return;
+  let jenis = pilihan.trim();
+  if(!['1','2','3'].includes(jenis)){ alert('Pilihan tidak valid'); return; }
+  const jenisText = jenis==='1'?'MASUK': jenis==='2'?'PULANG':'MASUK + PULANG';
+  if(!confirm('Yakin reset '+jenisText+' untuk '+nama+' tanggal '+tanggal+'?\nData akan hilang dan jadi Belum Absen (tanpa cap Koreksi).')) return;
+  try{
+    const {collection, query, where, getDocs, deleteDoc, doc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d = window.db || (typeof db!=='undefined'?db:null);
+    const snap = await getDocs(query(collection(d,"absensi"), where("gid","==",gid)));
+    let del=0;
+    for(const ds of snap.docs){
+      const data=ds.data();
+      if(normalizeTanggal(data.tanggal||'')!==normalizeTanggal(tanggal)) continue;
+      if(data.is_koreksi) continue; // jangan hapus koreksi
+      const j=(data.jenis_absen||'').toUpperCase();
+      if(jenis==='1' && !j.includes('MASUK')) continue;
+      if(jenis==='2' && !j.includes('PULANG')) continue;
+      if(jenis==='3' && !(j.includes('MASUK')||j.includes('PULANG'))) continue;
+      await deleteDoc(doc(d,"absensi",ds.id)); del++;
+    }
+    alert('✅ '+del+' data dihapus, '+nama+' kembali Belum Absen ('+jenisText+')');
+    if(typeof loadRekap==='function') loadRekap();
+  }catch(e){ alert('Gagal: '+(e.message||e)); }
+};
 
 // === PATCH V5 20-70 SILENT + LIBUR + LIVE ===
 const MIN_R=20, MAX_R=70, DEF_R=40;
@@ -2872,7 +2984,7 @@ function badgeStatus(rec, withUjiCobaBadge){
     else if(kat==='DINAS_LUAR' || izinJenis.includes('DINAS')) base='<span class="badge badge-dinas">✈️ Dinas Luar</span>';
     else if(kat==='URUSAN_KELUARGA' || izinJenis.includes('KELUARGA')) base='<span class="badge badge-keluarga">👨‍👩‍👧 Urusan Keluarga</span>';
     else base='<span class="badge badge-izin">📝 '+(rec.label_absen||'Izin')+'</span>';
-    if(rec.is_fake) base+=' <span style="font-size:9px;color:#64748b">(izin, belum scan)</span>';
+    if(rec.is_fake && !rec.is_izin_full) base+=' <span style="font-size:9px;color:#64748b">(izin, belum scan)</span>';
   } else if(rec.is_koreksi){
     base='<span class="badge" style="background:#dbeafe;color:#1e40af;border-color:#bfdbfe">✏️ '+(rec.label_absen||rec.kategori_absen||'Koreksi')+'</span>';
   } else if(kat.includes('BELUM')) base='<span class="badge badge-belum">⏳ Belum Waktunya Pulang</span>';
@@ -2898,6 +3010,61 @@ function badgeStatus(rec, withUjiCobaBadge){
 }
 function badgeStatusWithUji(rec){ return badgeStatus(rec, true); }
 
+
+window.showAksiMenu = function(gid, nama, tanggal){
+  document.getElementById('aksiGID').value=gid;
+  document.getElementById('aksiNama').textContent=nama+' ('+gid+')';
+  document.getElementById('aksiTanggal').value=tanggal;
+  document.getElementById('aksiTanggalText').textContent=tanggal;
+  var modal=document.getElementById('modalAksi');
+  modal.classList.remove('hidden'); modal.style.display='flex';
+};
+window.closeAksiMenu = function(){
+  var modal=document.getElementById('modalAksi');
+  modal.classList.add('hidden'); modal.style.display='none';
+};
+window.aksiKoreksi = function(){
+  var gid=document.getElementById('aksiGID').value;
+  var nama=document.getElementById('aksiNama').textContent;
+  var tanggal=document.getElementById('aksiTanggal').value;
+  closeAksiMenu();
+  openKoreksi(gid, nama, tanggal);
+};
+window.aksiValid = function(){
+  var gid=document.getElementById('aksiGID').value;
+  var tanggal=document.getElementById('aksiTanggal').value;
+  closeAksiMenu();
+  jadikanValid(gid, tanggal);
+};
+window.aksiResetPilih = function(jenis){
+  // jenis: 1=Masuk, 2=Pulang, 3=Keduanya - reuse resetAbsen logic without prompt
+  var gid=document.getElementById('aksiGID').value;
+  var nama=document.getElementById('aksiNama').textContent;
+  var tanggal=document.getElementById('aksiTanggal').value;
+  closeAksiMenu();
+  window._resetJenis = jenis;
+  // Call resetAbsen with preset - we override prompt by using direct delete
+  (async()=>{
+    var jenisText = jenis==='1'?'MASUK': jenis==='2'?'PULANG':'MASUK + PULANG';
+    if(!confirm('Yakin reset '+jenisText+' untuk '+nama+' tanggal '+tanggal+'?\nData akan hilang dan jadi Belum Absen (tanpa cap Koreksi).')) return;
+    try{
+      const {collection, query, where, getDocs, deleteDoc, doc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      const d = window.db || (typeof db!=='undefined'?db:null);
+      const snap = await getDocs(query(collection(d,"absensi"), where("gid","==",gid)));
+      let del=0;
+      for(const ds of snap.docs){
+        const data=ds.data();
+        if(normalizeTanggal(data.tanggal||'')!==normalizeTanggal(tanggal)) continue;
+        const j=(data.jenis_absen||'').toUpperCase();
+        if(jenis==='1' && !j.includes('MASUK')) continue;
+        if(jenis==='2' && !j.includes('PULANG')) continue;
+        await deleteDoc(doc(d,"absensi",ds.id)); del++;
+      }
+      alert('✅ '+del+' data dihapus, kembali Belum Absen ('+jenisText+')');
+      if(typeof loadRekap==='function') loadRekap();
+    }catch(e){ alert('Gagal: '+(e.message||e)); }
+  })();
+};
 window.renderLaporanBaru = function(){
   const body=document.getElementById('rekapBody'); if(!body) return;
   const tanggalStr=getTanggalLaporan();
@@ -2998,7 +3165,7 @@ window.renderLaporanBaru = function(){
     const isLiburPulang = pulang && ((pulang.kategori_absen||'').toUpperCase().includes('LIBUR') || pulang.is_libur);
     const isIzinMasuk = masuk && (masuk.is_izin || ['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes((masuk.kategori_absen||'').toUpperCase()));
     const isIzinPulang = pulang && (pulang.is_izin || ['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes((pulang.kategori_absen||'').toUpperCase()));
-    function fmtJam(rec){ if(!rec) return '-'; if(rec.is_fake){ return rec.waktu ? new Date(rec.waktu).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' (izin, belum scan)' : '(izin, belum scan)'; } try{ return new Date(rec.waktu).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return '-'; } }
+    function fmtJam(rec){ if(!rec) return '-'; if(rec.is_izin_full){ return rec.label_absen||rec.izinJenis||'Izin'; } if(rec.is_fake){ return rec.waktu ? new Date(rec.waktu).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' (izin, belum scan)' : '(izin, belum scan)'; } try{ return new Date(rec.waktu).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return '-'; } }
     if(isLiburMasuk || isLiburPulang){
       const nama = (masuk&&masuk.liburNama) || (pulang&&pulang.liburNama) || (masuk&&masuk.label_absen) || (pulang&&pulang.label_absen) || 'Libur';
       keterangan = nama;
@@ -3009,18 +3176,18 @@ window.renderLaporanBaru = function(){
       const ketP = (pulang&&pulang.keterangan)||'';
       const ket = ketM || ketP || (masuk&&masuk.label_absen) || (pulang&&pulang.label_absen) || 'Izin';
       if(masuk && pulang){
-        keterangan = `Masuk jam ${jamM} | Pulang izin ${pulang.izinJenis||pulang.label_absen||ket} jam ${jamP} ${ketM||ketP?'• '+(ketM||ketP):''}`.replace('  ',' ').trim();
         if(isIzinMasuk && isIzinPulang){
-          keterangan = `Masuk izin ${masuk.izinJenis||masuk.label_absen} jam ${jamM} | Pulang izin ${pulang.izinJenis||pulang.label_absen} jam ${jamP} ${ket?'• '+ket:''}`.trim();
-          if(masuk.is_fake && pulang.is_fake) keterangan = `Masuk izin ${masuk.izinJenis} (izin, belum scan) | Pulang izin ${pulang.izinJenis} (izin, belum scan) • ${ket}`.trim();
-        } else if(masuk && !pulang.is_izin){
-          keterangan = `Masuk jam ${jamM} | Pulang jam ${jamP} ${ket?'• '+ket:''}`.trim();
+          if(masuk.is_izin_full && pulang.is_izin_full){ keterangan = `Izin ${masuk.izinJenis||masuk.label_absen} (FULL) ${ket?'• '+ket:''}`.trim(); }
+          else if(masuk.is_fake && pulang.is_fake){ keterangan = `Masuk izin ${masuk.izinJenis} (izin, belum scan) | Pulang izin ${pulang.izinJenis} (izin, belum scan) • ${ket}`.trim(); }
+          else { keterangan = `Masuk izin ${masuk.izinJenis||masuk.label_absen} jam ${jamM} | Pulang izin ${pulang.izinJenis||pulang.label_absen} jam ${jamP} ${ket?'• '+ket:''}`.trim(); }
         } else if(isIzinMasuk && !isIzinPulang){
           keterangan = `Masuk izin ${masuk.izinJenis} jam ${jamM} | Pulang jam ${jamP} ${ket?'• '+ket:''}`.trim();
-          if(masuk.is_fake) keterangan = `Masuk izin ${masuk.izinJenis} (izin, belum scan) | Pulang jam ${jamP} ${ket?'• '+ket:''}`.trim();
-        } else {
+          if(masuk.is_fake && !masuk.is_izin_full) keterangan = `Masuk izin ${masuk.izinJenis} (izin, belum scan) | Pulang jam ${jamP} ${ket?'• '+ket:''}`.trim();
+        } else if(!isIzinMasuk && isIzinPulang){
           keterangan = `Masuk jam ${jamM} | Pulang izin ${pulang.izinJenis} jam ${jamP} ${ket?'• '+ket:''}`.trim();
-          if(pulang.is_fake) keterangan = `Masuk jam ${jamM} | Pulang izin ${pulang.izinJenis} (izin, belum scan) ${ket?'• '+ket:''}`.trim();
+          if(pulang.is_fake && !pulang.is_izin_full) keterangan = `Masuk jam ${jamM} | Pulang izin ${pulang.izinJenis} (izin, belum scan) ${ket?'• '+ket:''}`.trim();
+        } else {
+          keterangan = `Masuk jam ${jamM} | Pulang jam ${jamP} ${ket?'• '+ket:''}`.trim();
         }
       } else if(masuk){
         keterangan = isIzinMasuk ? (masuk.is_fake ? `Masuk izin ${masuk.izinJenis||masuk.label_absen} (izin, belum scan) ${ketM?'• '+ketM:''}` : `Masuk izin ${masuk.izinJenis||masuk.label_absen} jam ${jamM} ${ketM?'• '+ketM:''}`) : `Masuk jam ${jamM}`;
@@ -3045,7 +3212,7 @@ window.renderLaporanBaru = function(){
     }
 
     const tr=document.createElement('tr');
-    tr.innerHTML='<td style="font-weight:800">'+(g.no||idx+1)+'</td><td><div style="font-weight:700">'+g.nama+'</div><div style="font-size:10px;color:#64748b">'+g.gid+'</div></td><td><div>'+badgeStatusWithUji(masuk)+'</div></td><td style="font-weight:700;color:'+(telatMasuk>0?'#d97706':'#64748b')+'">'+telatText+'</td><td><div>'+badgeStatusWithUji(pulang)+'</div></td><td style="font-size:11px">'+keterangan+'</td><td><button style="height:32px;padding:0 10px;border-radius:10px;border:1px solid #e2e8f0;background:white;font-weight:700;font-size:11px;cursor:pointer" onclick="openKoreksi(\''+g.gid+'\',\''+g.nama.replace(/\'/g,"\'")+ '\',\''+tanggalStr+'\')">✏️ Koreksi</button></td>';
+    tr.innerHTML='<td style="font-weight:800">'+(g.no||idx+1)+'</td><td><div style="font-weight:700">'+g.nama+'</div><div style="font-size:10px;color:#64748b">'+g.gid+'</div></td><td><div>'+badgeStatusWithUji(masuk)+'</div></td><td style="font-weight:700;color:'+(telatMasuk>0?'#d97706':'#64748b')+'">'+telatText+'</td><td><div>'+badgeStatusWithUji(pulang)+'</div></td><td style="font-size:11px">'+keterangan+'</td><td><button style="height:32px;padding:0 12px;border-radius:10px;border:1px solid #e2e8f0;background:white;font-weight:700;font-size:11px;cursor:pointer" onclick="showAksiMenu(\''+g.gid+'\',\''+g.nama.replace(/\'/g,"\'")+ '\',\''+tanggalStr+'\')">⋮ Aksi</button></td>';
     body.appendChild(tr);
 
     const badgeMasukHtml = badgeStatusWithUji(masuk);
@@ -3058,7 +3225,7 @@ window.renderLaporanBaru = function(){
         <div class="lap-row"><span class="lap-label">Telat</span><span class="lap-value" style="color:${telatMasuk>0?'#d97706':'#64748b'}">${telatText}</span></div>
         <div class="lap-row"><span class="lap-label">Status Pulang</span><span class="lap-value">${badgePulangHtml}</span></div>
         <div class="lap-row"><span class="lap-label">Keterangan</span><span class="lap-value" style="font-size:11px;text-align:right;max-width:60%">${keterangan}</span></div>
-        <div class="lap-row"><span class="lap-label">Aksi</span><span class="lap-value"><button style="height:28px;padding:0 10px;border-radius:8px;border:1px solid #e2e8f0;background:white;font-weight:700;font-size:11px" onclick="openKoreksi('${g.gid}','${g.nama.replace(/'/g, "\'")}', '${tanggalStr}')">✏️ Koreksi</button></span></div>
+        <div class="lap-row"><span class="lap-label">Aksi</span><span class="lap-value"><button style="height:28px;padding:0 10px;border-radius:8px;border:1px solid #e2e8f0;background:white;font-weight:700;font-size:11px" onclick="showAksiMenu('${g.gid}','${g.nama.replace(/'/g, "\'")}', '${tanggalStr}')">⋮ Aksi</button></span></div>
       </div>`;
   });
   if(cardsEl){ cardsEl.innerHTML=cardsHtml || '<div style="text-align:center;color:#94a3b8;padding:20px">Belum ada data GTK</div>'; }
@@ -3440,6 +3607,30 @@ function toggleMobileMenu(force){
   };
 })();
 </script>
+
+
+<div id="modalAksi" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px">
+  <div class="card" style="width:100%;max-width:460px;background:white;border-radius:20px;padding:20px">
+    <div style="font-weight:800;font-size:16px">⚙️ Aksi Absen - <span id="aksiNama"></span></div>
+    <input type="hidden" id="aksiGID"/><input type="hidden" id="aksiTanggal"/>
+    <div style="margin-top:8px;font-size:12px;color:#64748b">Tanggal: <span id="aksiTanggalText"></span></div>
+    <div style="margin-top:16px;display:grid;gap:10px">
+      <button onclick="aksiKoreksi()" style="height:48px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:800;font-size:14px;cursor:pointer">✏️ Koreksi Absen</button>
+      <button onclick="aksiValid()" style="height:48px;border-radius:12px;border:1px solid #bbf7d0;background:#dcfce7;color:#166534;font-weight:800;font-size:14px;cursor:pointer">✅ Jadikan Valid (LUAR_RADIUS)</button>
+      <div style="border:1px dashed #fecaca;border-radius:12px;padding:12px;background:#fef2f2">
+        <div style="font-size:12px;font-weight:800;color:#991b1b;margin-bottom:8px">🗑️ Reset Absen (Jadi Belum Absen)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button onclick="aksiResetPilih('1')" style="height:40px;border-radius:10px;border:1px solid #fecaca;background:white;color:#991b1b;font-weight:700;font-size:12px;cursor:pointer">Reset Masuk</button>
+          <button onclick="aksiResetPilih('2')" style="height:40px;border-radius:10px;border:1px solid #fecaca;background:white;color:#991b1b;font-weight:700;font-size:12px;cursor:pointer">Reset Pulang</button>
+        </div>
+        <button onclick="aksiResetPilih('3')" style="width:100%;height:40px;margin-top:8px;border-radius:10px;border:1px solid #fecaca;background:#fee2e2;color:#991b1b;font-weight:700;font-size:12px;cursor:pointer">Reset Keduanya</button>
+      </div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px">
+      <button onclick="closeAksiMenu()" style="flex:1;height:44px;border-radius:12px;border:1px solid #e2e8f0;background:white;font-weight:700;cursor:pointer">Batal</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
