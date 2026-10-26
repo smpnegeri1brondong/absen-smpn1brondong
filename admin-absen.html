@@ -1897,7 +1897,7 @@ window.resetFilter=()=>{const ids=['filterTanggal','filterGuruSelect','filterKat
 window.exportExcel=async()=>{
   const tanggalStr=getTanggalLaporan();
   // === PERSENTASE PER GTK (bulan berjalan s/d tanggal export) ===
-  const persenMap={};
+  const persenMap={}; const rekapMap={};
   try{
     const {collection, query, where, getDocs} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
     const d2 = window.db || (typeof db!=='undefined'?db:null);
@@ -1945,7 +1945,7 @@ window.exportExcel=async()=>{
             if(selesai < firstDayStr || mulai > todayStr) return;
             izinList.push({...di, tanggal_mulai:mulai, tanggal_selesai:selesai});
           });
-          let hadir=0, izinCnt=0;
+          let hadir=0, izinCnt=0, telatCnt=0;
           kerjaDates.forEach(tgl=>{
             const abs = absByDate[tgl];
             let izinFull=null, izinMasuk=null, izinPulang=null;
@@ -1958,16 +1958,21 @@ window.exportExcel=async()=>{
               }
             });
             if(izinFull){ izinCnt++; }
-            else if(abs && abs.masuk){ hadir++; }
+            else if(abs && abs.masuk){
+              hadir++;
+              const kat=(abs.masuk.kategori_absen||'').toUpperCase();
+              if(kat.includes('TELAT')) telatCnt++;
+            }
             else if(abs && abs.pulang && izinPulang){ izinCnt++; }
-            else if(izinMasuk && abs && abs.masuk){ hadir++; }
+            else if(izinMasuk && abs && abs.masuk){ hadir++; const kat=(abs.masuk.kategori_absen||'').toUpperCase(); if(kat.includes('TELAT')) telatCnt++; }
             else if(izinMasuk){ izinCnt++; }
             else if(izinPulang){ izinCnt++; }
           });
           const pMasuk = totalHariKerja>0? Math.round(hadir/totalHariKerja*100):0;
           const pIzin = totalHariKerja>0? Math.round(izinCnt/totalHariKerja*100):0;
           persenMap[g.gid] = `Masuk ${pMasuk}%, Izin ${pIzin}%`;
-        }catch(e){ persenMap[g.gid]=`Masuk 0%, Izin 0%`; }
+          rekapMap[g.gid] = {hadir:hadir, izin:izinCnt, telat:telatCnt, persen:pMasuk, total:totalHariKerja};
+        }catch(e){ persenMap[g.gid]=`Masuk 0%, Izin 0%`; rekapMap[g.gid]={hadir:0, izin:0, telat:0, persen:0, total:0}; }
       }
     }
   }catch(e){ console.log('persen excel fail', e); }
@@ -2179,17 +2184,18 @@ window.exportExcel=async()=>{
   }catch(e){ console.log('excel color fail', e); }
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,"Laporan "+tanggalStr);
-  // Sheet 2: Rekap % Masuk per GTK (bulan berjalan)
+  // Sheet 2: Rekap Bulanan - ANGKA (beda dari Sheet 1 yang teks)
   try{
-    const rekapRows2 = parsedList.map((item, idx)=>{
-      const persenTxt = persenMap[item.guru.gid] || 'Masuk 0%, Izin 0%';
-      return {No: item.guru.no||idx+1, Nama: item.guru.nama, NIP: item.guru.nip||'-', 'Persentase Masuk': persenTxt};
+    const rekapRows2 = listGuru.map((g, idx)=>{
+      const r = rekapMap[g.gid] || {hadir:0, izin:0, telat:0, persen:0, total:0};
+      return {No: g.no||idx+1, Nama: g.nama, Masuk: r.hadir, Izin: r.izin, Telat: r.telat, '% Masuk': r.persen + '%'};
     });
     const ws2 = XLSX.utils.json_to_sheet([]);
-    XLSX.utils.sheet_add_aoa(ws2, [['Rekap Persentase Masuk - '+tanggalStr.slice(0,7)], [], ['No','Nama','NIP','Persentase Masuk']], {origin:0});
+    XLSX.utils.sheet_add_aoa(ws2, [['Rekap Bulanan - '+tanggalStr.slice(0,7)+' (1 s/d '+tanggalStr.slice(8,10)+')'], ['Total Hari Kerja: '+(rekapMap[listGuru[0]?.gid]?.total||0)+' hari'], ['No','Nama','Masuk','Izin','Telat','% Masuk']], {origin:0});
     XLSX.utils.sheet_add_json(ws2, rekapRows2, {origin:3, skipHeader:true});
-    ws2['!cols']=[{wch:5},{wch:30},{wch:20},{wch:25}];
-    XLSX.utils.book_append_sheet(wb,ws2,"Rekap % Masuk");
+    ws2['!cols']=[{wch:5},{wch:30},{wch:8},{wch:8},{wch:8},{wch:10}];
+    ws2['!freeze']={xSplit:0, ySplit:3, topLeftCell:'A4', activePane:'bottomLeft', state:'frozen'};
+    XLSX.utils.book_append_sheet(wb,ws2,"Rekap Bulanan");
   }catch(e){ console.log('sheet2 fail', e); }
   XLSX.writeFile(wb,`laporan-absen-`+tanggalStr+`.xlsx`);
 };
