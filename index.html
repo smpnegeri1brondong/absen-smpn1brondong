@@ -376,9 +376,10 @@ if('serviceWorker' in navigator){
   <div style="width:100%;max-width:420px;background:#0f355c;color:white;border-radius:20px;padding:20px;box-shadow:0 16px 40px rgba(0,0,0,.3);text-align:center">
     <div style="font-size:32px">🔔</div>
     <div style="font-weight:800;font-size:16px;margin-top:8px">Aktifkan Pengingat Absen?</div>
+    <div style="font-size:11px;opacity:.85;margin-top:6px">Aktifkan Agar Tidak Telat Absen</div>
     <div style="display:flex;gap:8px;margin-top:16px">
       <button onclick="aktifkanNotifikasi()" style="flex:1;height:44px;border-radius:12px;background:white;color:#0f355c;font-weight:800;border:none;cursor:pointer">Izinkan</button>
-      <button onclick="document.getElementById('notifBanner').style.display='none';localStorage.setItem('SNEB_NOTIF_LATER','1')" style="flex:1;height:44px;border-radius:12px;background:transparent;color:white;border:1px solid rgba(255,255,255,.4);font-weight:700;cursor:pointer">Nanti</button>
+      <button onclick="document.getElementById('notifBanner').style.display='none';sessionStorage.setItem('SNEB_NOTIF_LATER','1')" style="flex:1;height:44px;border-radius:12px;background:transparent;color:white;border:1px solid rgba(255,255,255,.4);font-weight:700;cursor:pointer">Nanti</button>
     </div>
   </div>
 </div>
@@ -449,7 +450,7 @@ function scheduleOneIdx(tglStr, hh, mm, body, tag){
   }, delay);
 }
 setTimeout(()=>{
-  if('Notification' in window && Notification.permission==='default' && !localStorage.getItem('SNEB_NOTIF_LATER') && !localStorage.getItem('SNEB_NOTIF')){
+  if('Notification' in window && Notification.permission==='default' && !sessionStorage.getItem('SNEB_NOTIF_LATER') && !localStorage.getItem('SNEB_NOTIF')){
     const b=document.getElementById('notifBanner'); if(b) b.style.display='flex';
   } else if(Notification.permission==='granted' && localStorage.getItem('SNEB_NOTIF')){
     scheduleAlarm7Hari();
