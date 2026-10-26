@@ -1874,14 +1874,13 @@ window.loadHistory7Hari=async()=>{
           const scope=String(z.scope||z.jenis_izin||'FULL').toUpperCase();
           const jenis=z.jenis_izin||z.jenis||z.keterangan||'Izin';
           const isFull = scope==='FULL' || scope.includes('FULL');
-          // Masuk fake
-          rows.push({tanggal:tStr, jenis_absen:'MASUK', waktu:tStr+'T07:00:00', is_izin:true, is_fake:true, is_izin_full:isFull, izinJenis:jenis, kategori_absen:jenis, label_absen:jenis, keterangan:z.keterangan||'', status:'IZIN'});
           if(isFull){
+            rows.push({tanggal:tStr, jenis_absen:'MASUK', waktu:tStr+'T07:00:00', is_izin:true, is_fake:true, is_izin_full:true, izinJenis:jenis, kategori_absen:jenis, label_absen:jenis, keterangan:z.keterangan||'', status:'IZIN'});
             rows.push({tanggal:tStr, jenis_absen:'PULANG', waktu:tStr+'T07:00:00', is_izin:true, is_fake:true, is_izin_full:true, izinJenis:jenis, kategori_absen:jenis, label_absen:jenis, keterangan:z.keterangan||'', status:'IZIN'});
-          } else if(scope==='MASUK'){
-            // hanya masuk yang izin, pulang tetap absen normal (akan di-merge di byDate)
-          } else if(scope==='PULANG'){
-            // hanya pulang izin
+          } else if(scope.includes('MASUK')){
+            rows.push({tanggal:tStr, jenis_absen:'MASUK', waktu:tStr+'T07:00:00', is_izin:true, is_fake:true, is_izin_full:false, izinJenis:jenis, kategori_absen:jenis, label_absen:jenis, keterangan:z.keterangan||'', status:'IZIN'});
+          } else if(scope.includes('PULANG')){
+            rows.push({tanggal:tStr, jenis_absen:'PULANG', waktu:tStr+'T07:00:00', is_izin:true, is_fake:true, is_izin_full:false, izinJenis:jenis, kategori_absen:jenis, label_absen:jenis, keterangan:z.keterangan||'', status:'IZIN'});
           }
         }
       });
@@ -1898,6 +1897,15 @@ window.loadHistory7Hari=async()=>{
       if((r.jenis_absen||r.jenis)==='MASUK' && !byDate[t].masuk) byDate[t].masuk=r;
       if((r.jenis_absen||r.jenis)==='PULANG' && !byDate[t].pulang) byDate[t].pulang=r;
     });
+    // Merge izin fake ke real record biar keterangan izin tetap keliatan walau ada scan
+    Object.keys(byDate).forEach(tgl=>{
+      const d=byDate[tgl];
+      // Cari fake izin untuk tanggal ini di rows
+      const fakeMasuk = rows.find(r=>r.tanggal===tgl && r.jenis_absen==='MASUK' && r.is_fake);
+      const fakePulang = rows.find(r=>r.tanggal===tgl && r.jenis_absen==='PULANG' && r.is_fake);
+      if(fakeMasuk && d.masuk && !d.masuk.is_izin){ d.masuk = {...d.masuk, is_izin:true, izinJenis:fakeMasuk.izinJenis, label_absen:fakeMasuk.label_absen, kategori_absen:fakeMasuk.kategori_absen}; }
+      if(fakePulang && d.pulang && !d.pulang.is_izin){ d.pulang = {...d.pulang, is_izin:true, izinJenis:fakePulang.izinJenis, label_absen:fakePulang.label_absen, kategori_absen:fakePulang.kategori_absen}; }
+    });
     let sortedDates=Object.keys(byDate).sort().reverse().slice(0,7);
     const listEl=document.getElementById('historyList');
     if(!listEl) return;
@@ -1910,14 +1918,33 @@ window.loadHistory7Hari=async()=>{
       let masukTxt='Belum';
       let pulangTxt='Belum';
       try{
+        function getIzinLabel(rec){
+          if(!rec) return null;
+          const kat=(rec.kategori_absen||'').toUpperCase();
+          const lbl=(rec.label_absen||rec.kategori_absen||'').toUpperCase();
+          if(rec.is_izin) return rec.izinJenis || rec.jenis_izin || rec.keterangan || rec.label_absen || rec.kategori_absen || 'Izin';
+          if(['SAKIT','DINAS_LUAR','URUSAN_KELUARGA','IZIN_LAIN'].includes(kat)) return rec.label_absen || rec.kategori_absen;
+          if(lbl.includes('IZIN') || lbl.includes('SAKIT') || lbl.includes('DINAS')) return rec.label_absen;
+          return null;
+        }
         if(d.masuk){
+          const iz=getIzinLabel(d.masuk);
           if(d.masuk.is_izin_full){ masukTxt='Izin '+(d.masuk.izinJenis||'FULL'); }
-          else if(d.masuk.is_izin && d.masuk.is_fake){ masukTxt='Izin '+(d.masuk.izinJenis||'')+' (belum scan)'; }
+          else if(iz){
+            const w=d.masuk.waktu?new Date(d.masuk.waktu):null;
+            const jamStr = (w && !d.masuk.is_fake) ? w.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' ' : '';
+            masukTxt = d.masuk.is_fake ? 'Izin '+iz+' (belum scan)' : jamStr+'Izin '+iz;
+          }
           else { const w=d.masuk.waktu?new Date(d.masuk.waktu):new Date(); masukTxt=w.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' '+(d.masuk.status||'Sudah'); }
         }
         if(d.pulang){
+          const iz=getIzinLabel(d.pulang);
           if(d.pulang.is_izin_full){ pulangTxt='Izin '+(d.pulang.izinJenis||'FULL'); }
-          else if(d.pulang.is_izin && d.pulang.is_fake){ pulangTxt='Izin '+(d.pulang.izinJenis||'')+' (belum scan)'; }
+          else if(iz){
+            const w2=d.pulang.waktu?new Date(d.pulang.waktu):null;
+            const jamStr2 = (w2 && !d.pulang.is_fake) ? w2.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' ' : '';
+            pulangTxt = d.pulang.is_fake ? 'Izin '+iz+' (belum scan)' : jamStr2+'Izin '+iz;
+          }
           else { const w2=d.pulang.waktu?new Date(d.pulang.waktu):new Date(); pulangTxt=w2.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' '+(d.pulang.status||'Sudah'); }
         }
       }catch(e){}
