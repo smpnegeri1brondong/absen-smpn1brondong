@@ -2382,6 +2382,7 @@ window.registerSidikJari = async function(){
     });
     if(cred){
       localStorage.setItem('SNEB_PASSKEY_GID', gid);
+      try{ const pwdEl=document.getElementById('passInput'); if(pwdEl && pwdEl.value) localStorage.setItem('SNEB_PASSKEY_PWD_'+gid, pwdEl.value); else { const savedPwd=localStorage.getItem('SNEB.in_PASS_'+gid); if(savedPwd) localStorage.setItem('SNEB_PASSKEY_PWD_'+gid, savedPwd); } }catch(e){}
       let rawIdStr=''; const rawArr=new Uint8Array(cred.rawId); for(let i=0;i<rawArr.length;i++) rawIdStr+=String.fromCharCode(rawArr[i]); localStorage.setItem('SNEB_PASSKEY_ID', btoa(rawIdStr));
       alert('✅ Sidik jari aktif! Besok login cukup klik "Login dengan Sidik Jari".');
       window.showSidikButton();
@@ -2405,20 +2406,21 @@ window.loginSidikJari = async function(){
     });
     if(assertion){
       localStorage.setItem('SNEB.in_GID', gid);
-      // Sama persis kayak doLogin: set currentGuru + showAbsenScreen, jangan reload
+      // Pakai jalur doLogin asli: isi gid + password yang tersimpan, lalu panggil doLogin()
       try{
-        if(typeof GURUS!=='undefined' && GURUS.length>0){
-          const g = GURUS.find(x=>x.gid===gid);
-          if(g){ window.currentGuru=g; if(typeof currentGuru!=='undefined') currentGuru=g; if(typeof showAbsenScreen==='function'){ showAbsenScreen(); return; } }
+        const gidEl=document.getElementById('gidInput');
+        const passEl=document.getElementById('passInput');
+        if(gidEl) gidEl.value=gid;
+        let pwd = localStorage.getItem('SNEB_PASSKEY_PWD_'+gid) || localStorage.getItem('SNEB.in_PASS_'+gid) || '';
+        // Kalau password belum tersimpan, coba ambil dari GURUS (password default)
+        if(!pwd && typeof GURUS!=='undefined'){
+          const gg=GURUS.find(x=>x.gid===gid);
+          if(gg) pwd=gg.password||'';
         }
-        // Fallback kalau GURUS belum ke-load: tunggu 1 detik lalu coba lagi, baru reload
-        setTimeout(()=>{
-          if(typeof GURUS!=='undefined' && GURUS.length>0){
-            const g2 = GURUS.find(x=>x.gid===gid);
-            if(g2){ window.currentGuru=g2; if(typeof showAbsenScreen==='function') showAbsenScreen(); }
-            else location.reload();
-          } else location.reload();
-        }, 1000);
+        if(passEl) passEl.value=pwd;
+        if(typeof window.doLogin==='function'){ window.doLogin(); return; }
+        // Fallback: kalau doLogin belum ada, tunggu GURUS ke-load lalu coba lagi
+        setTimeout(()=>{ if(typeof window.doLogin==='function') window.doLogin(); else location.reload(); }, 1000);
       }catch(e){ location.reload(); }
     }
   }catch(e){ alert('Sidik jari gagal / dibatalkan. Coba lagi atau pakai password.'); console.log('login passkey fail', e); }
