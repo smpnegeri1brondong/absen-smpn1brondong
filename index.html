@@ -460,12 +460,12 @@ setTimeout(()=>{
 
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 const firebaseConfig = { apiKey:"AIzaSyCSi5QKL-MapUUdGLV4OuiXupXa3XmRKvg", authDomain:"smpn1-brondong-absen.firebaseapp.com", projectId:"smpn1-brondong-absen", storageBucket:"smpn1-brondong-absen.firebasestorage.app", messagingSenderId:"174884842248", appId:"1:174884842248:web:8625540d5f3ff8b7f45abd" };
 try{
-  let app; try{ app = initializeApp(firebaseConfig); }catch(e){ app = window.__fbApp || app; if(!app){ throw e; } }
+  let app; try{ app = initializeApp(firebaseConfig); }catch(e){ app = getApp(); }
   const db = getFirestore(app);
   const messaging = getMessaging(app);
   window.fcmInit = async function(){
@@ -474,7 +474,7 @@ try{
       if(permission!=='granted') return;
       const token = await getToken(messaging, {vapidKey:"BE4CVwzUOmaWGk8RUNAroPH1_nnr6R1QM0UziVYtY35FSYNCnYse0sKhzFWKsiVwi2Sn5z3JRBtGbPLHk8LDNpI"});
       if(token){
-        const gid = localStorage.getItem('SNEB.in_GID') || 'anon';
+        const gid = localStorage.getItem('SNEB.in_GID') || localStorage.getItem('SNEB_GID') || localStorage.getItem('gid') || 'anon_' + token.slice(0,12);
         await setDoc(doc(db, 'fcm_tokens', gid), {token, gid, updatedAt: new Date().toISOString()}, {merge:true});
         console.log('FCM token saved', gid);
       }
