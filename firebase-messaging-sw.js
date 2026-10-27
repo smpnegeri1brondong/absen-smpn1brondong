@@ -1,0 +1,20 @@
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
+firebase.initializeApp({
+  apiKey: "AIzaSyD8K8K8K8K8K8K8K8K8K8K8K8K8K8K8",
+  authDomain: "smpn1-brondong-absen.firebaseapp.com",
+  projectId: "smpn1-brondong-absen",
+  storageBucket: "smpn1-brondong-absen.appspot.com",
+  messagingSenderId: "174884842248",
+  appId: "1:174884842248:web:xxxx"
+});
+const messaging = firebase.messaging();
+messaging.onBackgroundMessage((payload)=>{
+  const title = payload.notification?.title || 'SNEB.in';
+  const body = payload.notification?.body || 'Ada pengingat absen';
+  self.registration.showNotification(title, {body, icon:'/icon-192.png', data:{buka:'halaman-absen.html'}});
+});
+self.addEventListener('notificationclick', (e)=>{
+  e.notification.close();
+  e.waitUntil(clients.openWindow('/halaman-absen.html'));
+});
