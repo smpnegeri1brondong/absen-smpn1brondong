@@ -3675,5 +3675,35 @@ async function saveNotifJam(){
 }
 </script>
 
+
+<script>
+window.saveNotifJam = async function(){
+  try{
+    const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d = window.db || (typeof db!=='undefined' ? db : null);
+    if(!d){ alert('DB belum siap, refresh dulu'); return; }
+    const data = {
+      enabled: true,
+      masukJam: document.getElementById('notifMasukJam').value || '07:00',
+      masukEnabled: true,
+      pulangSeninKamisJam: document.getElementById('notifPulangJam').value || '13:55',
+      pulangJumatJam: document.getElementById('notifPulangJumatJam').value || '10:30',
+      pulangEnabled: true,
+      pulangCepatAktif: !!document.getElementById('notifPulangCepatJam').value,
+      pulangCepatJam: document.getElementById('notifPulangCepatJam').value || '',
+      pulangCepatTanggal: document.getElementById('notifPulangCepatTanggal').value || '',
+      aktif: document.getElementById('notifAktif')?.checked ? 1 : 0
+    };
+    await setDoc(doc(d, 'settings','notifikasi'), data, {merge:true});
+    if(data.pulangCepatAktif && data.pulangCepatTanggal){
+      await setDoc(doc(d, 'jam_khusus', data.pulangCepatTanggal), {pulang: data.pulangCepatJam, pulang_cepat: true}, {merge:true});
+    }
+    const el = document.getElementById('notifJamSaved');
+    if(el) el.textContent = '✅ Jam notif tersimpan: Masuk '+data.masukJam+' | Pulang '+data.pulangSeninKamisJam+' | Jumat '+data.pulangJumatJam;
+    alert('✅ Jam notif tersimpan: Masuk '+data.masukJam+' | Pulang '+data.pulangSeninKamisJam+' | Jumat '+data.pulangJumatJam);
+  }catch(e){ alert('Gagal simpan: '+e.message); }
+};
+</script>
+
 </body>
 </html>
