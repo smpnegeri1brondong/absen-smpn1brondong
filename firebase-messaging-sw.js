@@ -16,5 +16,5 @@ messaging.onBackgroundMessage((payload)=>{
 });
 self.addEventListener('notificationclick', (e)=>{
   e.notification.close();
-  e.waitUntil(clients.openWindow('/halaman-absen.html'));
+  e.waitUntil(clients.openWindow('https://smpnegeri1brondong.github.io/absen-smpn1brondong/halaman-absen.html'));
 });
