@@ -472,7 +472,8 @@ try{
     try{
       const permission = await Notification.requestPermission();
       if(permission!=='granted') return;
-      const token = await getToken(messaging, {vapidKey:"BE4CVwzUOmaWGk8RUNAroPH1_nnr6R1QM0UziVYtY35FSYNCnYse0sKhzFWKsiVwi2Sn5z3JRBtGbPLHk8LDNpI"});
+      const swReg = await navigator.serviceWorker.register('/absen-smpn1brondong/firebase-messaging-sw.js');
+      const token = await getToken(messaging, {vapidKey:"[STRIPPED 87 bytes]", serviceWorkerRegistration: swReg});
       if(token){
         const gid = localStorage.getItem('SNEB.in_GID') || localStorage.getItem('SNEB_GID') || localStorage.getItem('gid') || 'anon_' + token.slice(0,12);
         await setDoc(doc(db, 'fcm_tokens', gid), {token, gid, updatedAt: new Date().toISOString()}, {merge:true});
