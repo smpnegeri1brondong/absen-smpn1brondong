@@ -36,7 +36,7 @@ async function main(){
     if(inWindow(pulangJam) && s.pulangEnabled!==false){ title='SNEB.in - Absen Pulang'; body='⚠ Silahkan Absen Pulang. Klik untuk absen sekarang.'; }
   }
   if(!title) return console.log('Bukan jam notif', cur);
-  const res=await messaging.sendEachForMulticast({notification:{title, body}, data:{buka:'https://smpnegeri1brondong.github.io/absen-smpn1brondong/halaman-absen.html'}, tokens});
+  const res=await messaging.sendEachForMulticast({notification:{title, body}, data:{buka:'https://smpnegeri1brondong.github.io/absen-smpn1brondong/halaman-absen.html'}, webpush:{fcmOptions:{link:'https://smpnegeri1brondong.github.io/absen-smpn1brondong/halaman-absen.html'}}, tokens});
   console.log('Kirim', res.successCount+'/'+tokens.length, title);
 }
 main().catch(e=>{console.error(e); process.exit(1);});
