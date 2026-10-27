@@ -3705,5 +3705,27 @@ window.saveNotifJam = async function(){
 };
 </script>
 
+
+<script>
+async function loadNotifJam(){
+  try{
+    const {doc, getDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const d = window.db || (typeof db!=='undefined' ? db : null);
+    if(!d) return;
+    const snap = await getDoc(doc(d, 'settings','notifikasi'));
+    if(!snap.exists()) return;
+    const s = snap.data();
+    if(s.masukJam) document.getElementById('notifMasukJam').value = s.masukJam;
+    if(s.pulangSeninKamisJam) document.getElementById('notifPulangJam').value = s.pulangSeninKamisJam;
+    if(s.pulangJumatJam) document.getElementById('notifPulangJumatJam').value = s.pulangJumatJam;
+    if(s.pulangCepatJam) document.getElementById('notifPulangCepatJam').value = s.pulangCepatJam;
+    if(s.pulangCepatTanggal) document.getElementById('notifPulangCepatTanggal').value = s.pulangCepatTanggal;
+    if(typeof s.aktif !== 'undefined') document.getElementById('notifAktif').checked = s.aktif==1;
+  }catch(e){ console.log('loadNotifJam fail', e); }
+}
+setTimeout(loadNotifJam, 1500);
+window.addEventListener('load', ()=> setTimeout(loadNotifJam, 2000));
+</script>
+
 </body>
 </html>
