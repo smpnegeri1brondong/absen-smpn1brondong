@@ -19,13 +19,21 @@ async function main(){
   const tokensSnap=await db.collection('fcm_tokens').get();
   const tokens=[]; tokensSnap.forEach(d=>{ if(d.data().token) tokens.push(d.data().token); });
   if(tokens.length===0) return console.log('No tokens');
+  function inWindow(jamStr){
+    if(!jamStr) return false;
+    const [sh, sm] = jamStr.split(':').map(Number);
+    const scheduled = sh*60+sm;
+    const curMin = now.getHours()*60+now.getMinutes();
+    const diff = curMin - scheduled;
+    return diff>=0 && diff<5;
+  }
   let title='', body='';
-  if(cur===(s.masukJam||'07:00') && s.masukEnabled!==false){ title='SNEB.in - Absen Masuk'; body='⚠ Silahkan Absen Masuk. Klik untuk absen sekarang.'; }
+  if(inWindow(s.masukJam||'07:00') && s.masukEnabled!==false){ title='SNEB.in - Absen Masuk'; body='⚠ Silahkan Absen Masuk. Klik untuk absen sekarang.'; }
   else {
     let pulangJam = day===5 ? (s.pulangJumatJam||'10:30') : (s.pulangSeninKamisJam||'13:55');
     if(jamKhusus && (jamKhusus.pulang || jamKhusus.pulang_cepat)) pulangJam = jamKhusus.pulang || pulangJam;
     if(s.pulangCepatAktif && s.pulangCepatTanggal===todayStr && s.pulangCepatJam) pulangJam=s.pulangCepatJam;
-    if(cur===pulangJam && s.pulangEnabled!==false){ title='SNEB.in - Absen Pulang'; body='⚠ Silahkan Absen Pulang. Klik untuk absen sekarang.'; }
+    if(inWindow(pulangJam) && s.pulangEnabled!==false){ title='SNEB.in - Absen Pulang'; body='⚠ Silahkan Absen Pulang. Klik untuk absen sekarang.'; }
   }
   if(!title) return console.log('Bukan jam notif', cur);
   const res=await messaging.sendEachForMulticast({notification:{title, body}, data:{buka:'halaman-absen.html'}, tokens});
