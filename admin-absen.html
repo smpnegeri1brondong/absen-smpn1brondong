@@ -292,27 +292,36 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f8fafc;c
 <div style="font-size:10px;color:#64748b;margin-top:4px">Batas 20m-70m • Default 40m • Silent realtime ke halaman GTK • <span id="radiusLabel">40m</span></div>
 <div style="margin-top:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:10px"><div style="font-size:10px;font-weight:800;color:#9a3412;letter-spacing:.5px">🧪 MODE UJI COBA • TEST DARI RUMAH</div><div style="display:flex;align-items:center;gap:8px;margin-top:8px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="modeUjiCobaToggle" style="width:18px;height:18px;accent-color:#0f355c"/><span style="font-size:12px;font-weight:700">Aktifkan Mode Uji Coba</span></label><span id="modeUjiCobaLabel" style="font-size:9px;background:#fee2e2;color:#991b1b;padding:3px 8px;border-radius:999px;font-weight:700">Produksi - Luar radius diblok</span></div><div style="font-size:9px;color:#a16207;margin-top:6px;line-height:1.4">ON = luar radius tetap tercatat + badge kecil merah <span style="background:#fee2e2;color:#991b1b;padding:1px 4px;border-radius:4px">⚠️ Luar 120m</span> di laporan.<br>OFF = luar radius ❌ TIDAK TERCATAT (mode produksi final)</div><div style="margin-top:8px"><button id="btnSaveUjiCoba" onclick="saveModeUjiCoba()" style="width:100%;height:32px;border-radius:10px;border:none;background:#0f355c;color:white;font-weight:700;font-size:11px;cursor:pointer">💾 Simpan Mode ke Firestore</button></div></div>
 
-<div style="margin-top:12px;background:white;border:1px solid #e2e8f0;border-radius:16px;padding:14px">
+<div style="margin-top:12px;background:white;border:1px solid #e2e8f0;border-radius:16px;padding:14px" id="settingNotifikasiBaru">
   <div style="font-weight:800;color:#0f355c;font-size:13px">🔔 Setting Notifikasi</div>
-  <div style="font-size:11px;color:#64748b;margin-top:4px">Untuk semua GTK (universal). Weekend & libur gak bunyi.</div>
+  <div style="font-size:11px;color:#64748b;margin-top:4px">Untuk semua GTK (universal). Weekend & libur gak bunyi. Admin input jam langsung.</div>
   <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
     <input type="checkbox" id="notifAktif" checked style="width:18px;height:18px"/>
     <label for="notifAktif" style="font-size:12px;font-weight:700">Aktifkan Notif Masuk & Pulang</label>
   </div>
-  <div style="margin-top:10px;font-size:11px;color:#475569">Pengingat Masuk: <b>07:00</b> (tetap)</div>
-  <div style="margin-top:6px;font-size:11px;color:#475569">Pulang Senin-Kamis: <b>13:55</b> (tetap)</div>
   <div style="margin-top:10px">
-    <div style="font-size:12px;font-weight:700">Delay Jumat (setelah dibuka 10:00)</div>
-    <input type="number" id="delayJumat" class="input" value="30" min="0" max="120" placeholder="Contoh: 15 / 30 / 45" style="height:36px;margin-top:4px"/>
+    <div style="font-size:12px;font-weight:700">Notif Masuk jam</div>
+    <input type="time" id="notifMasukJam" class="input" value="07:00" style="height:36px;margin-top:4px"/>
   </div>
   <div style="margin-top:8px">
-    <div style="font-size:12px;font-weight:700">Delay Pulang Cepat</div>
-    <input type="number" id="delayPC" class="input" value="30" min="0" max="120" placeholder="Contoh: 15 / 30 / 45" style="height:36px;margin-top:4px"/>
+    <div style="font-size:12px;font-weight:700">Notif Pulang Senin-Kamis jam</div>
+    <input type="time" id="notifPulangJam" class="input" value="13:55" style="height:36px;margin-top:4px"/>
   </div>
-  <button onclick="simpanSettingNotif()" style="margin-top:12px;width:100%;height:40px;border-radius:12px;background:#0f355c;color:white;font-weight:800;border:none;cursor:pointer">💾 Simpan Setting Notif</button>
-  <div style="margin-top:6px;font-size:10px;color:#94a3b8">Disimpan ke Firestore settings/notifikasi & localStorage. HP GTK baca setting ini pas buka index.</div>
+  <div style="margin-top:8px">
+    <div style="font-size:12px;font-weight:700">Notif Pulang Jumat jam</div>
+    <input type="time" id="notifPulangJumatJam" class="input" value="10:30" style="height:36px;margin-top:4px"/>
+  </div>
+  <div style="margin-top:8px">
+    <div style="font-size:12px;font-weight:700">Pulang Cepat hari ini jam</div>
+    <input type="time" id="notifPulangCepatJam" class="input" value="" style="height:36px;margin-top:4px"/>
+    <input type="date" id="notifPulangCepatTanggal" class="input" style="height:36px;margin-top:4px"/>
+  </div>
+  <button onclick="saveNotifJam()" style="margin-top:12px;width:100%;height:40px;border-radius:12px;background:#0f355c;color:white;font-weight:800;border:none;cursor:pointer">💾 Simpan Setting Notif</button>
+  <div id="notifJamSaved" style="margin-top:6px;font-size:11px;color:#166534"></div>
+  <div style="margin-top:6px;font-size:10px;color:#94a3b8">Disimpan ke Firestore settings/notifikasi. Robot GitHub baca jam ini tiap 5 menit.</div>
 </div>
 <script>
+
 window.simpanSettingNotif = async function(){
   const aktif = document.getElementById('notifAktif')?.checked ? 1 : 0;
   let dj = parseInt(document.getElementById('delayJumat')?.value || '30'); if(isNaN(dj)||dj<0) dj=30; if(dj>120) dj=120;
@@ -3637,6 +3646,34 @@ function toggleMobileMenu(force){
     </div>
   </div>
 </div>
+
+
+<script>
+async function saveNotifJam(){
+  try{
+    const {doc, setDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const db = window.db;
+    if(!db) return alert('DB belum siap');
+    const data = {
+      enabled: true,
+      masukJam: document.getElementById('notifMasukJam').value || '07:00',
+      masukEnabled: true,
+      pulangSeninKamisJam: document.getElementById('notifPulangJam').value || '13:55',
+      pulangJumatJam: document.getElementById('notifPulangJumatJam').value || '10:30',
+      pulangEnabled: true,
+      pulangCepatAktif: !!document.getElementById('notifPulangCepatJam').value,
+      pulangCepatJam: document.getElementById('notifPulangCepatJam').value || '',
+      pulangCepatTanggal: document.getElementById('notifPulangCepatTanggal').value || ''
+    };
+    await setDoc(doc(db, 'settings','notifikasi'), data, {merge:true});
+    // juga simpan jam_khusus untuk pulang cepat
+    if(data.pulangCepatAktif && data.pulangCepatTanggal){
+      await setDoc(doc(db, 'jam_khusus', data.pulangCepatTanggal), {pulang: data.pulangCepatJam, pulang_cepat: true}, {merge:true});
+    }
+    document.getElementById('notifJamSaved').textContent='✅ Jam notif tersimpan: Masuk '+data.masukJam+' | Pulang '+data.pulangSeninKamisJam+' | Jumat '+data.pulangJumatJam;
+  }catch(e){ alert('Gagal simpan: '+e.message); }
+}
+</script>
 
 </body>
 </html>
