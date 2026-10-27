@@ -1,12 +1,12 @@
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
 firebase.initializeApp({
-  apiKey: "AIzaSyD8K8K8K8K8K8K8K8K8K8K8K8K8K8K8",
+  apiKey: "AIzaSyCSi5QKL-MapUUdGLV4OuiXupXa3XmRKvg",
   authDomain: "smpn1-brondong-absen.firebaseapp.com",
   projectId: "smpn1-brondong-absen",
-  storageBucket: "smpn1-brondong-absen.appspot.com",
+  storageBucket: "smpn1-brondong-absen.firebasestorage.app",
   messagingSenderId: "174884842248",
-  appId: "1:174884842248:web:xxxx"
+  appId: "1:174884842248:web:8625540d5f3ff8b7f45abd"
 });
 const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload)=>{
