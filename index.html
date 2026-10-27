@@ -463,9 +463,9 @@ setTimeout(()=>{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
-const firebaseConfig = { apiKey:"AIzaSyD8K8K8K8K8K8K8K8K8K8K8K8K8K8K8", authDomain:"smpn1-brondong-absen.firebaseapp.com", projectId:"smpn1-brondong-absen", storageBucket:"smpn1-brondong-absen.appspot.com", messagingSenderId:"174884842248", appId:"1:174884842248:web:xxxx" };
+const firebaseConfig = { apiKey:"AIzaSyCSi5QKL-MapUUdGLV4OuiXupXa3XmRKvg", authDomain:"smpn1-brondong-absen.firebaseapp.com", projectId:"smpn1-brondong-absen", storageBucket:"smpn1-brondong-absen.firebasestorage.app", messagingSenderId:"174884842248", appId:"1:174884842248:web:8625540d5f3ff8b7f45abd" };
 try{
-  const app = initializeApp(firebaseConfig);
+  let app; try{ app = initializeApp(firebaseConfig); }catch(e){ app = window.__fbApp || app; if(!app){ throw e; } }
   const db = getFirestore(app);
   const messaging = getMessaging(app);
   window.fcmInit = async function(){
