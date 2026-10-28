@@ -1,9 +1,7 @@
 name: Kirim Notif SNEB.in
 on:
   schedule:
-    - cron: '45 23 * * *'
-    - cron: '55 6 * * *'
-    - cron: '30 3 * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 jobs:
   kirim:
