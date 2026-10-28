@@ -2,19 +2,12 @@
   "name": "SNEB.in SMPN 1 Brondong",
   "short_name": "SNEB.in",
   "description": "SNEB.in - Sistem Absen GTK SMPN 1 Brondong",
-  "lang": "id",
-  "dir": "ltr",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#f8fafc",
   "theme_color": "#0f355c",
-  "categories": [
-    "education",
-    "productivity"
-  ],
-  "prefer_related_applications": false,
+  "orientation": "portrait",
   "icons": [
     {
       "src": "logo-snebin-v3.png",
@@ -39,12 +32,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
-    },
-    {
-      "src": "logo-snebin-v3.png",
-      "sizes": "any",
-      "type": "image/png",
-      "purpose": "any"
     }
   ]
 }
