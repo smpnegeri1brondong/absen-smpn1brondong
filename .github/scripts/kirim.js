@@ -25,10 +25,10 @@ async function main(){
     const scheduled = sh*60+sm;
     const curMin = now.getHours()*60+now.getMinutes();
     const diff = curMin - scheduled;
-    return diff>=0 && diff<5;
+    return diff>=0 && diff<60;
   }
   let title='', body='';
-  if(inWindow(s.masukJam||'07:00') && s.masukEnabled!==false){ title='SNEB.in - Absen Masuk'; body='⚠ Silahkan Absen Masuk. Klik untuk absen sekarang.'; }
+  if(inWindow(s.masukJam||'06:45') && s.masukEnabled!==false){ title='SNEB.in - Absen Masuk'; body='⚠ Silahkan Absen Masuk. Klik untuk absen sekarang.'; }
   else {
     let pulangJam = day===5 ? (s.pulangJumatJam||'10:30') : (s.pulangSeninKamisJam||'13:55');
     if(jamKhusus && (jamKhusus.pulang || jamKhusus.pulang_cepat)) pulangJam = jamKhusus.pulang || pulangJam;
