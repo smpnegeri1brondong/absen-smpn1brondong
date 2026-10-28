@@ -182,10 +182,10 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 
   <div style="margin-top:14px"><label style="font-size:11px;font-weight:800;color:#334155;letter-spacing:.5px">PASSWORD PRIBADI</label><div style="position:relative;margin-top:6px"><input id="passInput" class="input" type="password" placeholder="snebron####" style="padding-right:50px;font-weight:600;background:#f8fafc"/><button type="button" id="eyeBtn" onclick="togglePass()" style="position:absolute;right:6px;top:6px;height:36px;width:36px;border:none;background:white;border:1px solid #e2e8f0;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><div id="loginError" class="hidden" style="margin-top:8px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b;font-size:12px;padding:8px 12px;border-radius:10px"></div></div>
 
-  <button id="btnLogin" class="btn btn-primary" style="margin-top:18px;height:52px;font-size:14px;box-shadow:0 6px 16px rgba(15,53,92,.25)" onclick="doLogin(); return false;">Masuk →</button>
-
-
-  <button id="btnLoginSidik" onclick="loginSidikJari()" style="display:flex;margin-top:12px;width:100%;height:52px;border-radius:14px;background:white;border:1.5px solid #0f355c;color:#0f355c;font-weight:800;font-size:14px;cursor:pointer;align-items:center;justify-content:center;gap:8px">👆 Login dengan Sidik Jari</button>
+  <div style="display:flex;gap:10px;margin-top:18px">
+    <button id="btnLogin" class="btn btn-primary" style="flex:1;height:52px;font-size:14px;box-shadow:0 6px 16px rgba(15,53,92,.25);border-radius:14px" onclick="doLogin(); return false;">Masuk →</button>
+    <button id="btnLoginSidik" onclick="loginSidikJari()" style="width:52px;height:52px;border-radius:14px;background:#0f355c;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(15,53,92,.25);flex-shrink:0" title="Login dengan Sidik Jari"><img src="fingerprint-logo.png" alt="Sidik Jari" style="width:32px;height:32px;object-fit:contain;display:block"/></button>
+  </div>
   <div id="sidikHint" style="display:block;text-align:center;font-size:10px;color:#64748b;margin-top:6px">Sidik jari tersimpan di HP ini. Gagal? Pakai password di atas.</div>
 
   <div style="margin-top:14px;background:linear-gradient(180deg,#f8fafc,#f1f5f9);border:1px solid #e2e8f0;border-radius:14px;padding:12px 12px;display:flex;gap:10px;align-items:start">
