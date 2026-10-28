@@ -34,13 +34,9 @@ self.addEventListener('activate', e=>{
 
 self.addEventListener('fetch', e=>{
   const url = e.request.url;
-
-  // Jangan cache Firebase / Firestore / Google
   if(url.includes('firestore.googleapis.com') || url.includes('firebase') || url.includes('googleapis.com') || url.includes('gstatic.com') || url.includes('google.com/maps')){
     return;
   }
-
-  // Untuk semua HTML, manifest, logo -> NETWORK FIRST + NO STORE biar update GitHub langsung masuk tanpa clear cache
   if(url.includes('halaman-absen.html') || url.includes('admin-absen.html') || url.includes('index.html') || url.includes('manifest.json') || url.includes('logo-snebin') || url.includes('logo-smp2')){
     e.respondWith(
       fetch(new Request(e.request.url.split('?')[0], {cache: 'no-store', headers: {'Cache-Control': 'no-cache'}}))
@@ -53,34 +49,11 @@ self.addEventListener('fetch', e=>{
     );
     return;
   }
-
-  // Untuk document lain -> network first juga biar gak nyangkut v1
-  if(e.request.destination==='document'){
-    e.respondWith(
-      fetch(new Request(e.request, {cache: 'no-store'})).then(res=>{
-        const clone=res.clone();
-        caches.open(CACHE_NAME).then(c=>c.put(e.request, clone));
-        return res;
-      }).catch(()=>caches.match(e.request))
-    );
-    return;
-  }
-
-  // Lainnya cache first tapi update background
   e.respondWith(
-    caches.match(e.request).then(cached=>{
-      const networkFetch = fetch(e.request).then(res=>{
-        const clone=res.clone();
-        caches.open(CACHE_NAME).then(c=>c.put(e.request, clone));
-        return res;
-      }).catch(()=>cached);
-      return cached || networkFetch;
-    })
+    fetch(e.request).catch(()=>caches.match(e.request).then(r=> r || caches.match('./index.html')))
   );
 });
 
-
-// === SNEB Notif Alarm 7 hari - merged ===
 self.addEventListener('message', e=>{
   if(e.data && e.data.type==='SHOW_NOTIF'){
     self.registration.showNotification('SNEB.in', {
@@ -89,11 +62,7 @@ self.addEventListener('message', e=>{
       badge: 'logo-smp2.png',
       vibrate: [200,100,200],
       tag: e.data.tag || 'sneb-notif',
-      data: {url: e.data.url || 'halaman-absen.html'}
+      data: {url: 'halaman-absen.html'}
     });
   }
-});
-self.addEventListener('notificationclick', e=>{
-  e.notification.close();
-  e.waitUntil(clients.openWindow(e.notification.data.url || 'halaman-absen.html'));
 });
