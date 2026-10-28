@@ -55,6 +55,19 @@ body{margin:0;font-family:Inter,system-ui;background:#f8fafc;color:#0f172a}
 </style>
 </head>
 <body>
+<script>
+// === FIX: Kalau udah login, langsung ke halaman-absen, jangan minta login lagi ===
+try{
+  const gid = localStorage.getItem('SNEB.in_GID');
+  if(gid){
+    // Jangan redirect kalau lagi di halaman absen / admin - ini cuma di index
+    if(!location.pathname.includes('halaman-absen') && !location.pathname.includes('admin')){
+      location.replace('halaman-absen.html');
+    }
+  }
+}catch(e){}
+</script>
+
 <header class="header">
   <div class="logo-box">
     <div class="logo-img"><img src="logo-smp2.png?v=11" onerror="this.style.display='none'; this.parentElement.innerHTML='QR'; this.parentElement.style.background='#0f355c'; this.parentElement.style.color='white'" alt="SNEB.in" style="width:100%;height:100%;object-fit:contain"/></div>
