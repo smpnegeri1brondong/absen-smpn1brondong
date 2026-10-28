@@ -325,7 +325,7 @@ try{
   // === FIX ANTI-TRAUMA RULES: login anonymous biar bisa baca jam_khusus walau rules butuh auth ===
   try{
     const {getAuth, signInAnonymously, onAuthStateChanged} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
-    auth=getAuth(app); window.auth=auth;
+    auth=getAuth(app); window.auth=auth; try{ const {setPersistence, browserLocalPersistence} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"); await setPersistence(auth, browserLocalPersistence); }catch(e){} setInterval(()=>{ try{ if(auth && auth.currentUser) auth.currentUser.getIdToken(true); }catch(e){} }, 25*60*1000);
     onAuthStateChanged(auth, (user)=>{
       if(user){
         console.log('✅ Auth anonymous OK:', user.uid);
@@ -1390,9 +1390,7 @@ window.sembunyiPass=()=>{
 };
 window.simpanPasswordBaru=async()=>{ const newP=document.getElementById('newPassInput').value.trim(); const confP=document.getElementById('confirmPassInput').value.trim(); const msg=document.getElementById('passChangeMsg'); msg.classList.remove('hidden'); if(!newP || newP.length<4){ msg.textContent='Password minimal 4'; msg.style.background='#fee2e2'; msg.style.color='#991b1b'; return; } if(newP!==confP){ msg.textContent='Ulangi tidak sama'; msg.style.background='#fee2e2'; msg.style.color='#991b1b'; return; } localStorage.setItem('SNEB.in_PASS_'+currentGuru.gid, newP); msg.textContent='✅ Disimpan!'; msg.style.background='#dcfce7'; msg.style.color='#166534'; try{ if(db){ await setDoc(doc(db,"users", currentGuru.gid), { password_custom: newP, updated_at: new Date().toISOString(), nama: currentGuru.nama }, {merge:true}); msg.textContent='✅ Disimpan di HP & Firestore!'; } }catch(e){ msg.textContent='✅ Lokal. Firestore: '+e.message; } };
 
-document.addEventListener('DOMContentLoaded', ()=>{
-  const s=localStorage.getItem('SNEB.in_GID'); if(s){ currentGuru=GURUS.find(g=>g.gid===s); if(currentGuru) showAbsenScreen(); }
-});
+document.addEventListener('DOMContentLoaded', ()=>{ let tries=0; const t=setInterval(()=>{ tries++; const s=localStorage.getItem('SNEB.in_GID'); if(s && typeof GURUS!=='undefined' && GURUS.length>0){ const g=GURUS.find(x=>x.gid===s); if(g){ currentGuru=g; window.currentGuru=g; clearInterval(t); showAbsenScreen(); } } if(tries>20) clearInterval(t); }, 500); });
 
 // === PATCH KONEK ADMIN TERBARU - MAP + RADIUS + GURU + PASSWORD ===
 async function startAdminSync(){
@@ -2461,6 +2459,12 @@ setInterval(()=>{
     };
   }
 })();
+</script>
+
+
+<script>
+// === FIX: Jangan auto-logout kalau tab di-sleep / ditinggal lama ===
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible'){ const s=localStorage.getItem('SNEB.in_GID'); if(s && !window.currentGuru && typeof GURUS!=='undefined' && GURUS.length>0){ const g=GURUS.find(x=>x.gid===s); if(g){ currentGuru=g; window.currentGuru=g; showAbsenScreen(); } } } });
 </script>
 
 </body>
