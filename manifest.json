@@ -18,31 +18,31 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "logo-snebin-v2.png",
+      "src": "logo-snebin-v3.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "logo-snebin-v2.png",
+      "src": "logo-snebin-v3.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "logo-snebin-v2.png",
+      "src": "logo-snebin-v3.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "logo-snebin-v2.png",
+      "src": "logo-snebin-v3.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "logo-snebin-v2.png",
+      "src": "logo-snebin-v3.png",
       "sizes": "any",
       "type": "image/png",
       "purpose": "any"
