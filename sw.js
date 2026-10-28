@@ -1,10 +1,10 @@
-const CACHE_NAME = 'sneb-in-v12-FORCE-LOGO-V2';
+const CACHE_NAME = 'sneb-in-v12-FORCE-LOGO-V3';
 const urlsToCache = [
   './',
   './index.html',
   './halaman-absen.html',
   './admin-absen.html',
-  './logo-snebin-v2.png',
+  './logo-snebin-v3.png',
   './logo-smp2.png',
   './manifest.json'
 ];
