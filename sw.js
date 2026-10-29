@@ -1,3 +1,4 @@
+importScripts('firebase-messaging-sw.js');
 const CACHE_NAME = 'sneb-in-v13-FORCE-LOGO-V3';
 const urlsToCache = [
   './',
@@ -27,6 +28,6 @@ self.addEventListener('fetch', e=>{
 });
 self.addEventListener('message', e=>{
   if(e.data && e.data.type==='SHOW_NOTIF'){
-    self.registration.showNotification('SNEB.in', {body:e.data.body, icon:'logo-smp2.png', badge:'logo-smp2.png', vibrate:[200,100,200], tag:e.data.tag||'sneb-notif', data:{url:'halaman-absen.html'}});
+    self.registration.showNotification('SNEB.in', {body:e.data.body, icon:'logo-smp2.png', badge:'logo-smp2.png', vibrate:[200,100,200], tag:e.data.tag||'sneb-notif', data:{url:'./halaman-absen.html'}});
   }
 });
