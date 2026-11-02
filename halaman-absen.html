@@ -83,8 +83,8 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 .footer-scan{width:56px;height:56px;border-radius:50%;background:#0f355c;border:3px solid white;box-shadow:0 4px 12px rgba(15,53,92,.4);display:flex;align-items:center;justify-content:center;margin-top:-28px;flex-shrink:0;overflow:hidden}
 .footer-scan img{width:32px;height:32px;object-fit:contain;display:block}
 .footer-nav.hidden{display:none}
-#btnStartCam{display:none !important} #btnStopCam{display:none !important}
 
+#btnStartCam{display:none !important} #btnStopCam{display:none !important}
 .scan-frame{position:relative;border-radius:18px;overflow:hidden;background:#000;min-height:280px}
 .scan-corners{position:absolute;inset:0;pointer-events:none;z-index:10}
 .scan-corner{position:absolute;width:36px;height:36px;border:3px solid white}
@@ -92,6 +92,7 @@ body{margin:0;font-family:Inter;background:#f8fafc;color:#0f172a}
 .scan-corner.tr{top:16px;right:16px;border-left:none;border-bottom:none;border-radius:0 12px 0 0}
 .scan-corner.bl{bottom:16px;left:16px;border-right:none;border-top:none;border-radius:0 0 0 12px}
 .scan-corner.br{bottom:16px;right:16px;border-left:none;border-top:none;border-radius:0 0 12px 0}
+body[data-tab="radius"] #miniDashboard, body[data-tab="scan"] #miniDashboard, body[data-tab="history"] #miniDashboard, body[data-tab="persen"] #miniDashboard{display:none !important}
 </style>
 </head>
 <body>
@@ -2374,7 +2375,7 @@ window.registerSidikJari = async function(){
     if(!gid) return;
     if(localStorage.getItem('SNEB_PASSKEY_GID')===gid) return; // udah daftar
     const confirmReg = confirm('Aktifkan Login Sidik Jari untuk HP ini?\n\nNanti login cukup tempel sidik jari, gak perlu ketik password lagi.');
-    if(!confirmReg) return;
+    if(!confirmReg){ localStorage.setItem('SNEB_FINGERPRINT_TOLAK','1'); return; }
     const challenge = new Uint8Array(32); window.crypto.getRandomValues(challenge);
     const cred = await navigator.credentials.create({
       publicKey: {
@@ -2399,6 +2400,7 @@ window.registerSidikJari = async function(){
 window.loginSidikJari = async function(){
   try{
     if(!window.isWebAuthnSupported()){ alert('HP/Browser ini belum support sidik jari. Pakai password ya.'); return; }
+    localStorage.removeItem('SNEB_FINGERPRINT_TOLAK');
     const gid = localStorage.getItem('SNEB_PASSKEY_GID');
     if(!gid){ alert('Belum ada sidik jari di HP ini. Login pakai password dulu, nanti ditawari aktifkan sidik jari.'); return; }
     const challenge = new Uint8Array(32); window.crypto.getRandomValues(challenge);
@@ -2435,7 +2437,7 @@ window.loginSidikJari = async function(){
 
 // Setelah login password sukses, tawarkan daftar sidik jari (cek tiap 3 detik)
 setInterval(()=>{
-  if(window.currentGuru && !localStorage.getItem('SNEB_PASSKEY_GID') && window.isWebAuthnSupported() && !window._passkeyOffered){
+  if(window.currentGuru && !localStorage.getItem('SNEB_PASSKEY_GID') && window.isWebAuthnSupported() && !window._passkeyOffered && localStorage.getItem('SNEB_FINGERPRINT_TOLAK')!=='1'){
     window._passkeyOffered=true;
     setTimeout(()=>{ window.registerSidikJari(); }, 2000);
   }
@@ -2485,6 +2487,7 @@ document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState=
 </nav>
 <script>
 function switchFooterTab(tab){
+  document.body.dataset.tab=tab;
   document.querySelectorAll('.footer-item').forEach(el=>el.classList.remove('active'));
   const map={profil:'navProfil',radius:'navRadius',history:'navHistory',persen:'navPersen'};
   if(map[tab]) document.getElementById(map[tab]).classList.add('active');
