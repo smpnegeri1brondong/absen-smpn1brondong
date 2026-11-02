@@ -161,7 +161,21 @@ body[data-tab="radius"] #miniDashboard, body[data-tab="scan"] #miniDashboard, bo
         const z=d.data(); if(!z) return;
         const st=String(z.status||'').toUpperCase(); if(!st.includes('SETUJU')) return;
         const mulai=z.tanggal_mulai||z.tanggal||''; const selesai=z.tanggal_selesai||mulai;
-        if(today>=mulai && today<=selesai){ izinCount++; if(z.gid) izinSet.add(z.gid); }
+        if(today>=mulai && today<=selesai){
+          // FIX: IZIN badge cuma FULL, PULANG/MASUK jangan masuk IZIN
+          const scope = String(z.scope||z.jenis_scope||'').toUpperCase();
+          const jenis = String(z.jenis||'').toUpperCase();
+          const isFull = scope==='FULL' || scope==='' && (jenis.includes('SAKIT')||jenis.includes('CUTI')||jenis.includes('FULL')) || (!scope.includes('PULANG') && !scope.includes('MASUK') && !jenis.includes('PULANG') && !jenis.includes('MASUK') && (jenis.includes('SAKIT')||jenis.includes('CUTI')||jenis.includes('DINAS_LUAR') && z.tanggal_selesai && z.tanggal_selesai!==z.tanggal_mulai));
+          // Simpler: hanya FULL yang masuk IZIN, PULANG/MASUK skip
+          if(scope==='PULANG' || scope==='MASUK' || jenis==='PULANG' || jenis==='MASUK' || String(z.kategori||'').toUpperCase().includes('PULANG') || String(z.kategori||'').toUpperCase().includes('MASUK')){ 
+            // PULANG/MASUK gak masuk IZIN, biar SUDAH/BELUM aja yang ngitung
+            return; 
+          }
+          // Kalau gak ada scope, tapi jenisnya URUSAN_KELUARGA / DINAS_LUAR single day dengan scope PULANG/MASUK sudah di-return di atas, sisanya FULL
+          if(scope==='FULL' || (!scope || scope==='FULL')){
+            izinCount++; if(z.gid) izinSet.add(z.gid);
+          }
+        }
       });
       const sudah = sudahSet.size;
       const izin = izinSet.size || izinCount;
