@@ -10,7 +10,7 @@ const urlsToCache = [
   './manifest.json'
 ];
 self.addEventListener('install', e=>{
-  console.log('[SW v13] Installing - LOGO V3');
+  console.log('[SW v13] Installing - LOGO V3 + FCM');
   e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(urlsToCache.map(url=>new Request(url, {cache: 'reload'}))).catch(()=>Promise.allSettled(urlsToCache.map(u=>c.add(new Request(u, {cache: 'reload'})))))));
   self.skipWaiting();
 });
