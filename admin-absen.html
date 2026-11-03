@@ -3437,18 +3437,18 @@ async function loadAbsensiRealtime(){
       if(info){ const lbl=getLabelJamKerja(tglNorm); info.textContent=allAbsen.length+' absensi tercatat • Live '+tglNorm+' • '+lbl.text; }
       if(document.getElementById('rekapBody')) renderLaporanBaru();
     });
-    // === LOAD DEVICE_HISTORY JUGA (biar device_id kebaca walau absensi lama gak ada device_id) ===
+    // === LOAD DEVICE_HISTORY HEMAT (gak pakai live biar gak dobel quota) ===
     try{
+      const {getDocs} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
       const q2 = query(collection(d, "device_history"), where("tanggal","==", tglNorm));
-      onSnapshot(q2, (snap2)=>{
-        window.deviceHistory = [];
-        snap2.forEach(docSnap=>{
-          const data=docSnap.data(); data._id=docSnap.id;
-          window.deviceHistory.push(data);
-        });
-        console.log('device_history loaded', window.deviceHistory.length, 'for', tglNorm);
-        if(document.getElementById('rekapBody')) renderLaporanBaru();
+      const snap2 = await getDocs(q2);
+      window.deviceHistory = [];
+      snap2.forEach(docSnap=>{
+        const data=docSnap.data(); data._id=docSnap.id;
+        window.deviceHistory.push(data);
       });
+      console.log('device_history loaded (hemat)', window.deviceHistory.length, 'for', tglNorm);
+      if(document.getElementById('rekapBody')) renderLaporanBaru();
     }catch(e){ console.log('load device_history fail', e.message); }
   }catch(e){ console.log('load absensi realtime fail', e.message); }
 }
