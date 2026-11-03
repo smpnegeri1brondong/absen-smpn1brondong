@@ -10,22 +10,16 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "logo-snebin-v3.png",
-      "sizes": "192x192",
+      "src": "logo-snebin-v2.png",
+      "sizes": "any",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "logo-snebin-v3.png",
-      "sizes": "512x512",
+      "src": "logo-snebin-v2.png",
+      "sizes": "any",
       "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "logo-smp2.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "purpose": "maskable"
     }
   ]
 }
