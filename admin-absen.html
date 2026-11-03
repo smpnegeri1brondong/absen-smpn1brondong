@@ -3080,127 +3080,6 @@ window.aksiResetPilih = function(jenis){
     }catch(e){ alert('Gagal: '+(e.message||e)); }
   })();
 };
-window.deviceOwnerMap={};
-window.deviceHistoryCount={};
-function buildDeviceOwnerMap(){
-  try{
-    const all = window.allAbsen||[];
-    const counts={}; // device_id -> {gid: count}
-    const modelMap={}; // device_id -> model
-    all.forEach(d=>{
-      const dev=d.device_id||d.deviceId||'';
-      if(!dev) return;
-      if(!counts[dev]) counts[dev]={};
-      const gid=d.gid||'';
-      if(!gid) return;
-      counts[dev][gid]=(counts[dev][gid]||0)+1;
-      if(d.device_model) modelMap[dev]=d.device_model;
-    });
-    // also use device_history if available
-    const devHist = window.deviceHistory||[];
-    devHist.forEach(d=>{
-      const dev=d.device_id||'';
-      if(!dev) return;
-      if(!counts[dev]) counts[dev]={};
-      const gid=d.gid||'';
-      counts[dev][gid]=(counts[dev][gid]||0)+1;
-      if(d.model) modelMap[dev]=d.model;
-    });
-    const ownerMap={};
-    for(const dev in counts){
-      let maxGid='', maxCnt=0;
-      for(const gid in counts[dev]){
-        if(counts[dev][gid]>maxCnt){ maxCnt=counts[dev][gid]; maxGid=gid; }
-      }
-      if(maxGid){ ownerMap[dev]={owner_gid:maxGid, count:maxCnt, all:counts[dev], model:modelMap[dev]||''}; }
-    }
-    window.deviceOwnerMap=ownerMap;
-    window.deviceHistoryCount=counts;
-  }catch(e){ console.log('buildDeviceOwnerMap fail', e); }
-}
-function getTitipInfo(rec){
-  if(!rec) return null;
-  const dev=rec.device_id||rec.deviceId||'';
-  if(!dev) return null;
-  const ownerEntry = window.deviceOwnerMap[dev];
-  if(!ownerEntry) return null;
-  if(ownerEntry.owner_gid && ownerEntry.owner_gid!==rec.gid){
-    // owner different = indikasi titip
-    const ownerGuru = (typeof gurus!=='undefined'? gurus.find(x=>x.gid===ownerEntry.owner_gid) : null) || (window.gurus||[]).find(x=>x.gid===ownerEntry.owner_gid);
-    const pemakaiGuru = (typeof gurus!=='undefined'? gurus.find(x=>x.gid===rec.gid) : null) || (window.gurus||[]).find(x=>x.gid===rec.gid);
-    return {
-      device_id: dev,
-      model: rec.device_model||ownerEntry.model||'HP',
-      owner_gid: ownerEntry.owner_gid,
-      owner_nama: ownerGuru?ownerGuru.nama:ownerEntry.owner_gid,
-      dipakai_gid: rec.gid,
-      dipakai_nama: pemakaiGuru?pemakaiGuru.nama:rec.nama||rec.gid,
-      allCounts: ownerEntry.all
-    };
-  }
-  return null;
-}
-function titipBadgeHtml(rec){
-  const info=getTitipInfo(rec);
-  if(!info) return '';
-  // badge kuning tanda seru
-  return `<span class="titip-badge" onclick="showTitipPopup('${rec.gid}','${rec.jenis_absen||''}','${info.device_id}')" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#fef08a;border:1px solid #facc15;color:#854d0e;font-weight:900;font-size:12px;cursor:pointer;margin-left:6px;vertical-align:middle" title="Indikasi Titip Absen">!</span>`;
-}
-window.showTitipPopup = function(gid, jenis, device_id){
-  try{
-    const all = window.allAbsen||[];
-    const rec = all.find(d=> (d.gid===gid) && (d.device_id===device_id) && (jenis ? (d.jenis_absen||'').toUpperCase().includes(jenis.toUpperCase().slice(0,5)) : true)) || all.find(d=> d.gid===gid && d.device_id===device_id);
-    const info = rec ? getTitipInfo(rec) : null;
-    if(!info){ alert('Tidak ada info titip'); return; }
-    const modalId='titipModal';
-    let modal=document.getElementById(modalId);
-    if(!modal){
-      modal=document.createElement('div');
-      modal.id=modalId;
-      modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px';
-      modal.innerHTML=`<div id="titipModalBox" style="background:white;border-radius:16px;padding:20px;max-width:400px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.2)"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:900;font-size:14px;color:#854d0e">⚠️ INDIKASI TITIP ABSEN</div><button onclick="document.getElementById('${modalId}').style.display='none'" style="width:28px;height:28px;border-radius:8px;border:1px solid #e2e8f0;background:white">✕</button></div><div id="titipModalContent" style="margin-top:12px;font-size:12px;line-height:1.6;color:#0f172a"></div><div style="margin-top:12px;display:flex;justify-content:flex-end"><button onclick="document.getElementById('${modalId}').style.display='none'" style="height:32px;padding:0 14px;border-radius:8px;background:#facc15;border:none;font-weight:800">Tutup</button></div></div>`;
-      document.body.appendChild(modal);
-      modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.style.display='none'; });
-    }
-    const content=document.getElementById('titipModalContent');
-    if(content){
-      content.innerHTML=`<div style="background:#fefce8;border:1px solid #fef08a;border-radius:10px;padding:10px 12px"><div><b>Device :</b> ${info.device_id} - ${info.model.slice(0,80)}</div><div style="margin-top:6px"><b>Owner :</b> ${info.owner_gid} - ${info.owner_nama}</div><div style="margin-top:6px"><b>Dipakai :</b> ${info.dipakai_gid} - ${info.dipakai_nama}</div></div><div style="margin-top:8px;font-size:10px;color:#64748b">Device ini biasanya dipakai ${info.owner_gid}, tapi dipakai ${info.dipakai_gid} pada ${jenis||'absen ini'}</div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button onclick="resetDeviceId('${info.device_id}')" style="height:32px;padding:0 12px;border-radius:8px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b;font-weight:700;font-size:11px;cursor:pointer">🗑️ Hapus History Device</button><button onclick="setDeviceOwner('${info.device_id}','${info.dipakai_gid}')" style="height:32px;padding:0 12px;border-radius:8px;background:#dcfce7;border:1px solid #bbf7d0;color:#166534;font-weight:700;font-size:11px;cursor:pointer">✅ Set Jadi Milik ${info.dipakai_gid}</button></div>`;
-    }
-    modal.style.display='flex';
-  }catch(e){ alert('Gagal: '+e.message); }
-};
-
-window.resetDeviceId = async function(device_id){
-  if(!confirm('Hapus semua history untuk device '+device_id+'?\nOwner akan reset, badge ! hilang besok.')) return;
-  try{
-    const {collection, query, where, getDocs, deleteDoc, doc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-    const d = window.db||db;
-    // hapus dari device_history
-    const q = query(collection(d,"device_history"), where("device_id","==", device_id));
-    const snap = await getDocs(q);
-    let del=0;
-    for(const ds of snap.docs){ try{ await deleteDoc(doc(d,"device_history", ds.id)); del++; }catch(e){} }
-    alert('✅ '+del+' history device '+device_id+' dihapus. Refresh laporan.');
-    document.getElementById('titipModal').style.display='none';
-    try{ buildDeviceOwnerMap(); renderLaporanBaru(); }catch(e){}
-  }catch(e){ alert('Gagal: '+e.message); }
-};
-
-window.setDeviceOwner = async function(device_id, new_gid){
-  if(!confirm('Set owner '+device_id+' jadi '+new_gid+'?\nBadge ! untuk '+new_gid+' akan hilang, tapi untuk pemakai lain tetap muncul.')) return;
-  try{
-    const {collection, addDoc} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-    const d = window.db||db;
-    // tambah 10 history palsu biar count owner pindah ke new_gid
-    for(let i=0;i<10;i++){
-      await addDoc(collection(d,"device_history"), {gid:new_gid, device_id:device_id, model:'SET_OWNER_BY_ADMIN', waktu:new Date().toISOString(), tanggal: (typeof getTanggalLaporan==='function'?getTanggalLaporan():new Date().toISOString().split('T')[0]), jenis:'SET_OWNER'});
-    }
-    alert('✅ Owner '+device_id+' sekarang '+new_gid+' (ditambah 10 history). Refresh.');
-    document.getElementById('titipModal').style.display='none';
-    try{ buildDeviceOwnerMap(); renderLaporanBaru(); }catch(e){}
-  }catch(e){ alert('Gagal: '+e.message); }
-};
-
 window.renderLaporanBaru = function(){
   const body=document.getElementById('rekapBody'); if(!body) return;
   const tanggalStr=getTanggalLaporan();
@@ -3272,7 +3151,6 @@ window.renderLaporanBaru = function(){
     return;
   }
 
-  try{ buildDeviceOwnerMap(); }catch(e){}
   body.innerHTML='';
   const cardsEl=document.getElementById('laporanCards');
   let cardsHtml='';
@@ -3349,13 +3227,11 @@ window.renderLaporanBaru = function(){
     }
 
     const tr=document.createElement('tr');
-    const titipMasukBadge = titipBadgeHtml(masuk);
-    const titipPulangBadge = titipBadgeHtml(pulang);
-    tr.innerHTML='<td style="font-weight:800">'+(g.no||idx+1)+'</td><td><div style="font-weight:700">'+g.nama+'</div><div style="font-size:10px;color:#64748b">'+g.gid+'</div></td><td><div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap">'+badgeStatusWithUji(masuk)+titipMasukBadge+'</div></td><td style="font-weight:700;color:'+(telatMasuk>0?'#d97706':'#64748b')+'">'+telatText+'</td><td><div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap">'+badgeStatusWithUji(pulang)+titipPulangBadge+'</div></td><td style="font-size:11px">'+keterangan+'</td><td><button style="height:32px;padding:0 12px;border-radius:10px;border:1px solid #e2e8f0;background:white;font-weight:700;font-size:11px;cursor:pointer" onclick="showAksiMenu(\''+g.gid+'\',\''+g.nama.replace(/\'/g,"\'")+ '\',\''+tanggalStr+'\')">⋮ Aksi</button></td>';
+    tr.innerHTML='<td style="font-weight:800">'+(g.no||idx+1)+'</td><td><div style="font-weight:700">'+g.nama+'</div><div style="font-size:10px;color:#64748b">'+g.gid+'</div></td><td><div>'+badgeStatusWithUji(masuk)+'</div></td><td style="font-weight:700;color:'+(telatMasuk>0?'#d97706':'#64748b')+'">'+telatText+'</td><td><div>'+badgeStatusWithUji(pulang)+'</div></td><td style="font-size:11px">'+keterangan+'</td><td><button style="height:32px;padding:0 12px;border-radius:10px;border:1px solid #e2e8f0;background:white;font-weight:700;font-size:11px;cursor:pointer" onclick="showAksiMenu(\''+g.gid+'\',\''+g.nama.replace(/\'/g,"\'")+ '\',\''+tanggalStr+'\')">⋮ Aksi</button></td>';
     body.appendChild(tr);
 
-    const badgeMasukHtml = badgeStatusWithUji(masuk) + titipBadgeHtml(masuk);
-    const badgePulangHtml = badgeStatusWithUji(pulang) + titipBadgeHtml(pulang);
+    const badgeMasukHtml = badgeStatusWithUji(masuk);
+    const badgePulangHtml = badgeStatusWithUji(pulang);
     cardsHtml+=`
       <div class="lap-card">
         <div style="font-size:10px;color:#94a3b8;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="font-weight:800;color:#0f355c">${g.nama}</span><span style="margin-left:auto;font-size:9px;background:#f1f5f9;padding:2px 6px;border-radius:999px">${g.gid}</span></div>
